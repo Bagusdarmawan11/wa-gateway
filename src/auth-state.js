@@ -2,12 +2,15 @@ import { initAuthCreds, BufferJSON } from '@whiskeysockets/baileys';
 import { pool } from './db.js';
 
 /**
- * Auth state Baileys yang disimpan ke PostgreSQL (Neon),
+ * Auth state Baileys per-user, disimpan ke PostgreSQL (Neon),
  * sehingga session WhatsApp tetap ada meski server redeploy / restart.
  */
-export async function useDbAuthState() {
+export async function useDbAuthState(userId) {
   const readCreds = async () => {
-    const { rows } = await pool.query('SELECT data FROM auth_creds WHERE id = 1');
+    const { rows } = await pool.query(
+      'SELECT data FROM auth_creds WHERE user_id = $1',
+      [userId]
+    );
     if (!rows.length) return null;
     return JSON.parse(JSON.stringify(rows[0].data), BufferJSON.reviver);
   };
@@ -17,9 +20,9 @@ export async function useDbAuthState() {
   const saveCreds = async () => {
     const data = JSON.parse(JSON.stringify(creds, BufferJSON.replacer));
     await pool.query(
-      `INSERT INTO auth_creds (id, data, updated_at) VALUES (1, $1, now())
-       ON CONFLICT (id) DO UPDATE SET data = $1, updated_at = now()`,
-      [data]
+      `INSERT INTO auth_creds (user_id, data, updated_at) VALUES ($1, $2, now())
+       ON CONFLICT (user_id) DO UPDATE SET data = $2, updated_at = now()`,
+      [userId, data]
     );
   };
 
@@ -28,8 +31,8 @@ export async function useDbAuthState() {
       const result = {};
       if (!ids.length) return result;
       const { rows } = await pool.query(
-        'SELECT key_id, data FROM auth_keys WHERE key_id = ANY($1)',
-        [ids.map((id) => `${type}-${id}`)]
+        'SELECT key_id, data FROM auth_keys WHERE user_id = $1 AND key_id = ANY($2)',
+        [userId, ids.map((id) => `${type}-${id}`)]
       );
       for (const row of rows) {
         const id = row.key_id.slice(type.length + 1);
@@ -42,13 +45,16 @@ export async function useDbAuthState() {
         for (const [id, value] of Object.entries(entries || {})) {
           const keyId = `${type}-${id}`;
           if (value == null) {
-            await pool.query('DELETE FROM auth_keys WHERE key_id = $1', [keyId]);
+            await pool.query(
+              'DELETE FROM auth_keys WHERE user_id = $1 AND key_id = $2',
+              [userId, keyId]
+            );
           } else {
             const json = JSON.parse(JSON.stringify(value, BufferJSON.replacer));
             await pool.query(
-              `INSERT INTO auth_keys (key_id, data, updated_at) VALUES ($1, $2, now())
-               ON CONFLICT (key_id) DO UPDATE SET data = $2, updated_at = now()`,
-              [keyId, json]
+              `INSERT INTO auth_keys (user_id, key_id, data, updated_at) VALUES ($1, $2, $3, now())
+               ON CONFLICT (user_id, key_id) DO UPDATE SET data = $3, updated_at = now()`,
+              [userId, keyId, json]
             );
           }
         }
@@ -57,4 +63,9 @@ export async function useDbAuthState() {
   };
 
   return { state: { creds, keys }, saveCreds };
+}
+
+export async function clearAuthState(userId) {
+  await pool.query('DELETE FROM auth_creds WHERE user_id = $1', [userId]);
+  await pool.query('DELETE FROM auth_keys WHERE user_id = $1', [userId]);
 }

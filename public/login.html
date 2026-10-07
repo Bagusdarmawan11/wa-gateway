@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Masuk — WA Gateway</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family:'Inter',system-ui,sans-serif; min-height:100vh;
+    background:#0a0e14; color:#e8edf4;
+    display:flex; align-items:center; justify-content:center; padding:24px;
+    position:relative; overflow:hidden;
+  }
+  .blob { position:absolute; border-radius:50%; filter:blur(120px); opacity:.3; animation:drift 16s ease-in-out infinite alternate; }
+  .b1 { width:480px;height:480px; background:#14532d; top:-140px; left:-120px; }
+  .b2 { width:400px;height:400px; background:#065f46; bottom:-120px; right:-100px; animation-delay:-8s; }
+  @keyframes drift { from{transform:translate(0,0) scale(1);} to{transform:translate(50px,40px) scale(1.12);} }
+
+  .card {
+    width:100%; max-width:420px; padding:40px 36px; border-radius:24px;
+    background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.12);
+    backdrop-filter:blur(20px) saturate(160%);
+    box-shadow:0 24px 60px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.12);
+    animation:fadeUp .6s ease both; position:relative; z-index:1;
+  }
+  @keyframes fadeUp { from{opacity:0; transform:translateY(20px);} to{opacity:1; transform:translateY(0);} }
+  .logo { display:flex; align-items:center; justify-content:center; gap:10px; font-weight:800; font-size:1.2rem; text-decoration:none; color:#e8edf4; margin-bottom:8px; }
+  .logo-badge { width:36px;height:36px; border-radius:10px; display:grid; place-items:center; background:linear-gradient(135deg,#22c55e,#10b981); box-shadow:0 4px 16px rgba(34,197,94,.3); }
+  h1 { text-align:center; font-size:1.5rem; font-weight:800; margin:18px 0 6px; }
+  .sub { text-align:center; color:#93a1b5; font-size:.92rem; margin-bottom:28px; }
+  label { display:block; font-size:.85rem; font-weight:600; margin-bottom:7px; color:#c3cede; }
+  .field { margin-bottom:18px; }
+  .input-wrap { position:relative; }
+  input {
+    width:100%; padding:13px 16px; border-radius:13px; font-size:.95rem;
+    background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.12);
+    color:#e8edf4; outline:none; transition:all .25s; font-family:inherit;
+  }
+  input:focus { border-color:rgba(34,197,94,.55); box-shadow:0 0 0 3px rgba(34,197,94,.15); background:rgba(255,255,255,.07); }
+  .toggle-pw {
+    position:absolute; right:8px; top:50%; transform:translateY(-50%);
+    background:none; border:none; cursor:pointer; font-size:1.05rem;
+    padding:8px; border-radius:8px; opacity:.65; transition:opacity .2s;
+  }
+  .toggle-pw:hover { opacity:1; }
+  .btn {
+    width:100%; padding:14px; border-radius:14px; border:none; cursor:pointer;
+    font-weight:700; font-size:1rem; font-family:inherit;
+    background:linear-gradient(135deg,#22c55e,#10b981); color:#04120a;
+    box-shadow:0 4px 20px rgba(34,197,94,.25); transition:all .25s;
+  }
+  .btn:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(34,197,94,.35); }
+  .btn:disabled { opacity:.6; cursor:not-allowed; transform:none; }
+  .error {
+    display:none; padding:12px 16px; border-radius:12px; margin-bottom:18px;
+    background:rgba(239,68,68,.12); border:1px solid rgba(239,68,68,.35);
+    color:#fca5a5; font-size:.88rem; animation:shake .4s;
+  }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+  .switch { text-align:center; margin-top:22px; color:#93a1b5; font-size:.9rem; }
+  .switch a { color:#4ade80; text-decoration:none; font-weight:600; }
+  .switch a:hover { text-decoration:underline; }
+  .back { position:absolute; top:20px; left:24px; color:#93a1b5; text-decoration:none; font-size:.9rem; z-index:2; }
+  .back:hover { color:#e8edf4; }
+</style>
+</head>
+<body>
+<div class="blob b1"></div><div class="blob b2"></div>
+<a href="/" class="back">← Kembali</a>
+
+<div class="card">
+  <a href="/" class="logo"><span class="logo-badge">💬</span> WA Gateway</a>
+  <h1>Selamat Datang Kembali</h1>
+  <p class="sub">Masuk untuk mengelola WhatsApp API kamu</p>
+
+  <div class="error" id="error"></div>
+
+  <form id="form">
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="email" placeholder="nama@email.com" required autocomplete="email">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <div class="input-wrap">
+        <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password" style="padding-right:46px">
+        <button type="button" class="toggle-pw" id="togglePw" title="Tampilkan password">👁️</button>
+      </div>
+    </div>
+    <button class="btn" type="submit" id="submitBtn">Masuk →</button>
+  </form>
+
+  <p class="switch">Belum punya akun? <a href="/register">Daftar gratis</a></p>
+</div>
+
+<script>
+  // Hide / unhide password
+  const pw = document.getElementById('password');
+  const tg = document.getElementById('togglePw');
+  tg.onclick = () => {
+    const show = pw.type === 'password';
+    pw.type = show ? 'text' : 'password';
+    tg.textContent = show ? '🙈' : '👁️';
+    tg.title = show ? 'Sembunyikan password' : 'Tampilkan password';
+  };
+
+  const form = document.getElementById('form');
+  const err = document.getElementById('error');
+  const btn = document.getElementById('submitBtn');
+
+  form.onsubmit = async (e) => {
+    e.preventDefault();
+    err.style.display = 'none';
+    btn.disabled = true; btn.textContent = 'Memproses…';
+    try {
+      const r = await fetch('/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: document.getElementById('email').value,
+          password: pw.value,
+        }),
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || 'Login gagal');
+      location.href = '/dashboard';
+    } catch (e2) {
+      err.textContent = e2.message;
+      err.style.display = 'block';
+      btn.disabled = false; btn.textContent = 'Masuk →';
+    }
+  };
+</script>
+</body>
+</html>

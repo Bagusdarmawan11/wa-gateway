@@ -5,39 +5,44 @@ const { Pool } = pg;
 export const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false },
-  max: 5,
+  max: 10,
 });
 
 export async function initDb() {
   await pool.query(`
+    CREATE TABLE IF NOT EXISTS users (
+      id SERIAL PRIMARY KEY,
+      name TEXT NOT NULL,
+      email TEXT UNIQUE NOT NULL,
+      password_hash TEXT NOT NULL,
+      api_token TEXT UNIQUE NOT NULL,
+      created_at TIMESTAMPTZ DEFAULT now()
+    );
     CREATE TABLE IF NOT EXISTS auth_creds (
-      id INTEGER PRIMARY KEY,
+      user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
       data JSONB NOT NULL,
       updated_at TIMESTAMPTZ DEFAULT now()
     );
     CREATE TABLE IF NOT EXISTS auth_keys (
-      key_id TEXT PRIMARY KEY,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      key_id TEXT NOT NULL,
       data JSONB NOT NULL,
-      updated_at TIMESTAMPTZ DEFAULT now()
-    );
-    CREATE TABLE IF NOT EXISTS tokens (
-      id SERIAL PRIMARY KEY,
-      token TEXT UNIQUE NOT NULL,
-      name TEXT NOT NULL,
-      active BOOLEAN DEFAULT TRUE,
-      created_at TIMESTAMPTZ DEFAULT now()
+      updated_at TIMESTAMPTZ DEFAULT now(),
+      PRIMARY KEY (user_id, key_id)
     );
     CREATE TABLE IF NOT EXISTS message_logs (
       id SERIAL PRIMARY KEY,
+      user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
       direction TEXT NOT NULL,
       jid TEXT NOT NULL,
       text TEXT,
+      media_type TEXT,
       status TEXT,
-      token_name TEXT,
       created_at TIMESTAMPTZ DEFAULT now()
     );
     CREATE TABLE IF NOT EXISTS autoreplies (
       id SERIAL PRIMARY KEY,
+      user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
       keyword TEXT NOT NULL,
       response TEXT NOT NULL,
       match_mode TEXT DEFAULT 'contains',
@@ -46,20 +51,30 @@ export async function initDb() {
     );
     CREATE TABLE IF NOT EXISTS schedules (
       id SERIAL PRIMARY KEY,
+      user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
       jid TEXT NOT NULL,
       text TEXT NOT NULL,
       run_at TIMESTAMPTZ NOT NULL,
       done BOOLEAN DEFAULT FALSE,
       created_at TIMESTAMPTZ DEFAULT now()
     );
+    CREATE INDEX IF NOT EXISTS idx_logs_user ON message_logs (user_id, id DESC);
+    CREATE INDEX IF NOT EXISTS idx_sched_due ON schedules (done, run_at);
   `);
 }
 
-export async function logMessage({ direction, jid, text, status, tokenName }) {
+/** Klaim data lama (user_id NULL dari versi single-user) ke user pertama */
+export async function claimLegacyData(userId) {
+  for (const t of ['message_logs', 'autoreplies', 'schedules']) {
+    await pool.query(`UPDATE ${t} SET user_id = $1 WHERE user_id IS NULL`, [userId]);
+  }
+}
+
+export async function logMessage({ userId, direction, jid, text, mediaType, status }) {
   try {
     await pool.query(
-      'INSERT INTO message_logs (direction, jid, text, status, token_name) VALUES ($1,$2,$3,$4,$5)',
-      [direction, jid, text ?? null, status ?? null, tokenName ?? null]
+      'INSERT INTO message_logs (user_id, direction, jid, text, media_type, status) VALUES ($1,$2,$3,$4,$5,$6)',
+      [userId ?? null, direction, jid, text ?? null, mediaType ?? null, status ?? null]
     );
   } catch (e) {
     console.error('logMessage error:', e.message);

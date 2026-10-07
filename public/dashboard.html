@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — WA Gateway</title>
+<style>
+  :root {
+    --bg:#0a0e14; --panel:rgba(255,255,255,.04); --border:rgba(255,255,255,.09);
+    --text:#e8edf4; --muted:#93a1b5; --accent:#22c55e; --accent2:#10b981;
+    --danger:#ef4444;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Inter',system-ui,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+  .layout { display:flex; min-height:100vh; }
+
+  /* Sidebar */
+  aside {
+    width:250px; padding:24px 16px; border-right:1px solid var(--border);
+    display:flex; flex-direction:column; gap:4px; position:sticky; top:0; height:100vh;
+    background:rgba(255,255,255,.02); backdrop-filter:blur(10px);
+  }
+  .logo { display:flex; align-items:center; gap:10px; font-weight:800; font-size:1.1rem; padding:8px 12px 22px; text-decoration:none; color:var(--text); }
+  .logo-badge { width:32px;height:32px; border-radius:9px; display:grid; place-items:center; background:linear-gradient(135deg,var(--accent),var(--accent2)); font-size:.9rem; }
+  .nav-item {
+    display:flex; align-items:center; gap:12px; padding:11px 14px; border-radius:12px;
+    color:var(--muted); text-decoration:none; font-size:.92rem; font-weight:500;
+    cursor:pointer; transition:all .2s; border:none; background:none; text-align:left; width:100%; font-family:inherit;
+  }
+  .nav-item:hover { background:rgba(255,255,255,.06); color:var(--text); }
+  .nav-item.active { background:rgba(34,197,94,.12); color:#86efac; }
+  .spacer { flex:1; }
+  .user-chip { padding:12px 14px; border-radius:12px; background:var(--panel); border:1px solid var(--border); font-size:.85rem; }
+  .user-chip b { display:block; }
+  .user-chip span { color:var(--muted); font-size:.78rem; word-break:break-all; }
+
+  /* Main */
+  main { flex:1; padding:32px; max-width:1060px; }
+  .page { display:none; animation:fadeIn .35s ease; }
+  .page.active { display:block; }
+  @keyframes fadeIn { from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+  h1 { font-size:1.6rem; font-weight:800; margin-bottom:6px; }
+  .sub { color:var(--muted); font-size:.92rem; margin-bottom:26px; }
+
+  .panel {
+    background:var(--panel); border:1px solid var(--border); border-radius:18px;
+    padding:26px; margin-bottom:22px;
+  }
+  .panel h2 { font-size:1.05rem; font-weight:700; margin-bottom:16px; display:flex; align-items:center; gap:10px; }
+
+  .btn {
+    display:inline-flex; align-items:center; gap:8px; padding:10px 20px; border-radius:12px;
+    font-weight:600; font-size:.88rem; border:none; cursor:pointer; font-family:inherit; transition:all .2s;
+  }
+  .btn-primary { background:linear-gradient(135deg,var(--accent),var(--accent2)); color:#04120a; }
+  .btn-primary:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(34,197,94,.3); }
+  .btn-ghost { background:rgba(255,255,255,.06); color:var(--text); border:1px solid var(--border); }
+  .btn-ghost:hover { background:rgba(255,255,255,.1); }
+  .btn-danger { background:rgba(239,68,68,.12); color:#fca5a5; border:1px solid rgba(239,68,68,.3); }
+  .btn-sm { padding:6px 12px; font-size:.78rem; border-radius:9px; }
+  .btn:disabled { opacity:.55; cursor:not-allowed; }
+
+  input, textarea, select {
+    width:100%; padding:11px 14px; border-radius:11px; font-size:.92rem; font-family:inherit;
+    background:rgba(255,255,255,.05); border:1px solid var(--border); color:var(--text); outline:none; transition:all .2s;
+  }
+  input:focus, textarea:focus, select:focus { border-color:rgba(34,197,94,.5); box-shadow:0 0 0 3px rgba(34,197,94,.12); }
+  label { display:block; font-size:.82rem; font-weight:600; margin:0 0 6px; color:#c3cede; }
+  .field { margin-bottom:15px; }
+  .row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+
+  /* Status */
+  .status-pill { display:inline-flex; align-items:center; gap:8px; padding:7px 16px; border-radius:999px; font-size:.85rem; font-weight:600; }
+  .st-connected { background:rgba(34,197,94,.14); color:#86efac; border:1px solid rgba(34,197,94,.3); }
+  .st-qr { background:rgba(234,179,8,.12); color:#fde047; border:1px solid rgba(234,179,8,.3); }
+  .st-off { background:rgba(148,163,184,.12); color:#cbd5e1; border:1px solid rgba(148,163,184,.25); }
+  .dot { width:8px;height:8px;border-radius:50%;background:currentColor; }
+  .st-connected .dot { animation:pulse 2s infinite; }
+  @keyframes pulse { 50%{opacity:.4} }
+
+  #qrImg { border-radius:16px; border:1px solid var(--border); background:#fff; padding:10px; max-width:240px; }
+
+  /* Token box */
+  .token-box {
+    display:flex; gap:10px; align-items:center; padding:13px 16px; border-radius:12px;
+    background:rgba(0,0,0,.3); border:1px solid var(--border); font-family:monospace; font-size:.85rem;
+    word-break:break-all;
+  }
+  .token-box code { flex:1; color:#86efac; }
+
+  /* Table */
+  table { width:100%; border-collapse:collapse; font-size:.86rem; }
+  th { text-align:left; padding:10px 12px; color:var(--muted); font-weight:600; font-size:.76rem; text-transform:uppercase; letter-spacing:.06em; border-bottom:1px solid var(--border); }
+  td { padding:11px 12px; border-bottom:1px solid rgba(255,255,255,.05); vertical-align:top; }
+  tr:hover td { background:rgba(255,255,255,.02); }
+  .badge { padding:3px 10px; border-radius:999px; font-size:.72rem; font-weight:600; }
+  .b-in { background:rgba(59,130,246,.15); color:#93c5fd; }
+  .b-out { background:rgba(34,197,94,.15); color:#86efac; }
+  .b-fail { background:rgba(239,68,68,.15); color:#fca5a5; }
+  .muted { color:var(--muted); font-size:.8rem; }
+  .empty { text-align:center; color:var(--muted); padding:28px; font-size:.9rem; }
+
+  .toast {
+    position:fixed; bottom:24px; right:24px; padding:14px 22px; border-radius:14px;
+    background:#14532d; border:1px solid rgba(34,197,94,.4); color:#d1fae5;
+    font-size:.9rem; font-weight:500; z-index:200; opacity:0; transform:translateY(16px);
+    transition:all .3s; pointer-events:none; box-shadow:0 12px 32px rgba(0,0,0,.4);
+  }
+  .toast.show { opacity:1; transform:translateY(0); }
+  .toast.err { background:#450a0a; border-color:rgba(239,68,68,.4); color:#fecaca; }
+
+  .file-drop {
+    border:1.5px dashed rgba(255,255,255,.18); border-radius:12px; padding:18px;
+    text-align:center; color:var(--muted); font-size:.86rem; cursor:pointer; transition:all .2s;
+  }
+  .file-drop:hover { border-color:rgba(34,197,94,.4); color:var(--text); }
+
+  .hamburger { display:none; }
+  @media (max-width:820px) {
+    aside { position:fixed; z-index:50; transform:translateX(-100%); transition:transform .3s; background:#0d1219; }
+    aside.open { transform:translateX(0); }
+    main { padding:20px; }
+    .hamburger { display:block; position:fixed; top:14px; left:14px; z-index:60; background:rgba(255,255,255,.08); border:1px solid var(--border); color:var(--text); padding:9px 13px; border-radius:10px; cursor:pointer; font-size:1rem; }
+    .row { grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+<button class="hamburger" onclick="document.querySelector('aside').classList.toggle('open')">☰</button>
+<div class="layout">
+  <aside>
+    <a class="logo" href="/"><span class="logo-badge">💬</span> WA Gateway</a>
+    <button class="nav-item active" data-page="overview">📊 Overview</button>
+    <button class="nav-item" data-page="send">✉️ Kirim Pesan</button>
+    <button class="nav-item" data-page="autoreply">⚡ Autoreply</button>
+    <button class="nav-item" data-page="schedule">🗓️ Terjadwal</button>
+    <button class="nav-item" data-page="logs">📜 Riwayat</button>
+    <button class="nav-item" data-page="api">🔑 API &amp; Token</button>
+    <div class="spacer"></div>
+    <div class="user-chip"><b id="userName">…</b><span id="userEmail"></span></div>
+    <button class="nav-item" onclick="doLogout()" style="color:#fca5a5">🚪 Keluar</button>
+  </aside>
+
+  <main>
+    <!-- ===== Overview ===== -->
+    <div class="page active" id="page-overview">
+      <h1>Overview</h1>
+      <p class="sub">Status koneksi WhatsApp kamu</p>
+      <div class="panel">
+        <h2>📱 Koneksi WhatsApp</h2>
+        <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start">
+          <div style="flex:1;min-width:240px">
+            <div id="statusPill" class="status-pill st-off"><span class="dot"></span> Memuat…</div>
+            <p class="muted" id="meInfo" style="margin:14px 0"></p>
+            <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+              <button class="btn btn-primary" id="btnConnect" onclick="connectWA()">Hubungkan / Scan QR</button>
+              <button class="btn btn-danger" id="btnDisconnect" onclick="disconnectWA()" style="display:none">Putuskan</button>
+            </div>
+          </div>
+          <div id="qrBox" style="display:none;text-align:center">
+            <img id="qrImg" alt="QR Code">
+            <p class="muted" style="margin-top:8px">Scan dengan WhatsApp → Perangkat Tertaut</p>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <h2>💡 Langkah Cepat</h2>
+        <p class="muted">1. Klik <b>Hubungkan / Scan QR</b> lalu scan dengan WhatsApp kamu.<br>
+        2. Salin API token di menu <b>API &amp; Token</b>.<br>
+        3. Kirim pesan lewat menu <b>Kirim Pesan</b> atau dari aplikasimu via API.</p>
+      </div>
+    </div>
+
+    <!-- ===== Kirim Pesan ===== -->
+    <div class="page" id="page-send">
+      <h1>Kirim Pesan</h1>
+      <p class="sub">Teks, gambar, video, audio, atau dokumen</p>
+      <div class="panel">
+        <form id="sendForm">
+          <div class="field"><label>Nomor Tujuan</label>
+            <input id="sendTarget" placeholder="08xxxxxxxxxx atau 628xxx" required>
+          </div>
+          <div class="field"><label>Pesan / Caption</label>
+            <textarea id="sendMessage" rows="4" placeholder="Tulis pesan di sini…"></textarea>
+          </div>
+          <div class="field"><label>Lampiran (opsional)</label>
+            <div class="file-drop" id="fileDrop">📎 Klik untuk pilih gambar / video / audio / dokumen (maks 20MB)
+              <input type="file" id="sendFile" hidden>
+            </div>
+            <p class="muted" id="fileName" style="margin-top:8px"></p>
+          </div>
+          <button class="btn btn-primary" type="submit" id="sendBtn">Kirim 🚀</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ===== Autoreply ===== -->
+    <div class="page" id="page-autoreply">
+      <h1>Autoreply</h1>
+      <p class="sub">Balasan otomatis berbasis keyword untuk nomor kamu</p>
+      <div class="panel">
+        <form id="arForm" class="row" style="align-items:end">
+          <div class="field"><label>Keyword</label><input id="arKeyword" placeholder="misal: harga" required></div>
+          <div class="field"><label>Mode</label>
+            <select id="arMode"><option value="contains">Mengandung kata</option><option value="exact">Persis sama</option></select>
+          </div>
+          <div class="field" style="grid-column:1/-1"><label>Balasan</label>
+            <textarea id="arResponse" rows="2" placeholder="Balasan otomatis…" required></textarea>
+          </div>
+          <div style="grid-column:1/-1"><button class="btn btn-primary" type="submit">+ Tambah Autoreply</button></div>
+        </form>
+      </div>
+      <div class="panel">
+        <h2>📋 Daftar Autoreply</h2>
+        <div id="arList"><div class="empty">Memuat…</div></div>
+      </div>
+    </div>
+
+    <!-- ===== Schedule ===== -->
+    <div class="page" id="page-schedule">
+      <h1>Pesan Terjadwal</h1>
+      <p class="sub">Kirim pesan otomatis di waktu yang ditentukan (via API: POST /api/schedule)</p>
+      <div class="panel">
+        <h2>🗓️ Daftar Jadwal</h2>
+        <div id="schedList"><div class="empty">Memuat…</div></div>
+      </div>
+    </div>
+
+    <!-- ===== Logs ===== -->
+    <div class="page" id="page-logs">
+      <h1>Riwayat Pesan</h1>
+      <p class="sub">100 pesan terakhir masuk dan keluar</p>
+      <div class="panel">
+        <div id="logList"><div class="empty">Memuat…</div></div>
+      </div>
+    </div>
+
+    <!-- ===== API ===== -->
+    <div class="page" id="page-api">
+      <h1>API &amp; Token</h1>
+      <p class="sub">Gunakan token ini untuk mengakses API dari aplikasimu</p>
+      <div class="panel">
+        <h2>🔑 API Token Kamu</h2>
+        <div class="token-box">
+          <code id="apiToken">••••••••</code>
+          <button class="btn btn-ghost btn-sm" onclick="copyToken()">📋 Salin</button>
+          <button class="btn btn-danger btn-sm" onclick="regenToken()">♻️ Baru</button>
+        </div>
+        <p class="muted" style="margin-top:12px">⚠️ Token adalah rahasia — siapa pun yang memegangnya bisa mengirim pesan dari nomor kamu.</p>
+      </div>
+      <div class="panel">
+        <h2>📖 Contoh Penggunaan</h2>
+        <p class="muted" style="margin-bottom:12px">Kirim teks:</p>
+        <div class="token-box" style="display:block;white-space:pre-wrap">curl -X POST {BASE}/api/send \
+  -H "Authorization: Bearer TOKEN_KAMU" \
+  -H "Content-Type: application/json" \
+  -d '{"target":"628xxxxxxxxxx","message":"Halo dari API!"}'</div>
+        <p class="muted" style="margin:16px 0 12px">Kirim file (gambar/video/audio/dokumen):</p>
+        <div class="token-box" style="display:block;white-space:pre-wrap">curl -X POST {BASE}/api/send \
+  -H "Authorization: Bearer TOKEN_KAMU" \
+  -F "target=628xxxxxxxxxx" \
+  -F "message=Ini dokumennya" \
+  -F "file=@/path/invoice.pdf"</div>
+        <p class="muted" style="margin:16px 0 12px">Kirim media via URL:</p>
+        <div class="token-box" style="display:block;white-space:pre-wrap">curl -X POST {BASE}/api/send \
+  -H "Authorization: Bearer TOKEN_KAMU" \
+  -H "Content-Type: application/json" \
+  -d '{"target":"628xxx","media_url":"https://contoh.com/gambar.jpg","message":"Cek gambar ini"}'</div>
+        <p class="muted" style="margin:16px 0 12px">Broadcast (maks 100 nomor, delay otomatis):</p>
+        <div class="token-box" style="display:block;white-space:pre-wrap">curl -X POST {BASE}/api/broadcast \
+  -H "Authorization: Bearer TOKEN_KAMU" \
+  -H "Content-Type: application/json" \
+  -d '{"targets":["628xxx","628yyy"],"message":"Promo spesial!"}'</div>
+        <p class="muted" style="margin:16px 0 12px">Pesan terjadwal:</p>
+        <div class="token-box" style="display:block;white-space:pre-wrap">curl -X POST {BASE}/api/schedule \
+  -H "Authorization: Bearer TOKEN_KAMU" \
+  -H "Content-Type: application/json" \
+  -d '{"target":"628xxx","message":"Reminder rapat","run_at":"2026-10-10T09:00:00+07:00"}'</div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let ME = null;
+  const BASE = location.origin;
+
+  function toast(msg, isErr) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show' + (isErr ? ' err' : '');
+    setTimeout(() => t.classList.remove('show'), 3200);
+  }
+
+  async function api(url, opts = {}) {
+    const r = await fetch(url, opts);
+    if (r.status === 401) { location.href = '/login'; throw new Error('unauthorized'); }
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(data.error || 'Terjadi kesalahan');
+    return data;
+  }
+
+  // ===== Nav =====
+  document.querySelectorAll('.nav-item[data-page]').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById('page-' + btn.dataset.page).classList.add('active');
+      document.querySelector('aside').classList.remove('open');
+      loadPage(btn.dataset.page);
+    };
+  });
+
+  // ===== Status polling =====
+  const STATUS_LABEL = {
+    idle: 'Belum terhubung', starting: 'Menyambungkan…', qr: 'Menunggu scan QR',
+    connected: 'Terhubung', disconnected: 'Terputus',
+  };
+  async function refreshStatus() {
+    try {
+      const s = await api('/me/status');
+      const pill = document.getElementById('statusPill');
+      const cls = s.status === 'connected' ? 'st-connected' : s.status === 'qr' ? 'st-qr' : 'st-off';
+      pill.className = 'status-pill ' + cls;
+      pill.innerHTML = '<span class="dot"></span> ' + (STATUS_LABEL[s.status] || s.status);
+      document.getElementById('qrBox').style.display = s.qr ? 'block' : 'none';
+      if (s.qr) document.getElementById('qrImg').src = s.qr;
+      document.getElementById('btnDisconnect').style.display = s.status === 'connected' ? 'inline-flex' : 'none';
+      document.getElementById('meInfo').textContent =
+        s.me ? 'Terhubung sebagai: ' + (s.me.name || '') + ' (' + (s.me.id || '').split(':')[0] + ')' : '';
+    } catch {}
+  }
+  setInterval(refreshStatus, 3000);
+
+  async function connectWA() {
+    try { await api('/me/connect', { method: 'POST' }); toast('Menyambungkan… tunggu QR muncul'); }
+    catch (e) { toast(e.message, true); }
+  }
+  async function disconnectWA() {
+    if (!confirm('Yakin putuskan koneksi WhatsApp?')) return;
+    await api('/me/disconnect', { method: 'POST' });
+    toast('Koneksi diputus');
+    refreshStatus();
+  }
+
+  // ===== Send =====
+  const fileInput = document.getElementById('sendFile');
+  document.getElementById('fileDrop').onclick = () => fileInput.click();
+  fileInput.onchange = () => {
+    document.getElementById('fileName').textContent = fileInput.files[0] ? '📎 ' + fileInput.files[0].name : '';
+  };
+  document.getElementById('sendForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('sendBtn');
+    btn.disabled = true; btn.textContent = 'Mengirim…';
+    try {
+      const fd = new FormData();
+      fd.append('target', document.getElementById('sendTarget').value);
+      fd.append('message', document.getElementById('sendMessage').value);
+      if (fileInput.files[0]) fd.append('file', fileInput.files[0]);
+      await api('/me/send', { method: 'POST', body: fd });
+      toast('✅ Pesan terkirim!');
+      document.getElementById('sendForm').reset();
+      document.getElementById('fileName').textContent = '';
+    } catch (e2) { toast(e2.message, true); }
+    btn.disabled = false; btn.textContent = 'Kirim 🚀';
+  };
+
+  // ===== Autoreply =====
+  async function loadAutoreplies() {
+    const rows = await api('/me/autoreplies');
+    const el = document.getElementById('arList');
+    if (!rows.length) { el.innerHTML = '<div class="empty">Belum ada autoreply</div>'; return; }
+    el.innerHTML = '<table><tr><th>Keyword</th><th>Balasan</th><th>Mode</th><th>Status</th><th></th></tr>' +
+      rows.map(r => `<tr>
+        <td><b>${esc(r.keyword)}</b></td>
+        <td>${esc(r.response)}</td>
+        <td class="muted">${r.match_mode}</td>
+        <td><span class="badge ${r.active ? 'b-out' : 'b-fail'}">${r.active ? 'Aktif' : 'Nonaktif'}</span></td>
+        <td style="white-space:nowrap">
+          <button class="btn btn-ghost btn-sm" onclick="toggleAr(${r.id})">Toggle</button>
+          <button class="btn btn-danger btn-sm" onclick="delAr(${r.id})">Hapus</button>
+        </td></tr>`).join('') + '</table>';
+  }
+  document.getElementById('arForm').onsubmit = async (e) => {
+    e.preventDefault();
+    await api('/me/autoreplies', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        keyword: document.getElementById('arKeyword').value,
+        response: document.getElementById('arResponse').value,
+        match_mode: document.getElementById('arMode').value,
+      }),
+    });
+    document.getElementById('arForm').reset();
+    toast('Autoreply ditambahkan');
+    loadAutoreplies();
+  };
+  async function toggleAr(id) { await api(`/me/autoreplies/${id}/toggle`, { method: 'POST' }); loadAutoreplies(); }
+  async function delAr(id) { await api(`/me/autoreplies/${id}`, { method: 'DELETE' }); loadAutoreplies(); }
+
+  // ===== Schedules =====
+  async function loadSchedules() {
+    const rows = await api('/me/schedules');
+    const el = document.getElementById('schedList');
+    if (!rows.length) { el.innerHTML = '<div class="empty">Belum ada jadwal. Tambahkan lewat API POST /api/schedule</div>'; return; }
+    el.innerHTML = '<table><tr><th>Tujuan</th><th>Pesan</th><th>Waktu</th><th>Status</th><th></th></tr>' +
+      rows.map(r => `<tr>
+        <td>${esc(r.jid.split('@')[0])}</td>
+        <td>${esc(r.text)}</td>
+        <td class="muted">${new Date(r.run_at).toLocaleString('id-ID')}</td>
+        <td><span class="badge ${r.done ? 'b-out' : 'b-in'}">${r.done ? 'Terkirim' : 'Menunggu'}</span></td>
+        <td><button class="btn btn-danger btn-sm" onclick="delSched(${r.id})">Hapus</button></td></tr>`).join('') + '</table>';
+  }
+  async function delSched(id) { await api(`/me/schedules/${id}`, { method: 'DELETE' }); loadSchedules(); }
+
+  // ===== Logs =====
+  async function loadLogs() {
+    const rows = await api('/me/logs');
+    const el = document.getElementById('logList');
+    if (!rows.length) { el.innerHTML = '<div class="empty">Belum ada pesan</div>'; return; }
+    el.innerHTML = '<table><tr><th>Arah</th><th>Nomor</th><th>Pesan</th><th>Status</th><th>Waktu</th></tr>' +
+      rows.map(r => `<tr>
+        <td><span class="badge ${r.direction === 'in' ? 'b-in' : 'b-out'}">${r.direction === 'in' ? '⬅ Masuk' : '➡ Keluar'}</span></td>
+        <td>${esc((r.jid || '').split('@')[0])}</td>
+        <td>${r.media_type ? '📎 [' + r.media_type + '] ' : ''}${esc(r.text || '')}</td>
+        <td><span class="badge ${String(r.status).startsWith('failed') ? 'b-fail' : 'b-out'}">${esc(r.status || '')}</span></td>
+        <td class="muted">${new Date(r.created_at).toLocaleString('id-ID')}</td></tr>`).join('') + '</table>';
+  }
+
+  // ===== Token =====
+  function copyToken() {
+    navigator.clipboard.writeText(ME.api_token).then(() => toast('Token disalin 📋'));
+  }
+  async function regenToken() {
+    if (!confirm('Generate token baru? Token lama langsung tidak berlaku.')) return;
+    const d = await api('/me/regenerate-token', { method: 'POST' });
+    ME.api_token = d.api_token;
+    renderToken();
+    toast('Token baru dibuat');
+  }
+  function renderToken() {
+    document.getElementById('apiToken').textContent = ME.api_token;
+    document.querySelectorAll('.token-box').forEach(el => {
+      el.innerHTML = el.innerHTML.replaceAll('{BASE}', BASE).replaceAll('TOKEN_KAMU', ME.api_token);
+    });
+  }
+
+  async function doLogout() {
+    await fetch('/auth/logout', { method: 'POST' });
+    location.href = '/';
+  }
+
+  function esc(s) {
+    return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  function loadPage(p) {
+    if (p === 'autoreply') loadAutoreplies();
+    if (p === 'schedule') loadSchedules();
+    if (p === 'logs') loadLogs();
+  }
+
+  // ===== Init =====
+  (async () => {
+    try {
+      ME = await api('/me');
+      document.getElementById('userName').textContent = ME.user.name;
+      document.getElementById('userEmail').textContent = ME.user.email;
+      renderToken();
+      refreshStatus();
+    } catch {}
+  })();
+</script>
+</body>
+</html>

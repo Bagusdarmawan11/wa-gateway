@@ -1,7 +1,7 @@
 {
   "name": "wa-gateway",
-  "version": "1.0.0",
-  "description": "WhatsApp API Gateway pribadi (Baileys + Express + Neon PostgreSQL)",
+  "version": "2.0.0",
+  "description": "WhatsApp API Gateway multi-user (Baileys + Express + Neon PostgreSQL)",
   "type": "module",
   "main": "src/index.js",
   "scripts": {
@@ -13,7 +13,11 @@
   },
   "dependencies": {
     "@whiskeysockets/baileys": "^6.7.9",
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.7",
     "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
     "node-cron": "^3.0.3",
     "pg": "^8.13.1",
     "pino": "^9.5.0",
