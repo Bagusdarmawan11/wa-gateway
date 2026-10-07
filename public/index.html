@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WA Gateway Dashboard</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',system-ui,sans-serif; }
+  body { background:#0f172a; color:#e2e8f0; min-height:100vh; }
+  .container { max-width:900px; margin:0 auto; padding:24px 16px; }
+  h1 { font-size:22px; margin-bottom:4px; }
+  .sub { color:#94a3b8; font-size:13px; margin-bottom:20px; }
+  .badge { display:inline-block; padding:3px 12px; border-radius:999px; font-size:12px; font-weight:600; }
+  .badge.connected { background:#065f46; color:#6ee7b7; }
+  .badge.qr { background:#78350f; color:#fcd34d; }
+  .badge.disconnected, .badge.starting { background:#7f1d1d; color:#fca5a5; }
+  .tabs { display:flex; gap:8px; margin:20px 0; flex-wrap:wrap; }
+  .tab-btn { background:#1e293b; border:1px solid #334155; color:#94a3b8; padding:8px 16px; border-radius:8px; cursor:pointer; font-size:13px; }
+  .tab-btn.active { background:#2563eb; color:#fff; border-color:#2563eb; }
+  .card { background:#1e293b; border:1px solid #334155; border-radius:12px; padding:20px; margin-bottom:16px; }
+  input, select, textarea { width:100%; background:#0f172a; border:1px solid #334155; color:#e2e8f0; padding:10px 12px; border-radius:8px; font-size:14px; margin-bottom:10px; }
+  button.primary { background:#2563eb; color:#fff; border:none; padding:10px 18px; border-radius:8px; cursor:pointer; font-size:14px; font-weight:600; }
+  button.primary:hover { background:#1d4ed8; }
+  button.danger { background:#dc2626; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:12px; }
+  button.small { background:#334155; color:#e2e8f0; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:12px; margin-right:6px; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th, td { text-align:left; padding:8px 6px; border-bottom:1px solid #334155; word-break:break-all; }
+  th { color:#94a3b8; font-weight:600; }
+  #qr-img { display:block; margin:16px auto; border-radius:12px; background:#fff; padding:10px; }
+  .hidden { display:none; }
+  .mono { font-family:monospace; font-size:12px; }
+  .row { display:flex; gap:10px; flex-wrap:wrap; }
+  .row > * { flex:1; min-width:150px; }
+  code.endpoint { background:#0f172a; padding:2px 6px; border-radius:4px; color:#7dd3fc; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>📱 WA Gateway</h1>
+  <p class="sub">WhatsApp API Gateway pribadi — <span id="wa-badge" class="badge starting">memuat...</span> <span id="wa-me" class="sub"></span></p>
+
+  <div id="login-card" class="card">
+    <h3>Masukkan Admin Token</h3>
+    <p class="sub">Token ini sama dengan nilai ADMIN_TOKEN di environment variable Render.</p>
+    <input type="password" id="admin-token" placeholder="ADMIN_TOKEN">
+    <button class="primary" onclick="saveToken()">Masuk</button>
+  </div>
+
+  <div id="main" class="hidden">
+    <div class="tabs">
+      <button class="tab-btn active" onclick="showTab('status',this)">Status & QR</button>
+      <button class="tab-btn" onclick="showTab('tokens',this)">API Token</button>
+      <button class="tab-btn" onclick="showTab('autoreply',this)">Autoreply</button>
+      <button class="tab-btn" onclick="showTab('schedule',this)">Jadwal</button>
+      <button class="tab-btn" onclick="showTab('logs',this)">Log Pesan</button>
+    </div>
+
+    <div id="tab-status" class="tab-pane">
+      <div class="card" style="text-align:center">
+        <div id="qr-box">
+          <p id="qr-text">Menunggu QR code...</p>
+          <img id="qr-img" class="hidden" alt="QR WhatsApp">
+        </div>
+        <p class="sub" style="margin-top:12px">Scan QR dengan WhatsApp (Perangkat Tertaut) untuk menghubungkan nomor.</p>
+        <button class="danger" onclick="doLogout()">Logout WhatsApp (hapus session)</button>
+      </div>
+      <div class="card">
+        <h3>Cara pakai API</h3>
+        <p class="sub" style="margin-top:8px">
+          Kirim pesan: <code class="endpoint">POST /api/send</code><br><br>
+          Header: <code class="endpoint">Authorization: Bearer TOKEN_KAMU</code><br><br>
+          Body JSON: <code class="endpoint">{"target":"08123456789","message":"Halo!"}</code><br><br>
+          Broadcast: <code class="endpoint">POST /api/broadcast</code> dengan <code class="endpoint">{"targets":[...],"message":"..."}</code><br>
+          Jadwal: <code class="endpoint">POST /api/schedule</code> dengan <code class="endpoint">{"target":"...","message":"...","run_at":"2026-01-01T10:00:00Z"}</code>
+        </p>
+      </div>
+    </div>
+
+    <div id="tab-tokens" class="tab-pane hidden">
+      <div class="card">
+        <h3>Buat Token Baru</h3>
+        <div class="row" style="margin-top:10px">
+          <input id="token-name" placeholder="Nama pemakai (misal: Budi)">
+          <button class="primary" style="flex:0" onclick="createToken()">Buat</button>
+        </div>
+      </div>
+      <div class="card">
+        <table><thead><tr><th>Nama</th><th>Token</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="tokens-body"></tbody></table>
+      </div>
+    </div>
+
+    <div id="tab-autoreply" class="tab-pane hidden">
+      <div class="card">
+        <h3>Tambah Autoreply</h3>
+        <div class="row" style="margin-top:10px">
+          <input id="ar-keyword" placeholder="Keyword (misal: halo)">
+          <select id="ar-mode"><option value="contains">Mengandung kata</option><option value="exact">Persis sama</option></select>
+        </div>
+        <textarea id="ar-response" rows="2" placeholder="Balasan otomatis"></textarea>
+        <button class="primary" onclick="createAutoreply()">Simpan</button>
+      </div>
+      <div class="card">
+        <table><thead><tr><th>Keyword</th><th>Balasan</th><th>Mode</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="ar-body"></tbody></table>
+      </div>
+    </div>
+
+    <div id="tab-schedule" class="tab-pane hidden">
+      <div class="card">
+        <table><thead><tr><th>Tujuan</th><th>Pesan</th><th>Waktu Kirim</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="sched-body"></tbody></table>
+        <p class="sub" style="margin-top:10px">Jadwal dibuat lewat API: <code class="endpoint">POST /api/schedule</code></p>
+      </div>
+    </div>
+
+    <div id="tab-logs" class="tab-pane hidden">
+      <div class="card">
+        <button class="small" onclick="loadLogs()">↻ Refresh</button>
+        <table style="margin-top:10px"><thead><tr><th>Waktu</th><th>Arah</th><th>Nomor</th><th>Pesan</th><th>Status</th></tr></thead><tbody id="logs-body"></tbody></table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let adminToken = localStorage.getItem('adminToken') || '';
+const H = () => ({ 'x-admin-token': adminToken, 'Content-Type': 'application/json' });
+
+async function api(path, opts = {}) {
+  const r = await fetch(path, { ...opts, headers: { ...H(), ...(opts.headers||{}) } });
+  if (r.status === 401) { logoutAdmin(); throw new Error('unauthorized'); }
+  return r.json();
+}
+
+function saveToken() {
+  adminToken = document.getElementById('admin-token').value.trim();
+  localStorage.setItem('adminToken', adminToken);
+  init();
+}
+function logoutAdmin() {
+  localStorage.removeItem('adminToken');
+  document.getElementById('login-card').classList.remove('hidden');
+  document.getElementById('main').classList.add('hidden');
+}
+
+function showTab(name, btn) {
+  document.querySelectorAll('.tab-pane').forEach(e => e.classList.add('hidden'));
+  document.querySelectorAll('.tab-btn').forEach(e => e.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.remove('hidden');
+  btn.classList.add('active');
+  if (name === 'tokens') loadTokens();
+  if (name === 'autoreply') loadAutoreplies();
+  if (name === 'schedule') loadSchedules();
+  if (name === 'logs') loadLogs();
+}
+
+async function pollStatus() {
+  try {
+    const s = await api('/admin/status');
+    const badge = document.getElementById('wa-badge');
+    badge.className = 'badge ' + s.status;
+    badge.textContent = { connected:'Terhubung', qr:'Menunggu scan QR', disconnected:'Terputus', starting:'Menyalakan...' }[s.status] || s.status;
+    document.getElementById('wa-me').textContent = s.me ? '· ' + s.me.id.split(':')[0] : '';
+    const img = document.getElementById('qr-img');
+    if (s.qr) { img.src = s.qr; img.classList.remove('hidden'); document.getElementById('qr-text').textContent = 'Scan QR ini:'; }
+    else { img.classList.add('hidden'); document.getElementById('qr-text').textContent = s.status === 'connected' ? '✅ WhatsApp sudah terhubung' : 'Menunggu QR code...'; }
+  } catch (e) {}
+}
+
+async function doLogout() {
+  if (!confirm('Yakin logout WhatsApp? Session dihapus, harus scan QR ulang.')) return;
+  await api('/admin/logout', { method: 'POST' });
+}
+
+async function loadTokens() {
+  const rows = await api('/admin/tokens');
+  document.getElementById('tokens-body').innerHTML = rows.map(t => `
+    <tr><td>${t.name}</td><td class="mono">${t.token.slice(0,20)}...</td>
+    <td>${t.active ? '✅' : '⛔'}</td>
+    <td>
+      <button class="small" onclick="navigator.clipboard.writeText('${t.token}')">Copy</button>
+      <button class="small" onclick="toggleToken(${t.id})">${t.active?'Nonaktifkan':'Aktifkan'}</button>
+      <button class="danger" onclick="delToken(${t.id})">Hapus</button>
+    </td></tr>`).join('');
+}
+async function createToken() {
+  const name = document.getElementById('token-name').value.trim();
+  if (!name) return alert('Isi nama dulu');
+  await api('/admin/tokens', { method:'POST', body: JSON.stringify({ name }) });
+  document.getElementById('token-name').value = '';
+  loadTokens();
+}
+async function toggleToken(id) { await api(`/admin/tokens/${id}/toggle`, { method:'POST' }); loadTokens(); }
+async function delToken(id) { if (confirm('Hapus token ini?')) { await api(`/admin/tokens/${id}`, { method:'DELETE' }); loadTokens(); } }
+
+async function loadAutoreplies() {
+  const rows = await api('/admin/autoreplies');
+  document.getElementById('ar-body').innerHTML = rows.map(r => `
+    <tr><td>${r.keyword}</td><td>${r.response}</td><td>${r.match_mode}</td><td>${r.active?'✅':'⛔'}</td>
+    <td>
+      <button class="small" onclick="toggleAr(${r.id})">${r.active?'Nonaktifkan':'Aktifkan'}</button>
+      <button class="danger" onclick="delAr(${r.id})">Hapus</button>
+    </td></tr>`).join('');
+}
+async function createAutoreply() {
+  const keyword = document.getElementById('ar-keyword').value.trim();
+  const response = document.getElementById('ar-response').value.trim();
+  const match_mode = document.getElementById('ar-mode').value;
+  if (!keyword || !response) return alert('Lengkapi dulu');
+  await api('/admin/autoreplies', { method:'POST', body: JSON.stringify({ keyword, response, match_mode }) });
+  document.getElementById('ar-keyword').value = '';
+  document.getElementById('ar-response').value = '';
+  loadAutoreplies();
+}
+async function toggleAr(id) { await api(`/admin/autoreplies/${id}/toggle`, { method:'POST' }); loadAutoreplies(); }
+async function delAr(id) { if (confirm('Hapus rule ini?')) { await api(`/admin/autoreplies/${id}`, { method:'DELETE' }); loadAutoreplies(); } }
+
+async function loadSchedules() {
+  const rows = await api('/admin/schedules');
+  document.getElementById('sched-body').innerHTML = rows.map(s => `
+    <tr><td class="mono">${s.jid.split('@')[0]}</td><td>${s.text}</td>
+    <td>${new Date(s.run_at).toLocaleString('id-ID')}</td><td>${s.done?'✅ Terkirim':'⏳ Menunggu'}</td>
+    <td><button class="danger" onclick="delSched(${s.id})">Hapus</button></td></tr>`).join('');
+}
+async function delSched(id) { if (confirm('Hapus jadwal?')) { await api(`/admin/schedules/${id}`, { method:'DELETE' }); loadSchedules(); } }
+
+async function loadLogs() {
+  const rows = await api('/admin/logs');
+  document.getElementById('logs-body').innerHTML = rows.map(l => `
+    <tr><td>${new Date(l.created_at).toLocaleString('id-ID')}</td>
+    <td>${l.direction === 'in' ? '📥' : '📤'}</td>
+    <td class="mono">${l.jid.split('@')[0]}</td><td>${(l.text||'').slice(0,60)}</td><td>${l.status||''}</td></tr>`).join('');
+}
+
+async function init() {
+  if (!adminToken) return logoutAdmin();
+  try {
+    await api('/admin/status');
+    document.getElementById('login-card').classList.add('hidden');
+    document.getElementById('main').classList.remove('hidden');
+  } catch { logoutAdmin(); }
+}
+init();
+setInterval(pollStatus, 3000);
+</script>
+</body>
+</html>
