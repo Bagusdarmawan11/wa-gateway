@@ -1,8 +1,12 @@
-import makeWASocket, {
+import baileysDefault, {
   DisconnectReason,
   fetchLatestBaileysVersion,
   makeCacheableSignalKeyStore,
 } from '@whiskeysockets/baileys';
+
+// Kompatibel lintas versi Baileys (6.7.x vs 6.17.x):
+// di sebagian versi fungsi ada di default import, di versi lain di .default
+const makeWASocket = baileysDefault?.default ?? baileysDefault;
 import QRCode from 'qrcode';
 import pino from 'pino';
 import { useDbAuthState } from './auth-state.js';
