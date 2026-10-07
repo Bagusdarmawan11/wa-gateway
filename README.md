@@ -43,8 +43,11 @@ public/
      - `DATABASE_URL` = connection string Neon
      - `JWT_SECRET` = string acak panjang (misal hasil `openssl rand -hex 32`)
      - `NODE_ENV` = `production`
-4. **Anti-tidur** (free tier): buat cron di [cron-job.org](https://cron-job.org)
-   yang memanggil `https://URL-APP-RENDER.onrender.com/health` tiap 10 menit.
+4. **Anti-tidur** (free tier): pakai [UptimeRobot](https://uptimerobot.com).
+   - Monitor type: **HTTP(s)**
+   - URL: `https://URL-APP-RENDER.onrender.com/health`
+   - Interval: **5 menit**
+   - Opsional: keyword check `ok` supaya dibaca sebagai up hanya jika endpoint sehat.
 
 ## Menjalankan lokal
 
