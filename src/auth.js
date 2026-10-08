@@ -91,18 +91,40 @@ export async function requireLogin(req, res, next) {
   }
 }
 
-/** Middleware: auth via API token (untuk endpoint publik /api/*) */
+/** Middleware: auth via API token device (endpoint publik /api/*) */
 export async function tokenAuth(req, res, next) {
   try {
     const auth = req.headers['authorization'] || '';
     const token = auth.replace(/^Bearer\s+/i, '') || req.headers['x-api-token'] || req.query.token;
     if (!token) return res.status(401).json({ error: 'Token API diperlukan' });
-    const { rows } = await pool.query(
-      'SELECT id, name, email FROM users WHERE api_token = $1',
-      [token]
-    );
+
+    // Token device (syn_...)
+    let { rows } = await pool.query('SELECT * FROM devices WHERE token = $1', [token]);
+
+    // Fallback: master token akun (wgt_...) -> pakai device pertama user
+    if (!rows.length) {
+      const u = await pool.query('SELECT id FROM users WHERE api_token = $1', [token]);
+      if (u.rows.length) {
+        const d = await pool.query(
+          'SELECT * FROM devices WHERE user_id = $1 ORDER BY id LIMIT 1', [u.rows[0].id]
+        );
+        rows = d.rows;
+      }
+    }
     if (!rows.length) return res.status(403).json({ error: 'Token tidak valid' });
-    req.user = rows[0];
+
+    const device = rows[0];
+
+    // Whitelist IP (opsional): daftar IP dipisah koma
+    if (device.whitelist_ip?.trim()) {
+      const allowed = device.whitelist_ip.split(',').map((s) => s.trim()).filter(Boolean);
+      const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || req.ip;
+      if (!allowed.includes(ip)) {
+        return res.status(403).json({ error: `IP ${ip} tidak ada di whitelist` });
+      }
+    }
+
+    req.device = device;
     next();
   } catch (e) {
     res.status(500).json({ error: e.message });

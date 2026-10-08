@@ -1,6 +1,6 @@
 {
-  "name": "wa-gateway",
-  "version": "2.0.0",
+  "name": "synpera",
+  "version": "3.0.0",
   "description": "WhatsApp API Gateway multi-user (Baileys + Express + Neon PostgreSQL)",
   "type": "module",
   "main": "src/index.js",

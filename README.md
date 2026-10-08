@@ -1,35 +1,40 @@
-# WA Gateway v2 — WhatsApp API Gateway Multi-User
+# Synpera — WhatsApp API Gateway
 
-Seperti Fonnte, tapi milikmu sendiri. Setiap pengguna bisa daftar, login, scan QR dengan
-nomor WhatsApp-nya masing-masing, dan mendapat API token pribadi.
+Platform WhatsApp API multi-user & multi-device oleh PT. Catindo Bagus Perkasa.
+Setiap pengguna dapat mendaftar, menghubungkan hingga 5 nomor WhatsApp, dan mengelola
+masing-masing device dengan token API, webhook, autoreply, flow builder, dan lainnya.
 
 ## Fitur
 
-- 🌐 **Landing page** modern dengan liquid glass navbar + animasi
-- 👤 **Register & Login** (password ter-hash bcrypt, sesi via cookie JWT)
-- 📱 **Multi-session** — tiap user menghubungkan nomor WA sendiri via scan QR
-- ✉️ **Kirim teks, gambar, video, audio & dokumen** (upload file atau via URL)
-- 📡 **Broadcast** dengan jeda acak 2–6 detik (anti-banned)
-- 🗓️ **Pesan terjadwal** (cron tiap menit)
-- ⚡ **Autoreply** berbasis keyword (mode contains / exact)
-- 🔑 **API token per user** (bisa di-regenerate)
-- 📜 **Riwayat pesan** masuk & keluar
-- 💾 **Session WA tersimpan di Neon** — tidak hilang saat redeploy
+- Landing page modern (dark/light mode, animasi, liquid glass navbar)
+- Register & login (bcrypt + JWT cookie), hide/unhide password
+- Multi-device: 1 akun hingga 5 nomor WhatsApp, token API per device
+- Kirim teks, gambar, video, audio & dokumen (upload atau URL), personal & grup
+- Broadcast dengan jeda acak aman, pesan terjadwal
+- Autoreply keyword (personal/grup, contains/exact)
+- Flow builder visual (kondisi keyword, delay, balas teks/media)
+- Webhook: pesan masuk, status koneksi, status pesan, chaining
+- Whitelist IP untuk token API
+- Daftar grup WhatsApp per device
+- Autoread, silent read, inbox, quick reply, forward attachment, autodelete
+- Session WhatsApp tersimpan di database (tidak hilang saat redeploy)
 
 ## Struktur
 
 ```
 src/
   index.js       — server Express & semua route
-  auth.js        — register/login, JWT cookie, token API
-  wa.js          — manajer multi-session Baileys + kirim media
-  auth-state.js  — session Baileys disimpan ke PostgreSQL
-  db.js          — koneksi Neon + skema tabel
+  auth.js        — register/login, JWT cookie, token API (device + master)
+  wa.js          — manajer multi-device Baileys, kirim media, grup, webhook
+  flow.js        — eksekutor flow builder
+  auth-state.js  — session Baileys per device di PostgreSQL
+  db.js          — koneksi Neon + skema & migrasi tabel
 public/
   index.html     — landing page
-  login.html     — halaman masuk
-  register.html  — halaman daftar
+  login.html / register.html
   dashboard.html — dashboard per user
+  flow.html      — editor flow visual
+  assets/        — logo & favicon Synpera
 ```
 
 ## Deploy ke Render (gratis)
@@ -41,13 +46,10 @@ public/
    - Start command: `npm start`
    - Environment variables:
      - `DATABASE_URL` = connection string Neon
-     - `JWT_SECRET` = string acak panjang (misal hasil `openssl rand -hex 32`)
+     - `JWT_SECRET` = string acak panjang (`openssl rand -hex 32`)
      - `NODE_ENV` = `production`
-4. **Anti-tidur** (free tier): pakai [UptimeRobot](https://uptimerobot.com).
-   - Monitor type: **HTTP(s)**
-   - URL: `https://URL-APP-RENDER.onrender.com/health`
-   - Interval: **5 menit**
-   - Opsional: keyword check `ok` supaya dibaca sebagai up hanya jika endpoint sehat.
+4. **Anti-tidur** (free tier): cron di [cron-job.org](https://cron-job.org)
+   memanggil `https://URL-APP.onrender.com/health` tiap 10 menit.
 
 ## Menjalankan lokal
 
@@ -59,48 +61,28 @@ npm run dev
 
 Buka http://localhost:3000
 
-## API (untuk pemegang token)
+## API (token device)
 
-Semua endpoint butuh header: `Authorization: Bearer <API_TOKEN>`
+Header: `Authorization: Bearer <TOKEN_DEVICE>` (diawali `syn_`).
+Master token akun (`wgt_`) juga bisa dipakai — memakai device pertama akun.
 
-### Kirim teks
-```bash
-curl -X POST https://URL-APP/api/send \
-  -H "Authorization: Bearer TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"target":"628xxxxxxxxxx","message":"Halo!"}'
-```
+| Endpoint | Method | Fungsi |
+|---|---|---|
+| /api/send | POST | Kirim teks / media (JSON `media_url` atau multipart `file`) |
+| /api/broadcast | POST | Broadcast maks 100 nomor, jeda otomatis |
+| /api/schedule | POST | Jadwalkan pesan |
+| /api/device | GET | Info & status device |
 
-### Kirim file (gambar / video / audio / dokumen)
-```bash
-curl -X POST https://URL-APP/api/send \
-  -H "Authorization: Bearer TOKEN" \
-  -F "target=628xxxxxxxxxx" \
-  -F "message=Caption di sini" \
-  -F "file=@invoice.pdf"
-```
+Contoh ada di menu **API & Token** pada dashboard (otomatis terisi token kamu).
 
-### Kirim media via URL
-```json
-POST /api/send
-{"target":"628xxx","media_url":"https://contoh.com/gambar.jpg","message":"caption"}
-```
+## Migrasi dari v2
 
-### Broadcast (maks 100 nomor)
-```json
-POST /api/broadcast
-{"targets":["628xxx","628yyy"],"message":"Promo!","delay_ms":3000}
-```
+Semua migrasi database otomatis saat server start:
+- Session lama per-user dipindahkan ke "Device 1" milik user tersebut
+- Data autoreply/jadwal/log ikut terpindah
+- Pengguna cukup login seperti biasa
 
-### Pesan terjadwal
-```json
-POST /api/schedule
-{"target":"628xxx","message":"Reminder","run_at":"2026-10-10T09:00:00+07:00"}
-```
+## Catatan
 
-## Catatan penting
-
-- Ini **bukan** API resmi WhatsApp. Hindari spam/broadcast masif ke nomor asing agar
-  nomor tidak terkena banned.
+- Bukan produk resmi WhatsApp/Meta — gunakan secara wajar untuk menghindari banned.
 - File media maksimal 20MB per pengiriman.
-- Data lama dari v1 (single-user) otomatis diklaim oleh user pertama yang mendaftar.
