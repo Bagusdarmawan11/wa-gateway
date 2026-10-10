@@ -1,850 +1,1662 @@
 <!DOCTYPE html>
-<html lang="id" data-theme="dark">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Dashboard — Synpera</title>
 <link rel="icon" type="image/png" href="/assets/favicon.png">
 <style>
-  :root, [data-theme="dark"] {
-    --bg:#070b16; --panel:rgba(255,255,255,.04); --panel-solid:#101828;
-    --border:rgba(255,255,255,.09); --text:#e9eef7; --muted:#93a1b8;
-    --input:rgba(255,255,255,.05);
-    --accent:#3b82f6; --accent2:#22d3ee;
-    --accent-soft:rgba(59,130,246,.12); --accent-border:rgba(59,130,246,.4); --accent-text:#93c5fd;
-    --sidebar-bg:rgba(255,255,255,.02); --code-bg:rgba(0,0,0,.35);
-  }
-  [data-theme="light"] {
-    --bg:#f6f8fc; --panel:rgba(15,23,42,.03); --panel-solid:#ffffff;
-    --border:rgba(15,23,42,.1); --text:#0f172a; --muted:#5b6b84;
-    --input:rgba(15,23,42,.04);
-    --accent:#1d4ed8; --accent2:#0891b2;
-    --accent-soft:rgba(29,78,216,.08); --accent-border:rgba(29,78,216,.35); --accent-text:#1d4ed8;
-    --sidebar-bg:rgba(255,255,255,.6); --code-bg:rgba(15,23,42,.06);
-  }
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family:'Inter',system-ui,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; transition:background .35s,color .35s; }
-  .layout { display:flex; min-height:100vh; }
+/* ===== CSS VARIABLES ===== */
+:root,[data-theme="dark"]{
+  --bg:#070b16;--panel:rgba(255,255,255,.04);--panel-solid:#101828;
+  --border:rgba(255,255,255,.09);--text:#e9eef7;--muted:#93a1b8;
+  --input:rgba(255,255,255,.05);
+  --accent:#3b82f6;--accent2:#22d3ee;
+  --accent-soft:rgba(59,130,246,.12);--accent-border:rgba(59,130,246,.4);--accent-text:#93c5fd;
+  --sidebar-bg:rgba(10,15,28,.96);--code-bg:rgba(0,0,0,.35);
+  --navbar-bg:rgba(7,11,22,.72);
+  --scroll-track:rgba(255,255,255,.04);--scroll-thumb:rgba(59,130,246,.4);
+  --glass:rgba(255,255,255,.06);
+}
+[data-theme="light"]{
+  --bg:#f0f4fb;--panel:rgba(15,23,42,.03);--panel-solid:#ffffff;
+  --border:rgba(15,23,42,.1);--text:#0f172a;--muted:#5b6b84;
+  --input:rgba(15,23,42,.04);
+  --accent:#1d4ed8;--accent2:#0891b2;
+  --accent-soft:rgba(29,78,216,.08);--accent-border:rgba(29,78,216,.35);--accent-text:#1d4ed8;
+  --sidebar-bg:rgba(248,250,255,.96);--code-bg:rgba(15,23,42,.06);
+  --navbar-bg:rgba(240,244,251,.8);
+  --scroll-track:rgba(0,0,0,.05);--scroll-thumb:rgba(29,78,216,.4);
+  --glass:rgba(255,255,255,.7);
+}
 
-  aside {
-    width:256px; padding:22px 14px; border-right:1px solid var(--border);
-    display:flex; flex-direction:column; gap:4px; position:sticky; top:0; height:100vh;
-    background:var(--sidebar-bg); backdrop-filter:blur(12px); overflow-y:auto;
-  }
-  .logo { display:flex; align-items:center; gap:10px; font-weight:800; font-size:1.12rem; padding:8px 12px 20px; text-decoration:none; color:var(--text); }
-  .logo img { width:30px;height:30px; object-fit:contain; }
-  .nav-label { font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.09em; color:var(--muted); padding:14px 14px 6px; }
-  .nav-item {
-    display:flex; align-items:center; gap:11px; padding:11px 14px; border-radius:12px;
-    color:var(--muted); font-size:.9rem; font-weight:550;
-    cursor:pointer; transition:all .2s; border:none; background:none; text-align:left; width:100%; font-family:inherit;
-  }
-  .nav-item svg { width:17px;height:17px; flex-shrink:0; }
-  .nav-item:hover { background:var(--panel); color:var(--text); }
-  .nav-item.active { background:var(--accent-soft); color:var(--accent-text); }
-  .spacer { flex:1; }
-  .user-chip { padding:12px 14px; border-radius:12px; background:var(--panel); border:1px solid var(--border); font-size:.85rem; }
-  .user-chip b { display:block; }
-  .user-chip span { color:var(--muted); font-size:.76rem; word-break:break-all; }
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--scroll-track);border-radius:99px}
+::-webkit-scrollbar-thumb{background:var(--scroll-thumb);border-radius:99px}
+::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+*{scrollbar-width:thin;scrollbar-color:var(--scroll-thumb) var(--scroll-track)}
 
-  main { flex:1; padding:30px; max-width:1080px; }
-  .page { display:none; animation:fadeIn .35s ease; }
-  .page.active { display:block; }
-  @keyframes fadeIn { from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
-  h1 { font-size:1.55rem; font-weight:800; margin-bottom:6px; letter-spacing:-.02em; }
-  .sub { color:var(--muted); font-size:.92rem; margin-bottom:26px; }
-  .panel { background:var(--panel); border:1px solid var(--border); border-radius:18px; padding:26px; margin-bottom:22px; }
-  .panel h2 { font-size:1.02rem; font-weight:700; margin-bottom:16px; }
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background .35s,color .35s;overflow-x:hidden}
 
-  .btn {
-    display:inline-flex; align-items:center; gap:7px; padding:10px 18px; border-radius:11px;
-    font-weight:600; font-size:.86rem; border:none; cursor:pointer; font-family:inherit; transition:all .2s;
-  }
-  .btn svg { width:15px;height:15px; }
-  .btn-primary { background:linear-gradient(135deg,#2563eb,#0891b2); color:#fff; }
-  .btn-primary:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(37,99,235,.35); }
-  .btn-ghost { background:var(--panel); color:var(--text); border:1px solid var(--border); }
-  .btn-ghost:hover { background:var(--accent-soft); }
-  .btn-danger { background:rgba(239,68,68,.1); color:#f87171; border:1px solid rgba(239,68,68,.3); }
-  .btn-sm { padding:6px 12px; font-size:.77rem; border-radius:9px; }
-  .btn:disabled { opacity:.55; cursor:not-allowed; }
+/* ===== NAVBAR ===== */
+.navbar{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  height:58px;padding:0 20px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  background:var(--navbar-bg);
+  backdrop-filter:blur(20px) saturate(1.8);
+  -webkit-backdrop-filter:blur(20px) saturate(1.8);
+  border-bottom:1px solid var(--border);
+  box-shadow:0 1px 0 rgba(255,255,255,.04), 0 4px 24px rgba(0,0,0,.15);
+}
+.navbar-left{display:flex;align-items:center;gap:10px}
+.hamburger-btn{
+  background:none;border:none;color:var(--text);cursor:pointer;
+  padding:7px;border-radius:9px;transition:all .2s;
+  display:none;
+}
+.hamburger-btn:hover{background:var(--panel)}
+.hamburger-btn svg{display:block;width:20px;height:20px}
+.navbar-logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:1.05rem;color:var(--text);text-decoration:none}
+.navbar-logo img{width:26px;height:26px;object-fit:contain}
+.navbar-right{display:flex;align-items:center;gap:8px}
+.navbar-user{display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:10px;background:var(--panel);border:1px solid var(--border);font-size:.82rem}
+.navbar-user .name{font-weight:600}
+.navbar-user .email{color:var(--muted);font-size:.74rem}
+.lang-select{
+  background:var(--panel);border:1px solid var(--border);color:var(--text);
+  padding:5px 8px;border-radius:8px;font-size:.8rem;cursor:pointer;font-family:inherit
+}
+.theme-btn{
+  background:var(--panel);border:1px solid var(--border);color:var(--text);
+  padding:7px 10px;border-radius:9px;cursor:pointer;font-size:.85rem;transition:all .2s
+}
+.theme-btn:hover{background:var(--accent-soft)}
 
-  input, textarea, select {
-    width:100%; padding:11px 14px; border-radius:11px; font-size:.9rem; font-family:inherit;
-    background:var(--input); border:1px solid var(--border); color:var(--text); outline:none; transition:all .2s;
-  }
-  input:focus, textarea:focus, select:focus { border-color:var(--accent-border); box-shadow:0 0 0 3px var(--accent-soft); }
-  label { display:block; font-size:.82rem; font-weight:600; margin-bottom:6px; }
-  label .hint { font-weight:400; color:var(--muted); font-size:.76rem; }
-  .field { margin-bottom:15px; }
-  .row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+/* ===== LAYOUT ===== */
+.layout{display:flex;min-height:100vh;padding-top:58px}
 
-  .status-pill { display:inline-flex; align-items:center; gap:8px; padding:5px 14px; border-radius:999px; font-size:.8rem; font-weight:600; }
-  .st-connected { background:rgba(34,197,94,.13); color:#4ade80; border:1px solid rgba(34,197,94,.3); }
-  .st-qr { background:rgba(234,179,8,.12); color:#fbbf24; border:1px solid rgba(234,179,8,.3); }
-  .st-off { background:var(--panel); color:var(--muted); border:1px solid var(--border); }
-  [data-theme="light"] .st-connected { color:#15803d; }
-  [data-theme="light"] .st-qr { color:#b45309; }
-  .dot { width:8px;height:8px;border-radius:50%;background:currentColor; }
-  .st-connected .dot { animation:pulse 2s infinite; }
-  @keyframes pulse { 50%{opacity:.4} }
+/* ===== SIDEBAR ===== */
+aside{
+  width:240px;padding:14px 10px;
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;gap:2px;
+  position:fixed;top:58px;left:0;bottom:0;
+  background:var(--sidebar-bg);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  overflow-y:auto;z-index:110;
+  transition:transform .3s cubic-bezier(.4,0,.2,1);
+}
+.sidebar-overlay{
+  display:none;position:fixed;inset:0;z-index:109;
+  background:rgba(0,0,0,.5);backdrop-filter:blur(4px);
+}
+.nav-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:12px 12px 5px}
+.nav-item{
+  display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;
+  color:var(--muted);font-size:.875rem;font-weight:550;
+  cursor:pointer;transition:all .2s;border:none;background:none;text-align:left;width:100%;font-family:inherit
+}
+.nav-item svg{width:16px;height:16px;flex-shrink:0}
+.nav-item:hover{background:var(--panel);color:var(--text)}
+.nav-item.active{background:var(--accent-soft);color:var(--accent-text)}
 
-  .device-card {
-    background:var(--panel); border:1px solid var(--border); border-radius:18px;
-    padding:22px; margin-bottom:16px;
-  }
-  .device-head { display:flex; justify-content:space-between; align-items:flex-start; gap:14px; flex-wrap:wrap; }
-  .device-name { font-weight:700; font-size:1.05rem; display:flex; align-items:center; gap:10px; }
-  .device-num { color:var(--muted); font-size:.85rem; margin-top:3px; font-family:monospace; }
-  .device-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:16px; }
-  #qrModal, #editModal, #groupModal {
-    display:none; position:fixed; inset:0; z-index:150;
-    background:rgba(0,0,0,.6); backdrop-filter:blur(6px);
-    align-items:center; justify-content:center; padding:20px;
-  }
-  .modal-box {
-    background:var(--panel-solid); border:1px solid var(--border); border-radius:20px;
-    padding:28px; width:100%; max-width:520px; max-height:88vh; overflow-y:auto;
-    animation:fadeIn .25s ease;
-  }
-  .modal-box.wide { max-width:640px; }
-  .modal-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
-  .modal-head h3 { font-size:1.15rem; font-weight:750; }
-  .modal-close { background:none; border:none; color:var(--muted); font-size:1.3rem; cursor:pointer; }
-  #qrImg { border-radius:14px; background:#fff; padding:10px; max-width:240px; display:block; margin:0 auto; }
+/* ===== MAIN ===== */
+main{flex:1;padding:28px 28px 40px;margin-left:240px;min-width:0}
+.page{display:none;animation:fadeIn .3s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+h1{font-size:1.5rem;font-weight:800;margin-bottom:5px;letter-spacing:-.02em}
+.sub{color:var(--muted);font-size:.9rem;margin-bottom:22px}
 
-  .switch-row {
-    display:flex; justify-content:space-between; align-items:center; gap:14px;
-    padding:13px 0; border-bottom:1px solid var(--border);
-  }
-  .switch-row:last-child { border-bottom:none; }
-  .switch-row .info b { font-size:.9rem; display:block; }
-  .switch-row .info span { font-size:.78rem; color:var(--muted); }
-  .toggle { position:relative; width:44px; height:24px; flex-shrink:0; }
-  .toggle input { opacity:0; width:0; height:0; }
-  .toggle .slider {
-    position:absolute; inset:0; border-radius:999px; cursor:pointer;
-    background:var(--input); border:1px solid var(--border); transition:.25s;
-  }
-  .toggle .slider::before {
-    content:''; position:absolute; width:16px; height:16px; border-radius:50%;
-    background:var(--muted); top:3px; left:3px; transition:.25s;
-  }
-  .toggle input:checked + .slider { background:rgba(37,99,235,.35); border-color:var(--accent-border); }
-  .toggle input:checked + .slider::before { transform:translateX(20px); background:#3b82f6; }
+/* ===== PANELS ===== */
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:18px}
+.panel h2{font-size:.98rem;font-weight:700;margin-bottom:14px}
+.panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.panel-head h2{margin-bottom:0}
 
-  .token-box {
-    display:flex; gap:10px; align-items:center; padding:12px 15px; border-radius:11px;
-    background:var(--code-bg); border:1px solid var(--border); font-family:monospace; font-size:.84rem;
-    word-break:break-all;
-  }
-  .token-box code { flex:1; color:var(--accent-text); }
-  pre.code {
-    background:var(--code-bg); border:1px solid var(--border); border-radius:12px;
-    padding:16px; font-size:.8rem; font-family:monospace; white-space:pre-wrap; word-break:break-all;
-    color:var(--text); margin-bottom:16px;
-  }
+/* ===== BUTTONS ===== */
+.btn{
+  display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:10px;
+  font-weight:600;font-size:.84rem;border:none;cursor:pointer;font-family:inherit;transition:all .2s
+}
+.btn svg{width:14px;height:14px}
+.btn-primary{background:linear-gradient(135deg,#2563eb,#0891b2);color:#fff}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(37,99,235,.35)}
+.btn-ghost{background:var(--panel);color:var(--text);border:1px solid var(--border)}
+.btn-ghost:hover{background:var(--accent-soft);border-color:var(--accent-border)}
+.btn-danger{background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.3)}
+.btn-danger:hover{background:rgba(239,68,68,.2)}
+.btn-success{background:rgba(34,197,94,.12);color:#4ade80;border:1px solid rgba(34,197,94,.3)}
+.btn-sm{padding:5px 10px;font-size:.76rem;border-radius:8px}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
 
-  table { width:100%; border-collapse:collapse; font-size:.85rem; }
-  th { text-align:left; padding:10px 12px; color:var(--muted); font-weight:600; font-size:.72rem; text-transform:uppercase; letter-spacing:.06em; border-bottom:1px solid var(--border); }
-  td { padding:11px 12px; border-bottom:1px solid var(--border); vertical-align:top; }
-  .badge { padding:3px 10px; border-radius:999px; font-size:.72rem; font-weight:600; }
-  .b-in { background:rgba(59,130,246,.14); color:var(--accent-text); }
-  .b-out { background:rgba(34,197,94,.13); color:#4ade80; }
-  [data-theme="light"] .b-out { color:#15803d; }
-  .b-fail { background:rgba(239,68,68,.13); color:#f87171; }
-  .muted { color:var(--muted); font-size:.8rem; }
-  .empty { text-align:center; color:var(--muted); padding:28px; font-size:.9rem; }
+/* ===== FORMS ===== */
+input,textarea,select{
+  width:100%;padding:10px 13px;border-radius:10px;font-size:.88rem;font-family:inherit;
+  background:var(--input);border:1px solid var(--border);color:var(--text);outline:none;transition:all .2s
+}
+input:focus,textarea:focus,select:focus{border-color:var(--accent-border);box-shadow:0 0 0 3px var(--accent-soft)}
+label{display:block;font-size:.8rem;font-weight:600;margin-bottom:5px}
+label .hint{font-weight:400;color:var(--muted);font-size:.74rem}
+.field{margin-bottom:14px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+textarea{resize:vertical;min-height:100px}
 
-  .toast {
-    position:fixed; bottom:24px; right:24px; padding:14px 22px; border-radius:14px;
-    background:#052e16; border:1px solid rgba(34,197,94,.4); color:#d1fae5;
-    font-size:.9rem; font-weight:500; z-index:250; opacity:0; transform:translateY(16px);
-    transition:all .3s; pointer-events:none; box-shadow:0 12px 32px rgba(0,0,0,.4);
-  }
-  .toast.show { opacity:1; transform:translateY(0); }
-  .toast.err { background:#450a0a; border-color:rgba(239,68,68,.4); color:#fecaca; }
+/* ===== STATUS PILLS ===== */
+.status-pill{display:inline-flex;align-items:center;gap:7px;padding:4px 12px;border-radius:999px;font-size:.78rem;font-weight:600}
+.st-connected{background:rgba(34,197,94,.13);color:#4ade80;border:1px solid rgba(34,197,94,.3)}
+.st-qr{background:rgba(234,179,8,.12);color:#fbbf24;border:1px solid rgba(234,179,8,.3)}
+.st-off{background:var(--panel);color:var(--muted);border:1px solid var(--border)}
+[data-theme="light"] .st-connected{color:#15803d}
+[data-theme="light"] .st-qr{color:#b45309}
+.dot{width:7px;height:7px;border-radius:50%;background:currentColor}
+.st-connected .dot{animation:pulse 2s infinite}
+@keyframes pulse{50%{opacity:.4}}
 
-  .file-drop {
-    border:1.5px dashed var(--border); border-radius:12px; padding:18px;
-    text-align:center; color:var(--muted); font-size:.86rem; cursor:pointer; transition:all .2s;
-  }
-  .file-drop:hover { border-color:var(--accent-border); color:var(--text); }
+/* ===== DEVICE CARDS ===== */
+.device-card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:14px}
+.device-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.device-name{font-weight:700;font-size:1rem;display:flex;align-items:center;gap:9px}
+.device-num{color:var(--muted);font-size:.82rem;margin-top:3px;font-family:monospace}
+.device-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px}
 
-  .device-selector { margin-bottom:22px; max-width:340px; }
-  .theme-fab { margin-left:auto; }
+/* ===== MODALS ===== */
+.modal{
+  display:none;position:fixed;inset:0;z-index:300;
+  background:rgba(0,0,0,.65);backdrop-filter:blur(8px);
+  align-items:center;justify-content:center;padding:20px
+}
+.modal.open{display:flex}
+.modal-box{
+  background:var(--panel-solid);border:1px solid var(--border);border-radius:18px;
+  padding:26px;width:100%;max-width:500px;max-height:88vh;overflow-y:auto;
+  animation:fadeIn .25s ease
+}
+.modal-box.wide{max-width:640px}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.modal-head h3{font-size:1.1rem;font-weight:750}
+.modal-close{background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;padding:4px;border-radius:6px}
+.modal-close:hover{color:var(--text)}
+#qrImg{border-radius:12px;background:#fff;padding:10px;max-width:220px;display:block;margin:0 auto}
 
-  .hamburger { display:none; }
-  @media (max-width:860px) {
-    aside { position:fixed; z-index:120; transform:translateX(-100%); transition:transform .3s; background:var(--panel-solid); }
-    aside.open { transform:translateX(0); }
-    main { padding:20px; padding-top:64px; }
-    .hamburger { display:block; position:fixed; top:14px; left:14px; z-index:130; background:var(--panel-solid); border:1px solid var(--border); color:var(--text); padding:9px 13px; border-radius:10px; cursor:pointer; }
-    .row { grid-template-columns:1fr; }
-  }
+/* ===== SWITCHES ===== */
+.switch-row{
+  display:flex;justify-content:space-between;align-items:center;gap:12px;
+  padding:12px 0;border-bottom:1px solid var(--border)
+}
+.switch-row:last-child{border-bottom:none}
+.switch-row .info b{font-size:.88rem;display:block}
+.switch-row .info span{font-size:.76rem;color:var(--muted)}
+.toggle{position:relative;width:42px;height:22px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0;position:absolute}
+.toggle .slider{position:absolute;inset:0;border-radius:999px;cursor:pointer;background:var(--input);border:1px solid var(--border);transition:.25s}
+.toggle .slider::before{content:'';position:absolute;width:15px;height:15px;border-radius:50%;background:var(--muted);top:2.5px;left:2.5px;transition:.25s}
+.toggle input:checked+.slider{background:rgba(37,99,235,.35);border-color:var(--accent-border)}
+.toggle input:checked+.slider::before{transform:translateX(19px);background:#3b82f6}
+
+/* ===== TOKEN / CODE ===== */
+.token-box{
+  display:flex;gap:8px;align-items:center;padding:11px 13px;border-radius:10px;
+  background:var(--code-bg);border:1px solid var(--border);font-family:monospace;font-size:.82rem;word-break:break-all
+}
+.token-box code{flex:1;color:var(--accent-text)}
+pre.code{
+  background:var(--code-bg);border:1px solid var(--border);border-radius:11px;
+  padding:14px;font-size:.78rem;font-family:monospace;white-space:pre-wrap;word-break:break-all;
+  color:var(--text);margin-bottom:14px;overflow-x:auto
+}
+
+/* ===== TABLES ===== */
+.table-wrap{overflow-x:auto;border-radius:12px;border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:.83rem}
+th{text-align:left;padding:9px 12px;color:var(--muted);font-weight:600;font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--panel)}
+.badge{padding:2px 9px;border-radius:999px;font-size:.7rem;font-weight:600}
+.b-in{background:rgba(59,130,246,.14);color:var(--accent-text)}
+.b-out{background:rgba(34,197,94,.13);color:#4ade80}
+[data-theme="light"] .b-out{color:#15803d}
+.b-fail{background:rgba(239,68,68,.13);color:#f87171}
+.b-sched{background:rgba(168,85,247,.13);color:#c084fc}
+.muted{color:var(--muted);font-size:.78rem}
+.empty{text-align:center;color:var(--muted);padding:30px;font-size:.88rem}
+
+/* ===== TOAST ===== */
+.toast{
+  position:fixed;bottom:24px;right:24px;padding:13px 20px;border-radius:12px;
+  background:#052e16;border:1px solid rgba(34,197,94,.4);color:#d1fae5;
+  font-size:.88rem;font-weight:500;z-index:500;opacity:0;transform:translateY(14px);
+  transition:all .3s;pointer-events:none;box-shadow:0 12px 32px rgba(0,0,0,.4);max-width:320px
+}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast.err{background:#450a0a;border-color:rgba(239,68,68,.4);color:#fecaca}
+
+/* ===== MISC ===== */
+.device-selector{margin-bottom:20px;max-width:320px}
+.file-drop{border:1.5px dashed var(--border);border-radius:10px;padding:16px;text-align:center;color:var(--muted);font-size:.84rem;cursor:pointer;transition:all .2s}
+.file-drop:hover{border-color:var(--accent-border);color:var(--text)}
+.chip{display:inline-block;padding:3px 10px;border-radius:999px;font-size:.7rem;font-weight:600;background:var(--accent-soft);color:var(--accent-text);border:1px solid var(--accent-border)}
+
+/* Filter bar */
+.filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:flex-end}
+.filter-bar>*{flex:1;min-width:120px}
+.filter-bar .btn{flex:none}
+
+/* Stat cards */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;margin-bottom:22px}
+.stat-card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:18px;text-align:center}
+.stat-card .num{font-size:2rem;font-weight:800;color:var(--accent-text)}
+.stat-card .lbl{font-size:.76rem;color:var(--muted);margin-top:3px}
+
+/* Send form typing indicator */
+.typing-hint{font-size:.75rem;color:var(--muted);margin-top:4px}
+
+/* Group layout */
+.groups-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.group-card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .2s}
+.group-card:hover{border-color:var(--accent-border);background:var(--accent-soft)}
+.group-avatar{width:40px;height:40px;border-radius:12px;background:var(--accent-soft);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--accent-text);font-size:1.1rem;flex-shrink:0}
+.group-info{min-width:0}
+.group-name{font-weight:600;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.group-id{font-size:.72rem;color:var(--muted);font-family:monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* Recurring schedule display */
+.cron-hint{font-size:.74rem;color:var(--muted);margin-top:4px}
+
+/* ===== MOBILE ===== */
+@media(max-width:860px){
+  aside{transform:translateX(-260px)}
+  aside.open{transform:translateX(0)}
+  .sidebar-overlay.open{display:block}
+  main{margin-left:0;padding:16px;padding-top:22px}
+  .hamburger-btn{display:flex}
+  .navbar-user .email{display:none}
+  .row{grid-template-columns:1fr}
+  .row3{grid-template-columns:1fr}
+  .stat-grid{grid-template-columns:1fr 1fr}
+  .filter-bar>*{min-width:100%}
+  h1{font-size:1.25rem}
+  .groups-grid{grid-template-columns:1fr}
+  table{font-size:.78rem}
+  td,th{padding:8px 9px}
+}
 </style>
 </head>
 <body>
-<button class="hamburger" onclick="document.querySelector('aside').classList.toggle('open')">☰</button>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="navbar-left">
+    <button class="hamburger-btn" id="menuBtn" onclick="toggleSidebar()">
+      <svg id="menuIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+      <svg id="closeIcon" style="display:none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <a class="navbar-logo" href="/"><img src="/assets/logo.png" alt="Synpera">Synpera</a>
+  </div>
+  <div class="navbar-right">
+    <select class="lang-select" id="langSelect" onchange="setLang(this.value)">
+      <option value="en">🌐 EN</option>
+      <option value="id">🇮🇩 ID</option>
+      <option value="zh">🇨🇳 ZH</option>
+      <option value="ru">🇷🇺 RU</option>
+      <option value="ko">🇰🇷 KO</option>
+      <option value="ar">🇸🇦 AR</option>
+    </select>
+    <button class="theme-btn" onclick="toggleTheme()">🌙</button>
+    <div class="navbar-user" id="navUser">
+      <div><div class="name" id="navName">User</div><div class="email" id="navEmail">—</div></div>
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="doLogout()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      <span data-i18n="logout">Logout</span>
+    </button>
+  </div>
+</nav>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
 <div class="layout">
-  <aside>
-    <a class="logo" href="/"><img src="/assets/logo.png" alt="Synpera"> Synpera</a>
-    <div class="nav-label">Menu</div>
-    <button class="nav-item active" data-page="devices"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>Device</button>
-    <button class="nav-item" data-page="send"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg>Kirim Pesan</button>
-    <button class="nav-item" data-page="autoreply"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Autoreply</button>
-    <button class="nav-item" data-page="flow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="18" r="3"/><path d="M8.5 8.5L15.5 15.5M6 9v3a3 3 0 0 0 3 3h3"/></svg>Flow</button>
-    <button class="nav-item" data-page="groups"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Grup</button>
-    <button class="nav-item" data-page="schedule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Terjadwal</button>
-    <button class="nav-item" data-page="logs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8"/></svg>Riwayat</button>
-    <button class="nav-item" data-page="api"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>API &amp; Token</button>
-    <div class="spacer"></div>
-    <button class="nav-item" id="themeBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><span id="themeLabel">Mode Terang</span></button>
-    <div class="user-chip"><b id="userName">…</b><span id="userEmail"></span></div>
-    <button class="nav-item" onclick="doLogout()" style="color:#f87171"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>Keluar</button>
-  </aside>
+<!-- SIDEBAR -->
+<aside id="sidebar">
+  <div class="nav-label" data-i18n="nav_menu">Menu</div>
+  <button class="nav-item active" data-page="devices"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg><span data-i18n="nav_device">Device</span></button>
+  <button class="nav-item" data-page="send"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg><span data-i18n="nav_send">Send Message</span></button>
+  <button class="nav-item" data-page="inbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22,12 16,12 14,15 10,15 8,12 2,12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg><span data-i18n="nav_inbox">Inbox</span></button>
+  <button class="nav-item" data-page="history"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8"/></svg><span data-i18n="nav_history">History</span></button>
+  <button class="nav-item" data-page="autoreply"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg><span data-i18n="nav_autoreply">Autoreply</span></button>
+  <button class="nav-item" data-page="template"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg><span data-i18n="nav_template">Template</span></button>
+  <button class="nav-item" data-page="groups"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg><span data-i18n="nav_groups">Groups</span></button>
+  <button class="nav-item" data-page="schedule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span data-i18n="nav_schedule">Schedule</span></button>
+  <button class="nav-item" data-page="recurring"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23,4 23,10 17,10"/><polyline points="1,20 1,14 7,14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg><span data-i18n="nav_recurring">Recurring</span></button>
+  <button class="nav-item" data-page="flow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="18" r="3"/><path d="M8.5 8.5L15.5 15.5M6 9v3a3 3 0 0 0 3 3h3"/></svg><span data-i18n="nav_flow">Flow Builder</span></button>
+  <button class="nav-item" data-page="webhook"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg><span data-i18n="nav_webhook">Webhook</span></button>
+  <button class="nav-item" data-page="stats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span data-i18n="nav_stats">Statistics</span></button>
+  <button class="nav-item" data-page="api"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg><span data-i18n="nav_api">API & Token</span></button>
+</aside>
 
-  <main>
-    <!-- ===== Devices ===== -->
-    <div class="page active" id="page-devices">
-      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:6px">
-        <h1>Device</h1>
-        <button class="btn btn-primary" onclick="addDevice()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Tambah Device</button>
-      </div>
-      <p class="sub">Satu akun bisa mengelola hingga 5 nomor WhatsApp. Tiap device punya token &amp; pengaturan sendiri.</p>
-      <div id="deviceList"><div class="empty">Memuat…</div></div>
-    </div>
+<!-- MAIN -->
+<main>
 
-    <!-- ===== Kirim Pesan ===== -->
-    <div class="page" id="page-send">
-      <h1>Kirim Pesan</h1>
-      <p class="sub">Teks, gambar, video, audio, atau dokumen — dari device pilihanmu</p>
-      <div class="device-selector"><label>Dari Device</label><select id="sendDevice"></select></div>
-      <div class="panel">
-        <form id="sendForm">
-          <div class="field"><label>Nomor Tujuan / ID Grup</label>
-            <input id="sendTarget" placeholder="08xxxxxxxxxx atau 12036…@g.us" required>
-          </div>
-          <div class="field"><label>Pesan / Caption</label>
-            <textarea id="sendMessage" rows="4" placeholder="Tulis pesan di sini…"></textarea>
-          </div>
-          <div class="field"><label>Lampiran (opsional)</label>
-            <div class="file-drop" id="fileDrop">Klik untuk pilih gambar / video / audio / dokumen (maks 20MB)
-              <input type="file" id="sendFile" hidden>
-            </div>
-            <p class="muted" id="fileName" style="margin-top:8px"></p>
-          </div>
-          <button class="btn btn-primary" type="submit" id="sendBtn">Kirim</button>
-        </form>
-      </div>
-    </div>
-
-    <!-- ===== Autoreply ===== -->
-    <div class="page" id="page-autoreply">
-      <h1>Autoreply</h1>
-      <p class="sub">Balasan otomatis berbasis keyword per device</p>
-      <div class="device-selector"><label>Device</label><select id="arDevice"></select></div>
-      <div class="panel">
-        <form id="arForm">
-          <div class="row">
-            <div class="field"><label>Keyword</label><input id="arKeyword" placeholder="misal: harga" required></div>
-            <div class="field"><label>Mode</label>
-              <select id="arMode"><option value="contains">Mengandung kata</option><option value="exact">Persis sama</option></select>
-            </div>
-          </div>
-          <div class="field"><label>Balasan</label>
-            <textarea id="arResponse" rows="2" placeholder="Balasan otomatis…" required></textarea>
-          </div>
-          <button class="btn btn-primary" type="submit">Tambah Autoreply</button>
-        </form>
-      </div>
-      <div class="panel"><h2>Daftar Autoreply</h2><div id="arList"><div class="empty">Memuat…</div></div></div>
-    </div>
-
-    <!-- ===== Flow ===== -->
-    <div class="page" id="page-flow">
-      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
-        <h1>Flow Builder</h1>
-        <button class="btn btn-primary" onclick="openFlowEditor()">Buka Editor</button>
-      </div>
-      <p class="sub">Rancang alur balasan otomatis secara visual — tanpa coding</p>
-      <div class="device-selector"><label>Device</label><select id="flowDevice"></select></div>
-      <div class="panel"><h2>Daftar Flow</h2><div id="flowList"><div class="empty">Memuat…</div></div></div>
-    </div>
-
-    <!-- ===== Groups ===== -->
-    <div class="page" id="page-groups">
-      <h1>Grup WhatsApp</h1>
-      <p class="sub">Daftar grup yang diikuti device kamu — gunakan ID grup sebagai target pengiriman</p>
-      <div class="device-selector"><label>Device</label><select id="grpDevice"></select></div>
-      <div class="panel">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-          <h2 style="margin:0">Daftar Grup</h2>
-          <button class="btn btn-ghost btn-sm" onclick="loadGroups(true)">Muat Ulang</button>
-        </div>
-        <div id="groupList"><div class="empty">Pilih device lalu klik Muat Ulang</div></div>
-      </div>
-    </div>
-
-    <!-- ===== Schedule ===== -->
-    <div class="page" id="page-schedule">
-      <h1>Pesan Terjadwal</h1>
-      <p class="sub">Tambahkan lewat API: POST /api/schedule</p>
-      <div class="device-selector"><label>Device</label><select id="schedDevice"></select></div>
-      <div class="panel"><h2>Daftar Jadwal</h2><div id="schedList"><div class="empty">Memuat…</div></div></div>
-    </div>
-
-    <!-- ===== Logs ===== -->
-    <div class="page" id="page-logs">
-      <h1>Riwayat Pesan</h1>
-      <p class="sub">100 pesan terakhir masuk dan keluar</p>
-      <div class="device-selector"><label>Device</label><select id="logDevice"></select></div>
-      <div class="panel"><div id="logList"><div class="empty">Memuat…</div></div></div>
-    </div>
-
-    <!-- ===== API ===== -->
-    <div class="page" id="page-api">
-      <h1>API &amp; Token</h1>
-      <p class="sub">Setiap device punya token API sendiri</p>
-      <div class="device-selector"><label>Device</label><select id="apiDevice"></select></div>
-      <div class="panel">
-        <h2>Token Device</h2>
-        <div class="token-box">
-          <code id="apiToken">••••••••</code>
-          <button class="btn btn-ghost btn-sm" onclick="copyToken()">Salin</button>
-          <button class="btn btn-danger btn-sm" onclick="regenToken()">Baru</button>
-        </div>
-        <p class="muted" style="margin-top:12px">Token adalah rahasia — siapa pun yang memegangnya bisa mengirim pesan dari device ini. Batasi akses dengan whitelist IP di pengaturan device.</p>
-      </div>
-      <div class="panel">
-        <h2>Contoh Penggunaan</h2>
-        <p class="muted" style="margin-bottom:10px">Kirim teks:</p>
-        <pre class="code" id="codeText"></pre>
-        <p class="muted" style="margin-bottom:10px">Kirim file (gambar / video / audio / dokumen):</p>
-        <pre class="code" id="codeFile"></pre>
-        <p class="muted" style="margin-bottom:10px">Kirim media via URL:</p>
-        <pre class="code" id="codeMedia"></pre>
-        <p class="muted" style="margin-bottom:10px">Broadcast (maks 100 nomor, jeda otomatis):</p>
-        <pre class="code" id="codeBroadcast"></pre>
-        <p class="muted" style="margin-bottom:10px">Pesan terjadwal:</p>
-        <pre class="code" id="codeSchedule"></pre>
-      </div>
-    </div>
-  </main>
+<!-- ===== DEVICES PAGE ===== -->
+<div class="page active" id="page-devices">
+  <h1 data-i18n="devices_title">My Devices</h1>
+  <p class="sub" data-i18n="devices_sub">Manage connected WhatsApp devices</p>
+  <div id="devicesList"></div>
+  <button class="btn btn-primary" onclick="addDevice()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    <span data-i18n="add_device">Add Device</span>
+  </button>
 </div>
 
-<!-- ===== QR Modal ===== -->
-<div id="qrModal">
-  <div class="modal-box" style="max-width:380px;text-align:center">
-    <div class="modal-head"><h3>Scan QR</h3><button class="modal-close" onclick="closeModal('qrModal')">✕</button></div>
-    <img id="qrImg" alt="QR Code">
-    <p class="muted" style="margin-top:14px">WhatsApp → Pengaturan → Perangkat Tertaut → Tautkan Perangkat</p>
-    <p class="muted" id="qrStatus" style="margin-top:8px"></p>
+<!-- ===== SEND PAGE ===== -->
+<div class="page" id="page-send">
+  <h1 data-i18n="send_title">Send Message</h1>
+  <p class="sub" data-i18n="send_sub">Send WhatsApp messages to numbers or groups</p>
+  <div class="panel">
+    <div class="field">
+      <label data-i18n="send_device">Device</label>
+      <select id="sendDevice"></select>
+    </div>
+    <div class="field">
+      <label data-i18n="send_target_type">Select Target</label>
+      <select id="sendTargetType" onchange="updateTargetType()">
+        <option value="input" data-i18n="opt_manual">Manual Input</option>
+        <option value="group" data-i18n="opt_group">Group</option>
+      </select>
+    </div>
+    <div class="field" id="targetManualField">
+      <label>Input Target <span class="hint" data-i18n="send_target_hint">— 1 number per line, e.g. 628123456789</span></label>
+      <textarea id="sendTarget" rows="4" placeholder="628123456789&#10;628987654321"></textarea>
+    </div>
+    <div class="field" id="targetGroupField" style="display:none">
+      <label data-i18n="send_group_label">Select Group</label>
+      <select id="sendGroupSelect"><option data-i18n="load_groups">— Load groups —</option></select>
+      <button class="btn btn-ghost btn-sm" style="margin-top:6px" onclick="loadGroupsForSend()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23,4 23,10 17,10"/><path d="M20.49 15a9 9 0 1 1-.18-4.51"/></svg>
+        <span data-i18n="refresh">Refresh</span>
+      </button>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label data-i18n="send_country">Country</label>
+        <select id="sendCountry">
+          <option value="62">🇮🇩 Indonesia (+62)</option>
+          <option value="1">🇺🇸 USA/Canada (+1)</option>
+          <option value="44">🇬🇧 UK (+44)</option>
+          <option value="91">🇮🇳 India (+91)</option>
+          <option value="86">🇨🇳 China (+86)</option>
+          <option value="81">🇯🇵 Japan (+81)</option>
+          <option value="82">🇰🇷 Korea (+82)</option>
+          <option value="65">🇸🇬 Singapore (+65)</option>
+          <option value="60">🇲🇾 Malaysia (+60)</option>
+          <option value="66">🇹🇭 Thailand (+66)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label data-i18n="send_delay">Delay between messages (seconds)</label>
+        <input type="number" id="sendDelay" value="3" min="1" max="60">
+      </div>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label data-i18n="send_file_source">File Source</label>
+        <select id="sendFileSource" onchange="toggleFileSource()">
+          <option value="none" data-i18n="opt_none">None</option>
+          <option value="upload" data-i18n="opt_upload">Upload File</option>
+          <option value="url" data-i18n="opt_url">File URL</option>
+        </select>
+      </div>
+      <div class="field">
+        <label data-i18n="send_schedule_type">Type</label>
+        <select id="sendScheduleType" onchange="toggleSchedule()">
+          <option value="now" data-i18n="opt_send_now">Send Now</option>
+          <option value="schedule" data-i18n="opt_schedule">Schedule</option>
+        </select>
+      </div>
+    </div>
+    <div class="field" id="fileUploadField" style="display:none">
+      <label data-i18n="send_file">File <span class="hint">(max 20MB)</span></label>
+      <div class="file-drop" onclick="document.getElementById('sendFile').click()">
+        <svg style="width:20px;height:20px;margin:0 auto 6px;display:block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16,16 12,12 8,16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+        <span data-i18n="drop_file">Click or drag to upload</span>
+        <div id="fileName" class="muted" style="margin-top:4px"></div>
+      </div>
+      <input type="file" id="sendFile" style="display:none" onchange="document.getElementById('fileName').textContent=this.files[0]?.name||''">
+    </div>
+    <div class="field" id="fileUrlField" style="display:none">
+      <label data-i18n="send_file_url">File URL</label>
+      <input type="url" id="sendFileUrl" placeholder="https://example.com/image.jpg">
+    </div>
+    <div class="field" id="scheduleField" style="display:none">
+      <label data-i18n="send_schedule_time">Schedule Time</label>
+      <input type="datetime-local" id="sendScheduleTime">
+    </div>
+    <div class="field">
+      <label data-i18n="send_msg_source">Message Source</label>
+      <select id="sendMsgSource" onchange="toggleMsgSource()">
+        <option value="input" data-i18n="opt_manual">Manual Input</option>
+        <option value="template" data-i18n="opt_template">From Template</option>
+      </select>
+    </div>
+    <div class="field" id="msgInputField">
+      <label>Message <span class="hint" data-i18n="send_vars">— Variables: {name}, {var1}, {var2}</span></label>
+      <textarea id="sendMessage" rows="5" placeholder="Type your message..."></textarea>
+    </div>
+    <div class="field" id="msgTemplateField" style="display:none">
+      <label data-i18n="select_template">Select Template</label>
+      <select id="sendTemplateSelect" onchange="applyTemplate()"><option data-i18n="choose_template">— Choose template —</option></select>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label data-i18n="send_mode">Send</label>
+        <select id="sendMode">
+          <option value="once" data-i18n="opt_once">Once</option>
+          <option value="each" data-i18n="opt_each">Each target separately</option>
+        </select>
+      </div>
+      <div class="field">
+        <label data-i18n="send_typing">Typing Simulation</label>
+        <select id="sendTyping">
+          <option value="off" data-i18n="opt_off">Off</option>
+          <option value="on" data-i18n="opt_on">On (realistic delay)</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="doSend()" id="sendBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg>
+      <span data-i18n="send_btn">Send</span>
+    </button>
+    <div id="sendStatus" class="muted" style="margin-top:10px"></div>
   </div>
 </div>
 
-<!-- ===== Edit Device Modal ===== -->
-<div id="editModal">
+<!-- ===== INBOX PAGE ===== -->
+<div class="page" id="page-inbox">
+  <h1 data-i18n="inbox_title">Inbox</h1>
+  <p class="sub" data-i18n="inbox_sub">Incoming messages from all devices</p>
+  <div class="filter-bar">
+    <select id="inboxDevice">
+      <option value="" data-i18n="all_devices">All Devices</option>
+    </select>
+    <button class="btn btn-ghost" onclick="loadInbox()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23,4 23,10 17,10"/><path d="M20.49 15a9 9 0 1 1-.18-4.51"/></svg>
+      <span data-i18n="refresh">Refresh</span>
+    </button>
+  </div>
+  <div class="table-wrap">
+    <table><thead><tr>
+      <th>ID</th><th data-i18n="col_device">Device</th><th data-i18n="col_sender">Sender</th>
+      <th data-i18n="col_message">Message</th><th data-i18n="col_time">Time</th>
+    </tr></thead><tbody id="inboxBody"></tbody></table>
+  </div>
+</div>
+
+<!-- ===== HISTORY PAGE ===== -->
+<div class="page" id="page-history">
+  <h1 data-i18n="history_title">Message History</h1>
+  <p class="sub" data-i18n="history_sub">Sent and received message logs</p>
+  <div class="filter-bar">
+    <select id="histDevice">
+      <option value="" data-i18n="all_devices">All Devices</option>
+    </select>
+    <select id="histDir">
+      <option value="out" data-i18n="opt_sent">Sent</option>
+      <option value="in" data-i18n="opt_received">Received</option>
+      <option value="" data-i18n="opt_all">All</option>
+    </select>
+    <input type="date" id="histFrom">
+    <input type="date" id="histTo">
+    <button class="btn btn-ghost" onclick="loadHistory()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <span data-i18n="filter">Filter</span>
+    </button>
+    <button class="btn btn-ghost" onclick="exportHistory()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      CSV
+    </button>
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.82rem">
+      <input type="checkbox" id="histSelectAll" onchange="toggleSelectAll(this)"> <span data-i18n="select_all">Select All</span>
+    </label>
+    <button class="btn btn-danger btn-sm" onclick="deleteSelected()" id="delSelBtn" style="display:none">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3,6 5,6 21,6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+      <span data-i18n="delete_selected">Delete Selected</span>
+    </button>
+    <button class="btn btn-danger btn-sm" onclick="deleteAllHistory()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3,6 5,6 21,6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+      <span data-i18n="delete_all">Delete All</span>
+    </button>
+  </div>
+  <div class="table-wrap">
+    <table><thead><tr>
+      <th style="width:30px"></th><th>ID</th><th data-i18n="col_dir">Dir</th>
+      <th data-i18n="col_number">Number / JID</th><th data-i18n="col_message">Message</th>
+      <th data-i18n="col_status">Status</th><th data-i18n="col_time">Time</th>
+    </tr></thead><tbody id="historyBody"></tbody></table>
+  </div>
+</div>
+
+<!-- ===== AUTOREPLY PAGE ===== -->
+<div class="page" id="page-autoreply">
+  <h1 data-i18n="ar_title">Autoreply</h1>
+  <p class="sub" data-i18n="ar_sub">Automatic keyword-based responses</p>
+  <div class="device-selector">
+    <select id="arDevice" onchange="loadAutoreplies()"></select>
+  </div>
+  <div class="panel">
+    <h2 data-i18n="ar_add">Add Rule</h2>
+    <div class="row">
+      <div class="field"><label data-i18n="keyword">Keyword</label><input id="arKeyword" placeholder="hello"></div>
+      <div class="field">
+        <label data-i18n="match_mode">Match Mode</label>
+        <select id="arMode"><option value="contains" data-i18n="opt_contains">Contains</option><option value="exact" data-i18n="opt_exact">Exact</option></select>
+      </div>
+    </div>
+    <div class="field"><label data-i18n="response">Response</label><textarea id="arResponse" rows="3" placeholder="Hi! How can I help you?"></textarea></div>
+    <button class="btn btn-primary" onclick="addAutoreply()"><span data-i18n="add_rule">Add Rule</span></button>
+  </div>
+  <div id="arList"></div>
+</div>
+
+<!-- ===== TEMPLATE PAGE ===== -->
+<div class="page" id="page-template">
+  <h1 data-i18n="tpl_title">Templates</h1>
+  <p class="sub" data-i18n="tpl_sub">Reusable message templates</p>
+  <div class="panel">
+    <h2 id="tplFormTitle" data-i18n="tpl_add">Add Template</h2>
+    <div class="field"><label data-i18n="tpl_name">Name</label><input id="tplName" placeholder="Template name"></div>
+    <div class="field"><label>Message <span class="hint" data-i18n="send_vars">— {name}, {var1}, {var2}</span></label><textarea id="tplMessage" rows="4" placeholder="Your template message"></textarea></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-primary" onclick="saveTemplate()" id="tplSaveBtn"><span data-i18n="save">Save</span></button>
+      <button class="btn btn-ghost" onclick="cancelEditTpl()" id="tplCancelBtn" style="display:none"><span data-i18n="cancel">Cancel</span></button>
+    </div>
+  </div>
+  <div id="tplList"></div>
+</div>
+
+<!-- ===== GROUPS PAGE ===== -->
+<div class="page" id="page-groups">
+  <h1 data-i18n="groups_title">Groups</h1>
+  <p class="sub" data-i18n="groups_sub">WhatsApp groups for connected devices</p>
+  <div class="device-selector">
+    <select id="groupDevice" onchange="loadGroups()"></select>
+  </div>
+  <button class="btn btn-ghost" style="margin-bottom:16px" onclick="loadGroups()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23,4 23,10 17,10"/><path d="M20.49 15a9 9 0 1 1-.18-4.51"/></svg>
+    <span data-i18n="refresh_groups">Refresh Groups</span>
+  </button>
+  <div id="groupsGrid" class="groups-grid"></div>
+</div>
+
+<!-- ===== SCHEDULE PAGE ===== -->
+<div class="page" id="page-schedule">
+  <h1 data-i18n="sched_title">Scheduled Messages</h1>
+  <p class="sub" data-i18n="sched_sub">One-time future messages</p>
+  <div class="table-wrap">
+    <table><thead><tr>
+      <th>ID</th><th data-i18n="col_target">Target</th><th data-i18n="col_message">Message</th>
+      <th data-i18n="col_time">Scheduled At</th><th data-i18n="col_status">Status</th>
+      <th data-i18n="col_action">Action</th>
+    </tr></thead><tbody id="schedBody"></tbody></table>
+  </div>
+</div>
+
+<!-- ===== RECURRING PAGE ===== -->
+<div class="page" id="page-recurring">
+  <h1 data-i18n="rec_title">Recurring Messages</h1>
+  <p class="sub" data-i18n="rec_sub">Automatically repeated messages on a schedule</p>
+  <div class="panel">
+    <h2 data-i18n="rec_add">Add Recurring</h2>
+    <div class="row">
+      <div class="field"><label data-i18n="rec_name">Name</label><input id="recName" placeholder="Daily reminder"></div>
+      <div class="field"><label data-i18n="rec_device">Device</label><select id="recDevice"></select></div>
+    </div>
+    <div class="field"><label data-i18n="rec_target">Target (number or group JID)</label><input id="recTarget" placeholder="628123456789 or 120363...@g.us"></div>
+    <div class="field"><label data-i18n="rec_msg">Message</label><textarea id="recMessage" rows="3"></textarea></div>
+    <div class="field">
+      <label data-i18n="rec_cron">Cron Expression <span class="hint">e.g. 0 9 * * * = daily at 9:00 AM</span></label>
+      <input id="recCron" value="0 9 * * *">
+      <div class="cron-hint" id="cronHint"></div>
+    </div>
+    <button class="btn btn-primary" onclick="addRecurring()"><span data-i18n="rec_add_btn">Add Recurring</span></button>
+  </div>
+  <div id="recList"></div>
+</div>
+
+<!-- ===== FLOW PAGE ===== -->
+<div class="page" id="page-flow">
+  <h1 data-i18n="flow_title">Flow Builder</h1>
+  <p class="sub" data-i18n="flow_sub">Visual conversation flow automation</p>
+  <div class="device-selector"><select id="flowDevice" onchange="loadFlows()"></select></div>
+  <div id="flowList"></div>
+  <button class="btn btn-primary" onclick="openFlowEditor(null)" style="margin-top:12px">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    <span data-i18n="new_flow">New Flow</span>
+  </button>
+</div>
+
+<!-- ===== WEBHOOK PAGE ===== -->
+<div class="page" id="page-webhook">
+  <h1 data-i18n="wh_title">Webhook Settings</h1>
+  <p class="sub" data-i18n="wh_sub">Configure webhook URLs per device</p>
+  <div class="device-selector"><select id="whDevice" onchange="loadWebhookSettings()"></select></div>
+  <div id="whSettings"></div>
+</div>
+
+<!-- ===== STATS PAGE ===== -->
+<div class="page" id="page-stats">
+  <h1 data-i18n="stats_title">Statistics</h1>
+  <p class="sub" data-i18n="stats_sub">Message delivery overview</p>
+  <div class="stat-grid" id="statGrid">
+    <div class="stat-card"><div class="num" id="statSent">—</div><div class="lbl" data-i18n="stat_sent">Total Sent</div></div>
+    <div class="stat-card"><div class="num" id="statRecv">—</div><div class="lbl" data-i18n="stat_recv">Total Received</div></div>
+    <div class="stat-card"><div class="num" id="statSent7">—</div><div class="lbl" data-i18n="stat_7d">Sent (7 days)</div></div>
+    <div class="stat-card"><div class="num" id="statTotal30">—</div><div class="lbl" data-i18n="stat_30d">All (30 days)</div></div>
+  </div>
+  <div class="panel">
+    <h2 data-i18n="stats_chart">Daily Activity (14 days)</h2>
+    <canvas id="statsCanvas" height="200"></canvas>
+  </div>
+</div>
+
+<!-- ===== API PAGE ===== -->
+<div class="page" id="page-api">
+  <h1 data-i18n="api_title">API & Token</h1>
+  <p class="sub" data-i18n="api_sub">Device tokens for the API endpoint</p>
+  <div id="apiDeviceList"></div>
+  <div class="panel" style="margin-top:22px">
+    <h2 data-i18n="api_docs">API Docs</h2>
+    <div class="field"><label data-i18n="api_send_msg">Send Message</label>
+    <pre class="code">POST /api/send
+Authorization: Bearer {device_token}
+Content-Type: application/json
+
+{
+  "target": "628123456789",
+  "message": "Hello!"
+}</pre></div>
+    <div class="field"><label data-i18n="api_broadcast">Broadcast</label>
+    <pre class="code">POST /api/broadcast
+Authorization: Bearer {device_token}
+
+{
+  "targets": ["628123...", "628456..."],
+  "message": "Hello everyone!",
+  "delay_ms": 3000
+}</pre></div>
+    <div class="field"><label data-i18n="api_schedule">Schedule</label>
+    <pre class="code">POST /api/schedule
+Authorization: Bearer {device_token}
+
+{
+  "target": "628123456789",
+  "message": "Reminder!",
+  "run_at": "2026-12-25T09:00:00Z"
+}</pre></div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<!-- ===== MODALS ===== -->
+<div class="modal" id="qrModal">
+  <div class="modal-box" style="text-align:center">
+    <div class="modal-head"><h3 data-i18n="scan_qr">Scan QR Code</h3><button class="modal-close" onclick="closeModal('qrModal')">✕</button></div>
+    <img id="qrImg" alt="QR">
+    <p class="muted" style="margin-top:12px;font-size:.84rem" data-i18n="qr_hint">Open WhatsApp → Linked Devices → Link a Device</p>
+    <div id="qrStatus" class="muted" style="margin-top:8px"></div>
+  </div>
+</div>
+
+<div class="modal" id="editModal">
   <div class="modal-box wide">
-    <div class="modal-head"><h3>Edit Device</h3><button class="modal-close" onclick="closeModal('editModal')">✕</button></div>
-    <form id="editForm">
-      <div class="row">
-        <div class="field"><label>Nama Device</label><input id="edName" required></div>
-        <div class="field"><label>Nomor</label><input id="edNumber" disabled></div>
-      </div>
-      <div class="field"><label>Token</label>
-        <div class="token-box"><code id="edToken"></code>
-          <button type="button" class="btn btn-ghost btn-sm" onclick="navigator.clipboard.writeText(document.getElementById('edToken').textContent).then(()=>toast('Token disalin'))">Salin</button>
-        </div>
-      </div>
-      <div class="field"><label>Whitelist IP token <span class="hint">— batasi akses API, pisahkan dengan koma</span></label>
-        <input id="edWhitelist" placeholder="123.123.123.122, 123.123.123.123">
-      </div>
-      <div class="field"><label>Webhook <span class="hint">— URL harus menerima method POST</span></label>
-        <input id="edWebhook" placeholder="https://serverkamu.com/webhook">
-      </div>
-      <div class="field"><label>Webhook Connect <span class="hint">— notifikasi saat device terhubung/terputus</span></label>
-        <input id="edWebhookConnect" placeholder="https://serverkamu.com/webhook-connect">
-      </div>
-      <div class="field"><label>Webhook Message Status <span class="hint">— notifikasi status terkirim/dibaca</span></label>
-        <input id="edWebhookStatus" placeholder="https://serverkamu.com/webhook-status">
-      </div>
-      <div class="field"><label>Webhook Chaining <span class="hint">— teruskan payload pesan mentah</span></label>
-        <input id="edWebhookChaining" placeholder="https://serverkamu.com/webhook-chain">
-      </div>
+    <div class="modal-head"><h3 data-i18n="edit_device">Edit Device</h3><button class="modal-close" onclick="closeModal('editModal')">✕</button></div>
+    <div class="field"><label data-i18n="device_name">Device Name</label><input id="editName"></div>
+    <div class="panel" style="padding:16px">
+      <h2 data-i18n="device_settings">Settings</h2>
+      <div class="switch-row"><div class="info"><b data-i18n="autoread">Auto Read</b><span data-i18n="autoread_hint">Mark incoming as read</span></div><label class="toggle"><input type="checkbox" id="eAutoread"><span class="slider"></span></label></div>
+      <div class="switch-row"><div class="info"><b data-i18n="inbox_enabled">Enable Inbox</b><span data-i18n="inbox_hint">Store incoming messages</span></div><label class="toggle"><input type="checkbox" id="eInbox"><span class="slider"></span></label></div>
+      <div class="switch-row"><div class="info"><b data-i18n="ar_personal">Autoreply Personal</b><span data-i18n="ar_personal_hint">Reply to personal chats</span></div><label class="toggle"><input type="checkbox" id="eArPers"><span class="slider"></span></label></div>
+      <div class="switch-row"><div class="info"><b data-i18n="ar_group">Autoreply Group</b><span data-i18n="ar_group_hint">Reply to group messages</span></div><label class="toggle"><input type="checkbox" id="eArGrp"><span class="slider"></span></label></div>
+      <div class="switch-row"><div class="info"><b data-i18n="autodelete">Auto-delete Logs</b><span data-i18n="autodelete_hint">Delete messages after 24h</span></div><label class="toggle"><input type="checkbox" id="eAutodel"><span class="slider"></span></label></div>
+    </div>
+    <div id="editDevId" style="display:none"></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-primary" onclick="saveDevice()"><span data-i18n="save">Save</span></button>
+      <button class="btn btn-ghost" onclick="closeModal('editModal')"><span data-i18n="cancel">Cancel</span></button>
+    </div>
+  </div>
+</div>
 
-      <div style="margin-top:8px">
-        <div class="switch-row"><div class="info"><b>Autoread</b><span>Aktifkan jika kamu membangun chatbot</span></div>
-          <label class="toggle"><input type="checkbox" id="edAutoread"><span class="slider"></span></label></div>
-        <div class="switch-row"><div class="info"><b>Silent Read</b><span>Baca pesan tanpa menandai sebagai dibaca</span></div>
-          <label class="toggle"><input type="checkbox" id="edSilentRead"><span class="slider"></span></label></div>
-        <div class="switch-row"><div class="info"><b>Inbox</b><span>Simpan pesan masuk ke riwayat</span></div>
-          <label class="toggle"><input type="checkbox" id="edInbox"><span class="slider"></span></label></div>
-        <div class="switch-row"><div class="info"><b>Autoreply Personal</b><span>Balas pesan individual secara otomatis</span></div>
-          <label class="toggle"><input type="checkbox" id="edArPersonal"><span class="slider"></span></label></div>
-        <div class="switch-row"><div class="info"><b>Autoreply Group</b><span>Balas pesan grup secara otomatis</span></div>
-          <label class="toggle"><input type="checkbox" id="edArGroup"><span class="slider"></span></label></div>
-        <div class="switch-row"><div class="info"><b>Quick Reply</b><span>Proses juga pesan yang kamu kirim sendiri dari HP</span></div>
-          <label class="toggle"><input type="checkbox" id="edQuickReply"><span class="slider"></span></label></div>
-        <div class="switch-row"><div class="info"><b>Forward Attachment</b><span>Teruskan lampiran masuk ke nomor tertentu</span></div>
-          <label class="toggle"><input type="checkbox" id="edForward"><span class="slider"></span></label></div>
-        <div class="field" id="forwardNumWrap" style="display:none;margin-top:10px">
-          <label>Nomor tujuan forward</label><input id="edForwardNum" placeholder="628xxxxxxxxxx">
-        </div>
-        <div class="switch-row"><div class="info"><b>Autodelete Message</b><span>Hapus riwayat pesan otomatis setelah 1 hari</span></div>
-          <label class="toggle"><input type="checkbox" id="edAutodelete"><span class="slider"></span></label></div>
-      </div>
-
-      <div style="display:flex;gap:10px;margin-top:22px;justify-content:flex-end">
-        <button type="button" class="btn btn-ghost" onclick="closeModal('editModal')">Batal</button>
-        <button type="submit" class="btn btn-primary" id="edSaveBtn">Simpan</button>
-      </div>
-    </form>
+<div class="modal" id="groupModal">
+  <div class="modal-box wide">
+    <div class="modal-head"><h3 data-i18n="group_detail">Group Details</h3><button class="modal-close" onclick="closeModal('groupModal')">✕</button></div>
+    <div id="groupModalContent"></div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-  let ME = null;
-  let DEVICES = [];
-  const BASE = location.origin;
+// ===== i18n =====
+const LANGS = {
+  en:{
+    logout:'Logout',nav_menu:'Menu',nav_device:'Device',nav_send:'Send Message',nav_inbox:'Inbox',
+    nav_history:'History',nav_autoreply:'Autoreply',nav_template:'Template',nav_groups:'Groups',
+    nav_schedule:'Schedule',nav_recurring:'Recurring',nav_flow:'Flow Builder',nav_webhook:'Webhook',
+    nav_stats:'Statistics',nav_api:'API & Token',
+    devices_title:'My Devices',devices_sub:'Manage connected WhatsApp devices',add_device:'Add Device',
+    send_title:'Send Message',send_sub:'Send WhatsApp messages to numbers or groups',
+    send_device:'Device',send_target_type:'Select Target',opt_manual:'Manual Input',opt_group:'Group',
+    send_target_hint:'— 1 number per line, e.g. 628123456789',send_group_label:'Select Group',
+    send_country:'Country',send_delay:'Delay between messages (seconds)',
+    send_file_source:'File Source',opt_none:'None',opt_upload:'Upload File',opt_url:'File URL',
+    send_schedule_type:'Type',opt_send_now:'Send Now',opt_schedule:'Schedule',
+    send_file:'File',drop_file:'Click or drag to upload',send_file_url:'File URL',
+    send_schedule_time:'Schedule Time',send_msg_source:'Message Source',opt_template:'From Template',
+    send_vars:'— Variables: {name}, {var1}, {var2}',select_template:'Select Template',
+    choose_template:'— Choose template —',
+    send_mode:'Send',opt_once:'Once',opt_each:'Each target separately',
+    send_typing:'Typing Simulation',opt_off:'Off',opt_on:'On (realistic delay)',
+    send_btn:'Send',refresh:'Refresh',load_groups:'— Load groups —',all_devices:'All Devices',
+    inbox_title:'Inbox',inbox_sub:'Incoming messages from all devices',
+    history_title:'Message History',history_sub:'Sent and received message logs',
+    opt_sent:'Sent',opt_received:'Received',opt_all:'All',filter:'Filter',
+    select_all:'Select All',delete_selected:'Delete Selected',delete_all:'Delete All',
+    col_device:'Device',col_sender:'Sender',col_message:'Message',col_time:'Time',
+    col_dir:'Dir',col_number:'Number / JID',col_status:'Status',col_action:'Action',col_target:'Target',
+    ar_title:'Autoreply',ar_sub:'Automatic keyword-based responses',ar_add:'Add Rule',
+    keyword:'Keyword',match_mode:'Match Mode',opt_contains:'Contains',opt_exact:'Exact',
+    response:'Response',add_rule:'Add Rule',
+    tpl_title:'Templates',tpl_sub:'Reusable message templates',tpl_add:'Add Template',
+    tpl_name:'Name',save:'Save',cancel:'Cancel',
+    groups_title:'Groups',groups_sub:'WhatsApp groups for connected devices',refresh_groups:'Refresh Groups',
+    sched_title:'Scheduled Messages',sched_sub:'One-time future messages',
+    rec_title:'Recurring Messages',rec_sub:'Automatically repeated messages on a schedule',
+    rec_add:'Add Recurring',rec_name:'Name',rec_device:'Device',rec_target:'Target (number or group JID)',
+    rec_msg:'Message',rec_cron:'Cron Expression',rec_add_btn:'Add Recurring',
+    flow_title:'Flow Builder',flow_sub:'Visual conversation flow automation',new_flow:'New Flow',
+    wh_title:'Webhook Settings',wh_sub:'Configure webhook URLs per device',
+    stats_title:'Statistics',stats_sub:'Message delivery overview',
+    stat_sent:'Total Sent',stat_recv:'Total Received',stat_7d:'Sent (7 days)',stat_30d:'All (30 days)',
+    stats_chart:'Daily Activity (14 days)',
+    api_title:'API & Token',api_sub:'Device tokens for the API endpoint',api_docs:'API Docs',
+    api_send_msg:'Send Message',api_broadcast:'Broadcast',api_schedule:'Schedule',
+    scan_qr:'Scan QR Code',qr_hint:'Open WhatsApp → Linked Devices → Link a Device',
+    edit_device:'Edit Device',device_name:'Device Name',device_settings:'Settings',
+    autoread:'Auto Read',autoread_hint:'Mark incoming as read',
+    inbox_enabled:'Enable Inbox',inbox_hint:'Store incoming messages',
+    ar_personal:'Autoreply Personal',ar_personal_hint:'Reply to personal chats',
+    ar_group:'Autoreply Group',ar_group_hint:'Reply to group messages',
+    autodelete:'Auto-delete Logs',autodelete_hint:'Delete messages after 24h',
+    group_detail:'Group Details',
+  },
+  id:{
+    logout:'Keluar',nav_menu:'Menu',nav_device:'Perangkat',nav_send:'Kirim Pesan',nav_inbox:'Kotak Masuk',
+    nav_history:'Riwayat',nav_autoreply:'Autoreply',nav_template:'Template',nav_groups:'Grup',
+    nav_schedule:'Terjadwal',nav_recurring:'Berulang',nav_flow:'Flow Builder',nav_webhook:'Webhook',
+    nav_stats:'Statistik',nav_api:'API & Token',
+    devices_title:'Perangkat Saya',devices_sub:'Kelola perangkat WhatsApp yang terhubung',add_device:'Tambah Perangkat',
+    send_title:'Kirim Pesan',send_sub:'Kirim pesan WhatsApp ke nomor atau grup',
+    send_device:'Perangkat',send_target_type:'Pilih Target',opt_manual:'Input Manual',opt_group:'Grup',
+    send_target_hint:'— 1 nomor per baris, mis. 628123456789',send_group_label:'Pilih Grup',
+    send_country:'Negara',send_delay:'Jeda antar pesan (detik)',
+    send_file_source:'Sumber File',opt_none:'Tidak Ada',opt_upload:'Upload File',opt_url:'URL File',
+    send_schedule_type:'Tipe',opt_send_now:'Kirim Sekarang',opt_schedule:'Jadwalkan',
+    send_file:'File',drop_file:'Klik atau seret untuk upload',send_file_url:'URL File',
+    send_schedule_time:'Waktu Jadwal',send_msg_source:'Sumber Pesan',opt_template:'Dari Template',
+    send_vars:'— Variabel: {name}, {var1}, {var2}',select_template:'Pilih Template',
+    choose_template:'— Pilih template —',
+    send_mode:'Kirim',opt_once:'Sekali',opt_each:'Tiap target terpisah',
+    send_typing:'Simulasi Mengetik',opt_off:'Mati',opt_on:'Nyala (jeda realistis)',
+    send_btn:'Kirim',refresh:'Refresh',load_groups:'— Muat grup —',all_devices:'Semua Perangkat',
+    inbox_title:'Kotak Masuk',inbox_sub:'Pesan masuk dari semua perangkat',
+    history_title:'Riwayat Pesan',history_sub:'Log pesan terkirim dan diterima',
+    opt_sent:'Terkirim',opt_received:'Diterima',opt_all:'Semua',filter:'Filter',
+    select_all:'Pilih Semua',delete_selected:'Hapus Terpilih',delete_all:'Hapus Semua',
+    col_device:'Perangkat',col_sender:'Pengirim',col_message:'Pesan',col_time:'Waktu',
+    col_dir:'Arah',col_number:'Nomor / JID',col_status:'Status',col_action:'Aksi',col_target:'Target',
+    ar_title:'Autoreply',ar_sub:'Balasan otomatis berbasis kata kunci',ar_add:'Tambah Aturan',
+    keyword:'Kata Kunci',match_mode:'Mode Cocok',opt_contains:'Mengandung',opt_exact:'Persis',
+    response:'Balasan',add_rule:'Tambah Aturan',
+    tpl_title:'Template',tpl_sub:'Template pesan yang bisa digunakan ulang',tpl_add:'Tambah Template',
+    tpl_name:'Nama',save:'Simpan',cancel:'Batal',
+    groups_title:'Grup',groups_sub:'Grup WhatsApp untuk perangkat yang terhubung',refresh_groups:'Refresh Grup',
+    sched_title:'Pesan Terjadwal',sched_sub:'Pesan satu kali di masa mendatang',
+    rec_title:'Pesan Berulang',rec_sub:'Pesan yang otomatis dikirim berulang',
+    rec_add:'Tambah Berulang',rec_name:'Nama',rec_device:'Perangkat',rec_target:'Target (nomor atau JID grup)',
+    rec_msg:'Pesan',rec_cron:'Ekspresi Cron',rec_add_btn:'Tambah',
+    flow_title:'Flow Builder',flow_sub:'Otomasi alur percakapan visual',new_flow:'Flow Baru',
+    wh_title:'Pengaturan Webhook',wh_sub:'Konfigurasi URL webhook per perangkat',
+    stats_title:'Statistik',stats_sub:'Ikhtisar pengiriman pesan',
+    stat_sent:'Total Terkirim',stat_recv:'Total Diterima',stat_7d:'Terkirim (7 hari)',stat_30d:'Semua (30 hari)',
+    stats_chart:'Aktivitas Harian (14 hari)',
+    api_title:'API & Token',api_sub:'Token perangkat untuk endpoint API',api_docs:'Dokumentasi API',
+    api_send_msg:'Kirim Pesan',api_broadcast:'Broadcast',api_schedule:'Jadwalkan',
+    scan_qr:'Scan QR Code',qr_hint:'Buka WhatsApp → Perangkat Tertaut → Tautkan Perangkat',
+    edit_device:'Edit Perangkat',device_name:'Nama Perangkat',device_settings:'Pengaturan',
+    autoread:'Auto Read',autoread_hint:'Tandai pesan masuk sebagai dibaca',
+    inbox_enabled:'Aktifkan Kotak Masuk',inbox_hint:'Simpan pesan masuk',
+    ar_personal:'Autoreply Personal',ar_personal_hint:'Balas pesan personal',
+    ar_group:'Autoreply Grup',ar_group_hint:'Balas pesan di grup',
+    autodelete:'Hapus Log Otomatis',autodelete_hint:'Hapus pesan setelah 24 jam',
+    group_detail:'Detail Grup',
+  },
+  zh:{logout:'退出',nav_menu:'菜单',nav_device:'设备',nav_send:'发送消息',nav_inbox:'收件箱',nav_history:'历史记录',nav_autoreply:'自动回复',nav_template:'模板',nav_groups:'群组',nav_schedule:'定时',nav_recurring:'循环',nav_flow:'流程构建器',nav_webhook:'Webhook',nav_stats:'统计',nav_api:'API与令牌',devices_title:'我的设备',add_device:'添加设备',send_btn:'发送',save:'保存',cancel:'取消',refresh:'刷新',filter:'筛选',delete_all:'全部删除',delete_selected:'删除所选',select_all:'全选'},
+  ru:{logout:'Выйти',nav_menu:'Меню',nav_device:'Устройство',nav_send:'Отправить',nav_inbox:'Входящие',nav_history:'История',nav_autoreply:'Автоответ',nav_template:'Шаблон',nav_groups:'Группы',nav_schedule:'Расписание',nav_recurring:'Повторяющиеся',nav_flow:'Конструктор',nav_webhook:'Вебхук',nav_stats:'Статистика',nav_api:'API и токен',devices_title:'Мои устройства',add_device:'Добавить',send_btn:'Отправить',save:'Сохранить',cancel:'Отмена',refresh:'Обновить',filter:'Фильтр',delete_all:'Удалить всё',delete_selected:'Удалить выбранные',select_all:'Выбрать все'},
+  ko:{logout:'로그아웃',nav_menu:'메뉴',nav_device:'기기',nav_send:'메시지 보내기',nav_inbox:'받은편지함',nav_history:'기록',nav_autoreply:'자동응답',nav_template:'템플릿',nav_groups:'그룹',nav_schedule:'예약',nav_recurring:'반복',nav_flow:'플로우 빌더',nav_webhook:'웹훅',nav_stats:'통계',nav_api:'API 및 토큰',devices_title:'내 기기',add_device:'기기 추가',send_btn:'보내기',save:'저장',cancel:'취소',refresh:'새로고침',filter:'필터',delete_all:'모두 삭제',delete_selected:'선택 삭제',select_all:'전체 선택'},
+  ar:{logout:'تسجيل الخروج',nav_menu:'القائمة',nav_device:'الجهاز',nav_send:'إرسال رسالة',nav_inbox:'صندوق الوارد',nav_history:'السجل',nav_autoreply:'الرد التلقائي',nav_template:'القوالب',nav_groups:'المجموعات',nav_schedule:'الجدولة',nav_recurring:'المتكرر',nav_flow:'منشئ التدفق',nav_webhook:'Webhook',nav_stats:'الإحصائيات',nav_api:'API والرمز',devices_title:'أجهزتي',add_device:'إضافة جهاز',send_btn:'إرسال',save:'حفظ',cancel:'إلغاء',refresh:'تحديث',filter:'تصفية',delete_all:'حذف الكل',delete_selected:'حذف المحدد',select_all:'تحديد الكل'},
+};
 
-  function toast(msg, isErr) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.className = 'toast show' + (isErr ? ' err' : '');
-    setTimeout(() => t.classList.remove('show'), 3200);
-  }
-  function esc(s) {
-    return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
-  }
-  async function api(url, opts = {}) {
-    const r = await fetch(url, opts);
-    if (r.status === 401) { location.href = '/login'; throw new Error('unauthorized'); }
-    const data = await r.json().catch(() => ({}));
-    if (!r.ok) throw new Error(data.error || 'Terjadi kesalahan');
-    return data;
-  }
-  function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-  function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+let currentLang = localStorage.getItem('lang') || 'en';
+function t(key){ return (LANGS[currentLang]||LANGS.en)[key] || (LANGS.en[key] || key); }
+function setLang(lang){
+  currentLang = lang;
+  localStorage.setItem('lang', lang);
+  document.getElementById('langSelect').value = lang;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const k = el.getAttribute('data-i18n');
+    const v = t(k);
+    if(el.tagName==='INPUT'||el.tagName==='TEXTAREA') el.placeholder = v;
+    else if(el.tagName==='OPTION') el.textContent = v;
+    else el.textContent = v;
+  });
+}
 
-  // ===== Theme =====
-  const root = document.documentElement;
-  function applyTheme(t) {
-    root.setAttribute('data-theme', t);
-    document.getElementById('themeLabel').textContent = t === 'dark' ? 'Mode Terang' : 'Mode Gelap';
-    localStorage.setItem('synpera-theme', t);
+// ===== Theme =====
+function toggleTheme(){
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  document.querySelector('.theme-btn').textContent = isDark ? '🌙' : '☀️';
+  localStorage.setItem('theme', isDark ? 'light' : 'dark');
+}
+
+// ===== Sidebar =====
+function toggleSidebar(){
+  const aside = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  const isOpen = aside.classList.contains('open');
+  if(isOpen) closeSidebar();
+  else {
+    aside.classList.add('open');
+    overlay.classList.add('open');
+    document.getElementById('menuIcon').style.display = 'none';
+    document.getElementById('closeIcon').style.display = 'block';
   }
-  applyTheme(localStorage.getItem('synpera-theme') || 'dark');
-  document.getElementById('themeBtn').onclick = () =>
-    applyTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('open');
+  document.getElementById('menuIcon').style.display = 'block';
+  document.getElementById('closeIcon').style.display = 'none';
+}
 
-  // ===== Nav =====
-  // ===== Hash-based routing (bertahan saat refresh) =====
-  const VALID_PAGES = ['devices','send','autoreply','flow','groups','schedule','logs','api'];
-
-  function navigateTo(page) {
-    if (!VALID_PAGES.includes(page)) page = 'devices';
-    document.querySelectorAll('.nav-item[data-page]').forEach(b => b.classList.remove('active'));
-    const btn = document.querySelector(`.nav-item[data-page="${page}"]`);
-    if (btn) btn.classList.add('active');
+// ===== Navigation =====
+document.querySelectorAll('.nav-item[data-page]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const page = btn.getAttribute('data-page');
+    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById('page-' + page).classList.add('active');
-    document.querySelector('aside').classList.remove('open');
-    location.hash = page;
-    loadPage(page);
-  }
-
-  document.querySelectorAll('.nav-item[data-page]').forEach(btn => {
-    btn.onclick = () => navigateTo(btn.dataset.page);
+    document.getElementById('page-'+page).classList.add('active');
+    if(window.innerWidth <= 860) closeSidebar();
+    onPageOpen(page);
   });
+});
 
-  // Restore halaman dari hash saat load / refresh
-  window.addEventListener('hashchange', () => {
-    const page = location.hash.replace('#','') || 'devices';
-    navigateTo(page);
+// hash routing
+function goPage(page){
+  const btn = document.querySelector(`.nav-item[data-page="${page}"]`);
+  if(btn) btn.click();
+}
+
+// ===== Toast =====
+function toast(msg, isErr=false){
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show' + (isErr?' err':'');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 3500);
+}
+
+// ===== Modal =====
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+
+// ===== API helpers =====
+async function api(path, opts={}){
+  const r = await fetch(path, {headers:{'Content-Type':'application/json'}, credentials:'include', ...opts});
+  if(r.status===401){ location.href='/login'; throw new Error('Unauthorized'); }
+  return r.json();
+}
+
+// ===== Init =====
+let me = null;
+let myDevices = [];
+
+async function init(){
+  // Theme & lang
+  const savedTheme = localStorage.getItem('theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+  document.querySelector('.theme-btn').textContent = savedTheme === 'dark' ? '🌙' : '☀️';
+  
+  setLang(currentLang);
+  document.getElementById('langSelect').value = currentLang;
+
+  try {
+    me = await api('/me');
+    document.getElementById('navName').textContent = me.user.name;
+    document.getElementById('navEmail').textContent = me.user.email;
+  } catch(e){ return; }
+
+  myDevices = await api('/me/devices');
+  renderDevicesList();
+  populateDeviceSelects();
+  loadHistory();
+  loadStats();
+}
+
+// ===== Populate device selects =====
+function populateDeviceSelects(){
+  const selects = ['sendDevice','arDevice','groupDevice','flowDevice','recDevice','inboxDevice','histDevice','whDevice'];
+  selects.forEach(id => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    const hasAll = el.getAttribute('data-all') !== null || ['inboxDevice','histDevice'].includes(id);
+    el.innerHTML = (hasAll ? `<option value="">${t('all_devices')}</option>` : '') +
+      myDevices.map(d => `<option value="${d.id}">${d.name}${d.number?` (${d.number})`:''}</option>`).join('');
   });
+  loadTemplatesForSelect();
+}
 
-  // ===== Devices =====
-  const STATUS_LABEL = { idle:'Belum terhubung', starting:'Menyambungkan…', qr:'Menunggu scan QR', connected:'Terhubung', disconnected:'Terputus' };
-  function statusPill(st) {
-    const cls = st === 'connected' ? 'st-connected' : st === 'qr' ? 'st-qr' : 'st-off';
-    return `<span class="status-pill ${cls}"><span class="dot"></span>${STATUS_LABEL[st] || st}</span>`;
-  }
+// ===== DEVICES =====
+function renderDevicesList(){
+  const el = document.getElementById('devicesList');
+  if(!myDevices.length){ el.innerHTML = `<p class="muted" style="margin-bottom:16px">No devices yet. Add one to get started.</p>`; return; }
+  el.innerHTML = myDevices.map(d => {
+    const st = d.state?.status || 'idle';
+    const stClass = st==='connected'?'st-connected':st==='qr'?'st-qr':'st-off';
+    const stLabel = st==='connected'?'Connected':st==='qr'?'QR Ready':'Offline';
+    return `<div class="device-card">
+      <div class="device-head">
+        <div>
+          <div class="device-name">${d.name} <span class="status-pill ${stClass}"><span class="dot"></span>${stLabel}</span></div>
+          <div class="device-num">${d.number||'Not connected'}</div>
+        </div>
+      </div>
+      <div class="device-actions">
+        ${st!=='connected'?`<button class="btn btn-primary btn-sm" onclick="connectDevice(${d.id})">⚡ Connect</button>`:''}
+        ${st==='connected'?`<button class="btn btn-ghost btn-sm" onclick="disconnectDevice(${d.id})">Disconnect</button>`:''}
+        ${st==='qr'?`<button class="btn btn-ghost btn-sm" onclick="showQr(${d.id})">Show QR</button>`:''}
+        <button class="btn btn-ghost btn-sm" onclick="openEdit(${d.id})">⚙ Settings</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteDevice(${d.id})">✕ Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+}
 
-  async function loadDevices() {
-    DEVICES = await api('/me/devices');
-    const el = document.getElementById('deviceList');
-    if (!DEVICES.length) {
-      el.innerHTML = '<div class="panel"><div class="empty">Belum ada device. Klik "Tambah Device" untuk menghubungkan nomor WhatsApp pertamamu.</div></div>';
-    } else {
-      el.innerHTML = DEVICES.map(d => `
-        <div class="device-card">
-          <div class="device-head">
-            <div>
-              <div class="device-name">${esc(d.name)} ${statusPill(d.state.status)}</div>
-              <div class="device-num">${d.number ? esc(d.number) : 'Belum terhubung'}</div>
-            </div>
-          </div>
-          ${d.state.qr ? `<div style="margin:16px 0;text-align:center"><img src="${d.state.qr}" style="border-radius:12px;background:#fff;padding:8px;max-width:200px"><p class="muted" style="margin-top:8px">Scan QR dengan WhatsApp kamu</p></div>` : ''}
-          <div class="device-actions">
-            ${d.state.status !== 'connected'
-              ? `<button class="btn btn-primary btn-sm" onclick="connectDevice(${d.id})">Hubungkan / Scan QR</button>`
-              : `<button class="btn btn-danger btn-sm" onclick="disconnectDevice(${d.id})">Putuskan</button>`}
-            <button class="btn btn-ghost btn-sm" onclick="openEdit(${d.id})">Edit</button>
-            <button class="btn btn-ghost btn-sm" onclick="openFlowEditor(${d.id})">Flow</button>
-            <button class="btn btn-danger btn-sm" onclick="delDevice(${d.id})">Hapus</button>
-          </div>
-        </div>`).join('');
-    }
-    fillDeviceSelectors();
-  }
+async function addDevice(){
+  const name = prompt('Device name:','My Device');
+  if(!name) return;
+  const d = await api('/me/devices',{method:'POST',body:JSON.stringify({name})});
+  myDevices.push(d);
+  renderDevicesList();
+  populateDeviceSelects();
+  toast('Device added!');
+}
 
-  function fillDeviceSelectors() {
-    const opts = DEVICES.map(d => `<option value="${d.id}">${esc(d.name)}${d.number ? ' (' + esc(d.number) + ')' : ''}</option>`).join('');
-    for (const id of ['sendDevice','arDevice','flowDevice','grpDevice','schedDevice','logDevice','apiDevice']) {
-      const sel = document.getElementById(id);
-      const prev = sel.value;
-      sel.innerHTML = opts || '<option value="">— belum ada device —</option>';
-      if (prev) sel.value = prev;
-    }
-    renderApiDocs();
-  }
+async function connectDevice(id){
+  await api(`/me/devices/${id}/connect`,{method:'POST'});
+  toast('Connecting... please wait for QR');
+  setTimeout(async()=>{
+    myDevices = await api('/me/devices');
+    renderDevicesList();
+    const d = myDevices.find(x=>x.id===id);
+    if(d?.state?.status==='qr') showQr(id);
+  }, 2500);
+}
 
-  async function addDevice() {
-    const name = prompt('Nama device baru:', 'Device ' + (DEVICES.length + 1));
-    if (name === null) return;
-    try {
-      await api('/me/devices', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name }) });
-      toast('Device ditambahkan');
-      loadDevices();
-    } catch (e) { toast(e.message, true); }
-  }
+async function disconnectDevice(id){
+  if(!confirm('Disconnect this device?')) return;
+  await api(`/me/devices/${id}/disconnect`,{method:'POST'});
+  myDevices = await api('/me/devices');
+  renderDevicesList();
+  toast('Disconnected');
+}
 
-  async function connectDevice(id) {
-    try {
-      await api(`/me/devices/${id}/connect`, { method:'POST' });
-      toast('Menyambungkan… tunggu QR muncul');
-      setTimeout(loadDevices, 1500);
-    } catch (e) { toast(e.message, true); }
-  }
-  async function disconnectDevice(id) {
-    if (!confirm('Yakin putuskan koneksi device ini?')) return;
-    await api(`/me/devices/${id}/disconnect`, { method:'POST' });
-    toast('Koneksi diputus');
-    loadDevices();
-  }
-  async function delDevice(id) {
-    if (!confirm('Hapus device ini beserta session, autoreply, dan flow-nya?')) return;
-    await api(`/me/devices/${id}`, { method:'DELETE' });
-    toast('Device dihapus');
-    loadDevices();
-  }
+async function deleteDevice(id){
+  if(!confirm('Delete this device? This cannot be undone.')) return;
+  await api(`/me/devices/${id}`,{method:'DELETE'});
+  myDevices = myDevices.filter(d=>d.id!==id);
+  renderDevicesList();
+  populateDeviceSelects();
+  toast('Device deleted');
+}
 
-  // ===== Edit Device =====
-  let EDIT_ID = null;
-  function openEdit(id) {
-    const d = DEVICES.find(x => x.id === id);
-    if (!d) return;
-    EDIT_ID = id;
-    edName.value = d.name;
-    edNumber.value = d.number || 'Belum terhubung';
-    edToken.textContent = d.token;
-    edWhitelist.value = d.whitelist_ip || '';
-    edWebhook.value = d.webhook_url || '';
-    edWebhookConnect.value = d.webhook_connect_url || '';
-    edWebhookStatus.value = d.webhook_status_url || '';
-    edWebhookChaining.value = d.webhook_chaining_url || '';
-    edAutoread.checked = !!d.autoread;
-    edSilentRead.checked = !!d.silent_read;
-    edInbox.checked = !!d.inbox_enabled;
-    edArPersonal.checked = !!d.ar_personal;
-    edArGroup.checked = !!d.ar_group;
-    edQuickReply.checked = !!d.quick_reply;
-    edForward.checked = !!d.forward_attachment;
-    edForwardNum.value = d.forward_number || '';
-    forwardNumWrap.style.display = edForward.checked ? 'block' : 'none';
-    edAutodelete.checked = !!d.autodelete;
-    openModal('editModal');
-  }
-  edForward.onchange = () => forwardNumWrap.style.display = edForward.checked ? 'block' : 'none';
-  document.getElementById('editForm').onsubmit = async (e) => {
-    e.preventDefault();
-    const btn = document.getElementById('edSaveBtn');
-    btn.disabled = true;
-    try {
-      await api(`/me/devices/${EDIT_ID}`, {
-        method:'PUT', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({
-          name: edName.value, whitelist_ip: edWhitelist.value,
-          webhook_url: edWebhook.value, webhook_connect_url: edWebhookConnect.value,
-          webhook_status_url: edWebhookStatus.value, webhook_chaining_url: edWebhookChaining.value,
-          autoread: edAutoread.checked, silent_read: edSilentRead.checked,
-          inbox_enabled: edInbox.checked, ar_personal: edArPersonal.checked,
-          ar_group: edArGroup.checked, quick_reply: edQuickReply.checked,
-          forward_attachment: edForward.checked, forward_number: edForwardNum.value,
-          autodelete: edAutodelete.checked,
-        }),
-      });
-      toast('Pengaturan disimpan');
-      closeModal('editModal');
-      loadDevices();
-    } catch (e2) { toast(e2.message, true); }
-    btn.disabled = false;
+function openEdit(id){
+  const d = myDevices.find(x=>x.id===id);
+  if(!d) return;
+  document.getElementById('editDevId').textContent = id;
+  document.getElementById('editName').value = d.name;
+  document.getElementById('eAutoread').checked = !!d.autoread;
+  document.getElementById('eInbox').checked = !!d.inbox_enabled;
+  document.getElementById('eArPers').checked = !!d.ar_personal;
+  document.getElementById('eArGrp').checked = !!d.ar_group;
+  document.getElementById('eAutodel').checked = !!d.autodelete;
+  openModal('editModal');
+}
+
+async function saveDevice(){
+  const id = Number(document.getElementById('editDevId').textContent);
+  const body = {
+    name: document.getElementById('editName').value,
+    autoread: document.getElementById('eAutoread').checked,
+    inbox_enabled: document.getElementById('eInbox').checked,
+    ar_personal: document.getElementById('eArPers').checked,
+    ar_group: document.getElementById('eArGrp').checked,
+    autodelete: document.getElementById('eAutodel').checked,
   };
+  await api(`/me/devices/${id}`,{method:'PUT',body:JSON.stringify(body)});
+  myDevices = await api('/me/devices');
+  renderDevicesList();
+  populateDeviceSelects();
+  closeModal('editModal');
+  toast('Saved!');
+}
 
-  // ===== Send =====
-  const fileInput = document.getElementById('sendFile');
-  document.getElementById('fileDrop').onclick = () => fileInput.click();
-  fileInput.onchange = () => {
-    document.getElementById('fileName').textContent = fileInput.files[0] ? 'Lampiran: ' + fileInput.files[0].name : '';
-  };
-  document.getElementById('sendForm').onsubmit = async (e) => {
-    e.preventDefault();
-    const devId = document.getElementById('sendDevice').value;
-    if (!devId) return toast('Pilih device dulu', true);
-    const btn = document.getElementById('sendBtn');
-    btn.disabled = true; btn.textContent = 'Mengirim…';
-    try {
+let qrInterval;
+async function showQr(id){
+  const d = myDevices.find(x=>x.id===id);
+  if(d?.state?.qr){ document.getElementById('qrImg').src=d.state.qr; }
+  document.getElementById('qrStatus').textContent = 'Waiting for scan...';
+  openModal('qrModal');
+  clearInterval(qrInterval);
+  qrInterval = setInterval(async()=>{
+    myDevices = await api('/me/devices');
+    const dd = myDevices.find(x=>x.id===id);
+    if(!dd) return clearInterval(qrInterval);
+    if(dd.state?.qr) document.getElementById('qrImg').src = dd.state.qr;
+    if(dd.state?.status==='connected'){
+      clearInterval(qrInterval);
+      closeModal('qrModal');
+      renderDevicesList();
+      toast('Connected! ✅');
+    }
+  }, 3000);
+}
+document.getElementById('qrModal').addEventListener('click', e=>{ if(e.target.id==='qrModal') { clearInterval(qrInterval); closeModal('qrModal'); }});
+
+// ===== SEND =====
+function updateTargetType(){
+  const v = document.getElementById('sendTargetType').value;
+  document.getElementById('targetManualField').style.display = v==='group'?'none':'';
+  document.getElementById('targetGroupField').style.display = v==='group'?'':'none';
+}
+function toggleFileSource(){
+  const v = document.getElementById('sendFileSource').value;
+  document.getElementById('fileUploadField').style.display = v==='upload'?'':'none';
+  document.getElementById('fileUrlField').style.display = v==='url'?'':'none';
+}
+function toggleSchedule(){
+  const v = document.getElementById('sendScheduleType').value;
+  document.getElementById('scheduleField').style.display = v==='schedule'?'':'none';
+}
+function toggleMsgSource(){
+  const v = document.getElementById('sendMsgSource').value;
+  document.getElementById('msgInputField').style.display = v==='template'?'none':'';
+  document.getElementById('msgTemplateField').style.display = v==='template'?'':'none';
+}
+async function loadGroupsForSend(){
+  const devId = document.getElementById('sendDevice').value;
+  if(!devId){ toast('Select a device first',true); return; }
+  try {
+    const groups = await api(`/me/devices/${devId}/groups`);
+    const sel = document.getElementById('sendGroupSelect');
+    sel.innerHTML = groups.map(g=>`<option value="${g.id}">${g.name} (${g.participants} members)</option>`).join('');
+    toast(`${groups.length} groups loaded`);
+  } catch(e){ toast('Error: '+e.message, true); }
+}
+
+async function loadTemplatesForSelect(){
+  try {
+    const tpls = await api('/me/templates');
+    const sel = document.getElementById('sendTemplateSelect');
+    sel.innerHTML = `<option value="">${t('choose_template')}</option>` +
+      tpls.map(tp=>`<option value="${encodeURIComponent(tp.message)}">${tp.name}</option>`).join('');
+  } catch(e){}
+}
+function applyTemplate(){
+  const sel = document.getElementById('sendTemplateSelect');
+  if(sel.value) document.getElementById('sendMessage').value = decodeURIComponent(sel.value);
+}
+
+async function doSend(){
+  const devId = document.getElementById('sendDevice').value;
+  if(!devId){ toast('Select a device',true); return; }
+  const targetType = document.getElementById('sendTargetType').value;
+  let targets = [];
+  if(targetType==='group'){
+    const g = document.getElementById('sendGroupSelect').value;
+    if(!g){ toast('Select a group',true); return; }
+    targets = [g];
+  } else {
+    targets = document.getElementById('sendTarget').value.split('\n').map(s=>s.trim()).filter(Boolean);
+    if(!targets.length){ toast('Enter at least one target',true); return; }
+  }
+  const message = document.getElementById('sendMessage').value.trim();
+  const fileSource = document.getElementById('sendFileSource').value;
+  const schedType = document.getElementById('sendScheduleType').value;
+  
+  const btn = document.getElementById('sendBtn');
+  btn.disabled = true;
+  document.getElementById('sendStatus').textContent = 'Sending...';
+
+  try {
+    if(schedType==='schedule'){
+      const runAt = document.getElementById('sendScheduleTime').value;
+      if(!runAt){ toast('Set schedule time',true); btn.disabled=false; return; }
+      for(const t of targets){
+        await api('/api/schedule',{method:'POST',headers:{'Authorization':'Bearer '+myDevices.find(d=>d.id==devId)?.token,'Content-Type':'application/json'},body:JSON.stringify({target:t,message,run_at:new Date(runAt).toISOString()})});
+      }
+      toast(`Scheduled for ${targets.length} target(s) ✅`);
+    } else if(targets.length===1){
       const fd = new FormData();
-      fd.append('target', document.getElementById('sendTarget').value);
-      fd.append('message', document.getElementById('sendMessage').value);
-      if (fileInput.files[0]) fd.append('file', fileInput.files[0]);
-      await api(`/me/devices/${devId}/send`, { method:'POST', body: fd });
-      toast('Pesan terkirim');
-      document.getElementById('sendForm').reset();
-      document.getElementById('fileName').textContent = '';
-    } catch (e2) { toast(e2.message, true); }
-    btn.disabled = false; btn.textContent = 'Kirim';
-  };
-
-  // ===== Autoreply =====
-  async function loadAutoreplies() {
-    const devId = document.getElementById('arDevice').value;
-    const el = document.getElementById('arList');
-    if (!devId) { el.innerHTML = '<div class="empty">Tambah device dulu</div>'; return; }
-    const rows = await api('/me/autoreplies?device=' + devId);
-    if (!rows.length) { el.innerHTML = '<div class="empty">Belum ada autoreply</div>'; return; }
-    el.innerHTML = '<table><tr><th>Keyword</th><th>Balasan</th><th>Mode</th><th>Status</th><th></th></tr>' +
-      rows.map(r => `<tr>
-        <td><b>${esc(r.keyword)}</b></td><td>${esc(r.response)}</td>
-        <td class="muted">${r.match_mode}</td>
-        <td><span class="badge ${r.active ? 'b-out' : 'b-fail'}">${r.active ? 'Aktif' : 'Nonaktif'}</span></td>
-        <td style="white-space:nowrap">
-          <button class="btn btn-ghost btn-sm" onclick="toggleAr(${r.id})">Toggle</button>
-          <button class="btn btn-danger btn-sm" onclick="delAr(${r.id})">Hapus</button>
-        </td></tr>`).join('') + '</table>';
-  }
-  document.getElementById('arForm').onsubmit = async (e) => {
-    e.preventDefault();
-    const devId = document.getElementById('arDevice').value;
-    if (!devId) return toast('Pilih device dulu', true);
-    await api('/me/autoreplies', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        device_id: devId, keyword: arKeyword.value,
-        response: arResponse.value, match_mode: arMode.value,
-      }),
-    });
-    document.getElementById('arForm').reset();
-    toast('Autoreply ditambahkan');
-    loadAutoreplies();
-  };
-  async function toggleAr(id) { await api(`/me/autoreplies/${id}/toggle`, { method:'POST' }); loadAutoreplies(); }
-  async function delAr(id) { await api(`/me/autoreplies/${id}`, { method:'DELETE' }); loadAutoreplies(); }
-  document.getElementById('arDevice').onchange = loadAutoreplies;
-
-  // ===== Flow =====
-  async function loadFlows() {
-    const devId = document.getElementById('flowDevice').value;
-    const el = document.getElementById('flowList');
-    if (!devId) { el.innerHTML = '<div class="empty">Tambah device dulu</div>'; return; }
-    const rows = await api(`/me/devices/${devId}/flows`);
-    if (!rows.length) { el.innerHTML = '<div class="empty">Belum ada flow. Klik "Buka Editor" untuk membuat.</div>'; return; }
-    el.innerHTML = '<table><tr><th>Nama</th><th>Node</th><th>Status</th><th></th></tr>' +
-      rows.map(f => `<tr>
-        <td><b>${esc(f.name)}</b></td>
-        <td class="muted">${(f.data?.nodes || []).length} node</td>
-        <td><span class="badge ${f.active ? 'b-out' : 'b-fail'}">${f.active ? 'Aktif' : 'Nonaktif'}</span></td>
-        <td style="white-space:nowrap">
-          <button class="btn btn-ghost btn-sm" onclick="openFlowEditor(${devId}, ${f.id})">Edit</button>
-          <button class="btn btn-danger btn-sm" onclick="delFlow(${f.id})">Hapus</button>
-        </td></tr>`).join('') + '</table>';
-  }
-  async function delFlow(id) {
-    if (!confirm('Hapus flow ini?')) return;
-    await api(`/me/flows/${id}`, { method:'DELETE' });
-    loadFlows();
-  }
-  function openFlowEditor(deviceId, flowId) {
-    const devId = deviceId || document.getElementById('flowDevice').value;
-    if (!devId) return toast('Pilih device dulu', true);
-    location.href = '/flow?device=' + devId + (flowId ? '&id=' + flowId : '');
-  }
-  document.getElementById('flowDevice').onchange = loadFlows;
-
-  // ===== Groups (dengan cache localStorage + auto-refresh) =====
-  const GRP_CACHE_KEY = (devId) => `synpera_groups_${devId}`;
-
-  function renderGroups(rows, el) {
-    if (!rows.length) { el.innerHTML = '<div class="empty">Device ini belum tergabung di grup mana pun</div>'; return; }
-    el.innerHTML = '<table><tr><th>ID Grup</th><th>Nama</th><th>Anggota</th><th></th></tr>' +
-      rows.map(g => `<tr>
-        <td style="font-family:monospace;font-size:.8rem">${esc(g.id)}</td>
-        <td><b>${esc(g.name)}</b></td>
-        <td class="muted">${g.participants}</td>
-        <td><button class="btn btn-ghost btn-sm" onclick="navigator.clipboard.writeText('${esc(g.id)}').then(()=>toast('ID grup disalin'))">Salin ID</button></td>
-      </tr>`).join('') + '</table>';
-  }
-
-  async function loadGroups(forceRefresh = false) {
-    const devId = document.getElementById('grpDevice').value;
-    const el = document.getElementById('groupList');
-    if (!devId) { el.innerHTML = '<div class="empty">Tambah device dulu</div>'; return; }
-
-    // Tampilkan cache dulu jika ada (agar tidak blank saat refresh halaman)
-    const cacheKey = GRP_CACHE_KEY(devId);
-    const cached = localStorage.getItem(cacheKey);
-    if (cached && !forceRefresh) {
-      try {
-        const { rows, ts } = JSON.parse(cached);
-        renderGroups(rows, el);
-        const age = Math.round((Date.now() - ts) / 1000);
-        el.insertAdjacentHTML('beforeend', `<p style="font-size:.75rem;color:var(--muted);margin-top:8px">Cache ${age}s lalu — memuat ulang…</p>`);
-      } catch {}
+      fd.append('target', targets[0]);
+      fd.append('message', message);
+      if(fileSource==='upload'){ const f=document.getElementById('sendFile').files[0]; if(f) fd.append('file',f); }
+      if(fileSource==='url') fd.append('media_url', document.getElementById('sendFileUrl').value);
+      const r = await fetch(`/me/devices/${devId}/send`,{method:'POST',credentials:'include',body:fd});
+      const j = await r.json();
+      if(j.error) throw new Error(j.error);
+      toast('Message sent! ✅');
     } else {
-      el.innerHTML = '<div class="empty">Memuat grup…</div>';
+      // broadcast
+      const token = myDevices.find(d=>d.id==devId)?.token;
+      const r = await api('/api/broadcast',{method:'POST',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({targets,message,delay_ms:Number(document.getElementById('sendDelay').value)*1000})});
+      toast(`Broadcast to ${targets.length} targets started`);
     }
-
-    try {
-      const rows = await api(`/me/devices/${devId}/groups`);
-      // Simpan ke cache
-      localStorage.setItem(cacheKey, JSON.stringify({ rows, ts: Date.now() }));
-      renderGroups(rows, el);
-    } catch (e) {
-      if (!cached) el.innerHTML = `<div class="empty">${esc(e.message)}</div>`;
-    }
+    document.getElementById('sendStatus').textContent = '';
+  } catch(e){
+    toast('Error: '+e.message, true);
+    document.getElementById('sendStatus').textContent = 'Error: '+e.message;
   }
+  btn.disabled = false;
+}
 
-  document.getElementById('grpDevice').onchange = () => loadGroups(true);
+// ===== INBOX =====
+async function loadInbox(){
+  const devId = document.getElementById('inboxDevice').value;
+  const url = devId ? `/me/inbox?device=${devId}` : '/me/inbox';
+  const rows = await api(url);
+  const tbody = document.getElementById('inboxBody');
+  if(!rows.length){ tbody.innerHTML = `<tr><td colspan="5" class="empty">No incoming messages</td></tr>`; return; }
+  tbody.innerHTML = rows.map(r=>`<tr>
+    <td>${r.id}</td>
+    <td>${myDevices.find(d=>d.id===r.device_id)?.name||r.device_id||'—'}</td>
+    <td><span class="muted">${r.jid||''}</span></td>
+    <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.text||'[media]')}</td>
+    <td class="muted">${fmtDate(r.created_at)}</td>
+  </tr>`).join('');
+}
 
-  // ===== Schedules =====
-  async function loadSchedules() {
-    const devId = document.getElementById('schedDevice').value;
-    const el = document.getElementById('schedList');
-    const rows = await api('/me/schedules' + (devId ? '?device=' + devId : ''));
-    if (!rows.length) { el.innerHTML = '<div class="empty">Belum ada jadwal. Tambahkan lewat API POST /api/schedule</div>'; return; }
-    el.innerHTML = '<table><tr><th>Tujuan</th><th>Pesan</th><th>Waktu</th><th>Status</th><th></th></tr>' +
-      rows.map(r => `<tr>
-        <td>${esc((r.jid || '').split('@')[0])}</td><td>${esc(r.text)}</td>
-        <td class="muted">${new Date(r.run_at).toLocaleString('id-ID')}</td>
-        <td><span class="badge ${r.done ? 'b-out' : 'b-in'}">${r.done ? 'Terkirim' : 'Menunggu'}</span></td>
-        <td><button class="btn btn-danger btn-sm" onclick="delSched(${r.id})">Hapus</button></td></tr>`).join('') + '</table>';
+// ===== HISTORY =====
+let histSelectedIds = new Set();
+
+async function loadHistory(){
+  const dev = document.getElementById('histDevice')?.value;
+  const dir = document.getElementById('histDir')?.value;
+  const from = document.getElementById('histFrom')?.value;
+  const to = document.getElementById('histTo')?.value;
+  
+  let url = '/me/logs?';
+  if(dev) url += `device=${dev}&`;
+  if(dir) url += `direction=${dir}&`;
+  // For now filter client-side
+  const rows = await api(url.replace(/[?&]$/,''));
+  
+  let filtered = rows;
+  if(dir) filtered = filtered.filter(r=>r.direction===dir);
+  if(from) filtered = filtered.filter(r=>new Date(r.created_at)>=new Date(from));
+  if(to) filtered = filtered.filter(r=>new Date(r.created_at)<=new Date(to+' 23:59:59'));
+  
+  const tbody = document.getElementById('historyBody');
+  histSelectedIds.clear();
+  document.getElementById('delSelBtn').style.display='none';
+  
+  if(!filtered.length){ tbody.innerHTML=`<tr><td colspan="7" class="empty">No messages found</td></tr>`; return; }
+  tbody.innerHTML = filtered.map(r=>`<tr>
+    <td><input type="checkbox" onchange="toggleHistSelect(${r.id},this.checked)"></td>
+    <td>${r.id}</td>
+    <td><span class="badge ${r.direction==='in'?'b-in':'b-out'}">${r.direction==='in'?'↓ IN':'↑ OUT'}</span></td>
+    <td class="muted">${r.jid||''}</td>
+    <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.text||'[media]')}</td>
+    <td><span class="badge ${r.status?.includes('fail')?'b-fail':r.status?.includes('sched')?'b-sched':'b-out'}">${r.status||'sent'}</span></td>
+    <td class="muted">${fmtDate(r.created_at)}</td>
+  </tr>`).join('');
+}
+
+function toggleHistSelect(id, checked){
+  if(checked) histSelectedIds.add(id); else histSelectedIds.delete(id);
+  document.getElementById('delSelBtn').style.display = histSelectedIds.size?'':'none';
+}
+function toggleSelectAll(cb){
+  document.querySelectorAll('#historyBody input[type=checkbox]').forEach(c=>{
+    c.checked = cb.checked;
+    const id = Number(c.closest('tr').querySelector('td:nth-child(2)').textContent);
+    if(cb.checked) histSelectedIds.add(id); else histSelectedIds.delete(id);
+  });
+  document.getElementById('delSelBtn').style.display = cb.checked && histSelectedIds.size?'':'none';
+}
+async function deleteSelected(){
+  if(!histSelectedIds.size) return;
+  if(!confirm(`Delete ${histSelectedIds.size} messages?`)) return;
+  await api('/me/logs',{method:'DELETE',body:JSON.stringify({ids:[...histSelectedIds]})});
+  toast('Deleted');
+  loadHistory();
+}
+async function deleteAllHistory(){
+  const dev = document.getElementById('histDevice')?.value;
+  if(!confirm('Delete ALL messages? This cannot be undone.')) return;
+  await api('/me/logs',{method:'DELETE',body:JSON.stringify(dev?{device:dev}:{})});
+  toast('All deleted');
+  loadHistory();
+}
+function exportHistory(){
+  const dev = document.getElementById('histDevice')?.value;
+  const dir = document.getElementById('histDir')?.value;
+  let url = '/me/logs/export?';
+  if(dev) url += `device=${dev}&`;
+  if(dir) url += `direction=${dir}&`;
+  location.href = url;
+}
+
+// ===== AUTOREPLY =====
+async function loadAutoreplies(){
+  const devId = document.getElementById('arDevice').value;
+  if(!devId) return;
+  const rows = await api(`/me/autoreplies?device=${devId}`);
+  const el = document.getElementById('arList');
+  if(!rows.length){ el.innerHTML='<p class="muted">No autoreply rules yet.</p>'; return; }
+  el.innerHTML = rows.map(r=>`<div class="panel" style="display:flex;align-items:center;gap:12px;padding:14px 16px">
+    <div style="flex:1">
+      <b>${esc(r.keyword)}</b> <span class="badge b-in">${r.match_mode}</span>
+      ${!r.active?'<span class="badge b-fail">Off</span>':''}
+      <div class="muted" style="margin-top:3px">${esc(r.response)}</div>
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="toggleAR(${r.id})">${r.active?'Disable':'Enable'}</button>
+    <button class="btn btn-danger btn-sm" onclick="deleteAR(${r.id})">✕</button>
+  </div>`).join('');
+}
+
+async function addAutoreply(){
+  const devId = document.getElementById('arDevice').value;
+  const keyword = document.getElementById('arKeyword').value.trim();
+  const response = document.getElementById('arResponse').value.trim();
+  const match_mode = document.getElementById('arMode').value;
+  if(!devId||!keyword||!response){ toast('Fill all fields',true); return; }
+  await api('/me/autoreplies',{method:'POST',body:JSON.stringify({device_id:devId,keyword,response,match_mode})});
+  document.getElementById('arKeyword').value='';
+  document.getElementById('arResponse').value='';
+  loadAutoreplies();
+  toast('Rule added!');
+}
+async function toggleAR(id){
+  await api(`/me/autoreplies/${id}/toggle`,{method:'POST'});
+  loadAutoreplies();
+}
+async function deleteAR(id){
+  await api(`/me/autoreplies/${id}`,{method:'DELETE'});
+  loadAutoreplies();
+  toast('Deleted');
+}
+
+// ===== TEMPLATES =====
+let editTplId = null;
+async function loadTemplates(){
+  const rows = await api('/me/templates');
+  const el = document.getElementById('tplList');
+  if(!rows.length){ el.innerHTML='<p class="muted">No templates yet.</p>'; return; }
+  el.innerHTML = rows.map(r=>`<div class="panel" style="padding:14px 16px;display:flex;align-items:center;gap:12px">
+    <div style="flex:1">
+      <b>${esc(r.name)}</b>
+      <div class="muted" style="margin-top:3px;white-space:pre-wrap">${esc(r.message.substring(0,100))}${r.message.length>100?'...':''}</div>
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="editTpl(${r.id},'${encodeURIComponent(r.name)}','${encodeURIComponent(r.message)}')">Edit</button>
+    <button class="btn btn-danger btn-sm" onclick="deleteTpl(${r.id})">✕</button>
+  </div>`).join('');
+  loadTemplatesForSelect();
+}
+function editTpl(id,name,msg){
+  editTplId=id;
+  document.getElementById('tplName').value=decodeURIComponent(name);
+  document.getElementById('tplMessage').value=decodeURIComponent(msg);
+  document.getElementById('tplFormTitle').textContent='Edit Template';
+  document.getElementById('tplCancelBtn').style.display='';
+}
+function cancelEditTpl(){
+  editTplId=null;
+  document.getElementById('tplName').value='';
+  document.getElementById('tplMessage').value='';
+  document.getElementById('tplFormTitle').setAttribute('data-i18n','tpl_add');
+  document.getElementById('tplFormTitle').textContent=t('tpl_add');
+  document.getElementById('tplCancelBtn').style.display='none';
+}
+async function saveTemplate(){
+  const name=document.getElementById('tplName').value.trim();
+  const message=document.getElementById('tplMessage').value.trim();
+  if(!name||!message){ toast('Fill all fields',true); return; }
+  if(editTplId){
+    await api(`/me/templates/${editTplId}`,{method:'PUT',body:JSON.stringify({name,message})});
+    toast('Updated!');
+  } else {
+    await api('/me/templates',{method:'POST',body:JSON.stringify({name,message})});
+    toast('Template saved!');
   }
-  async function delSched(id) { await api(`/me/schedules/${id}`, { method:'DELETE' }); loadSchedules(); }
-  document.getElementById('schedDevice').onchange = loadSchedules;
+  cancelEditTpl();
+  loadTemplates();
+}
+async function deleteTpl(id){
+  await api(`/me/templates/${id}`,{method:'DELETE'});
+  loadTemplates();
+  toast('Deleted');
+}
 
-  // ===== Logs =====
-  async function loadLogs() {
-    const devId = document.getElementById('logDevice').value;
-    const el = document.getElementById('logList');
-    const rows = await api('/me/logs' + (devId ? '?device=' + devId : ''));
-    if (!rows.length) { el.innerHTML = '<div class="empty">Belum ada pesan</div>'; return; }
-    el.innerHTML = '<table><tr><th>Arah</th><th>Nomor</th><th>Pesan</th><th>Status</th><th>Waktu</th></tr>' +
-      rows.map(r => `<tr>
-        <td><span class="badge ${r.direction === 'in' ? 'b-in' : 'b-out'}">${r.direction === 'in' ? 'Masuk' : 'Keluar'}</span></td>
-        <td>${esc((r.jid || '').split('@')[0])}</td>
-        <td>${r.media_type ? '[' + esc(r.media_type) + '] ' : ''}${esc(r.text || '')}</td>
-        <td><span class="badge ${String(r.status).startsWith('failed') ? 'b-fail' : 'b-out'}">${esc(r.status || '')}</span></td>
-        <td class="muted">${new Date(r.created_at).toLocaleString('id-ID')}</td></tr>`).join('') + '</table>';
-  }
-  document.getElementById('logDevice').onchange = loadLogs;
+// ===== GROUPS =====
+let groupsCache = [];
+async function loadGroups(){
+  const devId = document.getElementById('groupDevice').value;
+  if(!devId){ document.getElementById('groupsGrid').innerHTML='<p class="muted">Select a device</p>'; return; }
+  document.getElementById('groupsGrid').innerHTML = '<p class="muted">Loading groups...</p>';
+  try {
+    const groups = await api(`/me/devices/${devId}/groups`);
+    groupsCache = groups;
+    if(!groups.length){ document.getElementById('groupsGrid').innerHTML='<p class="muted">No groups found</p>'; return; }
+    document.getElementById('groupsGrid').innerHTML = groups.map(g=>`<div class="group-card" onclick="showGroupDetail('${g.id}')">
+      <div class="group-avatar">${g.name.charAt(0).toUpperCase()}</div>
+      <div class="group-info">
+        <div class="group-name">${esc(g.name)}</div>
+        <div class="group-id">${g.id}</div>
+        <div class="muted">${g.participants} members</div>
+      </div>
+    </div>`).join('');
+  } catch(e){ document.getElementById('groupsGrid').innerHTML=`<p class="muted">Error: ${e.message}</p>`; }
+}
+function showGroupDetail(id){
+  const g = groupsCache.find(x=>x.id===id);
+  if(!g) return;
+  document.getElementById('groupModalContent').innerHTML = `
+    <div class="field"><label>Group Name</label><div>${esc(g.name)}</div></div>
+    <div class="field"><label>Group ID (JID)</label>
+      <div class="token-box"><code>${g.id}</code>
+        <button class="btn btn-ghost btn-sm" onclick="navigator.clipboard.writeText('${g.id}').then(()=>toast('Copied!'))">Copy</button>
+      </div>
+    </div>
+    <div class="field"><label>Members</label><div>${g.participants}</div></div>
+    <button class="btn btn-primary" onclick="sendToGroup('${g.id}')">Send Message</button>
+  `;
+  openModal('groupModal');
+}
+function sendToGroup(jid){
+  closeModal('groupModal');
+  goPage('send');
+  setTimeout(()=>{
+    document.getElementById('sendTargetType').value='input';
+    updateTargetType();
+    document.getElementById('sendTarget').value = jid;
+  },200);
+}
 
-  // ===== API docs =====
-  function currentApiDevice() {
-    return DEVICES.find(d => d.id === Number(document.getElementById('apiDevice').value));
-  }
-  function renderApiDocs() {
-    const d = currentApiDevice();
-    const token = d ? d.token : 'TOKEN_DEVICE';
-    document.getElementById('apiToken').textContent = token;
-    document.getElementById('codeText').textContent =
-`curl -X POST ${BASE}/api/send \\
-  -H "Authorization: Bearer ${token}" \\
-  -H "Content-Type: application/json" \\
-  -d '{"target":"628xxxxxxxxxx","message":"Halo dari Synpera!"}'`;
-    document.getElementById('codeFile').textContent =
-`curl -X POST ${BASE}/api/send \\
-  -H "Authorization: Bearer ${token}" \\
-  -F "target=628xxxxxxxxxx" \\
-  -F "message=Ini dokumennya" \\
-  -F "file=@/path/invoice.pdf"`;
-    document.getElementById('codeMedia').textContent =
-`curl -X POST ${BASE}/api/send \\
-  -H "Authorization: Bearer ${token}" \\
-  -H "Content-Type: application/json" \\
-  -d '{"target":"628xxx","media_url":"https://contoh.com/gambar.jpg","message":"Cek gambar ini"}'`;
-    document.getElementById('codeBroadcast').textContent =
-`curl -X POST ${BASE}/api/broadcast \\
-  -H "Authorization: Bearer ${token}" \\
-  -H "Content-Type: application/json" \\
-  -d '{"targets":["628xxx","628yyy"],"message":"Promo spesial!"}'`;
-    document.getElementById('codeSchedule').textContent =
-`curl -X POST ${BASE}/api/schedule \\
-  -H "Authorization: Bearer ${token}" \\
-  -H "Content-Type: application/json" \\
-  -d '{"target":"628xxx","message":"Reminder rapat","run_at":"2026-10-10T09:00:00+07:00"}'`;
-  }
-  document.getElementById('apiDevice').onchange = renderApiDocs;
-  function copyToken() {
-    const d = currentApiDevice();
-    if (!d) return toast('Pilih device dulu', true);
-    navigator.clipboard.writeText(d.token).then(() => toast('Token disalin'));
-  }
-  async function regenToken() {
-    const d = currentApiDevice();
-    if (!d) return toast('Pilih device dulu', true);
-    if (!confirm('Generate token baru? Token lama langsung tidak berlaku.')) return;
-    const r = await api(`/me/devices/${d.id}/regenerate-token`, { method:'POST' });
-    d.token = r.token;
-    renderApiDocs();
-    toast('Token baru dibuat');
-  }
+// ===== SCHEDULE =====
+async function loadSchedule(){
+  const rows = await api('/me/schedules');
+  const tbody = document.getElementById('schedBody');
+  if(!rows.length){ tbody.innerHTML=`<tr><td colspan="6" class="empty">No scheduled messages</td></tr>`; return; }
+  tbody.innerHTML = rows.map(r=>`<tr>
+    <td>${r.id}</td>
+    <td class="muted">${r.jid||'—'}</td>
+    <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis">${esc(r.text||'')}</td>
+    <td class="muted">${fmtDate(r.run_at)}</td>
+    <td><span class="badge ${r.done?'b-out':'b-sched'}">${r.done?'Done':'Pending'}</span></td>
+    <td><button class="btn btn-danger btn-sm" onclick="deleteSchedule(${r.id})">✕</button></td>
+  </tr>`).join('');
+}
+async function deleteSchedule(id){
+  await api(`/me/schedules/${id}`,{method:'DELETE'});
+  loadSchedule();
+  toast('Deleted');
+}
 
-  async function doLogout() {
-    await fetch('/auth/logout', { method:'POST' });
-    location.href = '/';
+// ===== RECURRING =====
+async function loadRecurring(){
+  const rows = await api('/me/recurring');
+  const el = document.getElementById('recList');
+  if(!rows.length){ el.innerHTML='<p class="muted">No recurring messages yet.</p>'; return; }
+  el.innerHTML = rows.map(r=>`<div class="panel" style="padding:14px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+    <div style="flex:1;min-width:200px">
+      <b>${esc(r.name)}</b> ${!r.active?'<span class="badge b-fail">Paused</span>':'<span class="badge b-out">Active</span>'}
+      <div class="muted">📱 ${esc(r.device_name||'—')} → ${r.target}</div>
+      <div class="muted">⏰ ${r.cron_expr} ${r.last_run?'| Last: '+fmtDate(r.last_run):''}</div>
+      <div style="margin-top:4px;font-size:.82rem">${esc(r.message.substring(0,80))}${r.message.length>80?'...':''}</div>
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="toggleRecurring(${r.id})">${r.active?'Pause':'Resume'}</button>
+    <button class="btn btn-danger btn-sm" onclick="deleteRecurring(${r.id})">✕</button>
+  </div>`).join('');
+}
+async function addRecurring(){
+  const name=document.getElementById('recName').value.trim();
+  const devId=document.getElementById('recDevice').value;
+  const target=document.getElementById('recTarget').value.trim();
+  const message=document.getElementById('recMessage').value.trim();
+  const cron_expr=document.getElementById('recCron').value.trim();
+  if(!devId||!target||!message){ toast('Fill all required fields',true); return; }
+  await api('/me/recurring',{method:'POST',body:JSON.stringify({name,device_id:devId,target,message,cron_expr})});
+  document.getElementById('recName').value='';
+  document.getElementById('recTarget').value='';
+  document.getElementById('recMessage').value='';
+  loadRecurring();
+  toast('Recurring added!');
+}
+async function toggleRecurring(id){
+  await api(`/me/recurring/${id}/toggle`,{method:'POST'});
+  loadRecurring();
+}
+async function deleteRecurring(id){
+  await api(`/me/recurring/${id}`,{method:'DELETE'});
+  loadRecurring();
+  toast('Deleted');
+}
+// cron hint
+document.getElementById('recCron').addEventListener('input', function(){
+  const val = this.value.trim().split(' ');
+  if(val.length===5){
+    const [min,hour,dom,mon,dow]=val;
+    let hint='';
+    if(dom==='*'&&mon==='*'&&dow==='*') hint=`Every day at ${hour}:${min.padStart(2,'0')}`;
+    else if(dom!=='*') hint=`On day ${dom} of month at ${hour}:${min.padStart(2,'0')}`;
+    else if(dow!=='*') hint=`Weekly on day ${dow} at ${hour}:${min.padStart(2,'0')}`;
+    document.getElementById('cronHint').textContent=hint;
   }
+});
 
-  function loadPage(p) {
-    if (p === 'devices') loadDevices();
-    if (p === 'autoreply') loadAutoreplies();
-    if (p === 'flow') loadFlows();
-    // groups: tampilkan cache segera, refresh dari server di background
-    if (p === 'groups') loadGroups(false);
-    if (p === 'schedule') loadSchedules();
-    if (p === 'logs') loadLogs();
-    if (p === 'api') renderApiDocs();
+// ===== FLOW =====
+async function loadFlows(){
+  const devId = document.getElementById('flowDevice').value;
+  if(!devId){ document.getElementById('flowList').innerHTML='<p class="muted">Select a device</p>'; return; }
+  const rows = await api(`/me/devices/${devId}/flows`);
+  const el = document.getElementById('flowList');
+  if(!rows.length){ el.innerHTML='<p class="muted">No flows yet. Create one below.</p>'; return; }
+  el.innerHTML = rows.map(r=>`<div class="panel" style="padding:14px 16px;display:flex;align-items:center;gap:12px">
+    <div style="flex:1"><b>${esc(r.name)}</b> <span class="badge ${r.active?'b-out':'b-fail'}">${r.active?'Active':'Paused'}</span></div>
+    <button class="btn btn-ghost btn-sm" onclick="openFlowEditor(${r.id})">Edit</button>
+    <button class="btn btn-danger btn-sm" onclick="deleteFlow(${r.id},${devId})">✕</button>
+  </div>`).join('');
+}
+async function openFlowEditor(id){
+  const devId = document.getElementById('flowDevice').value;
+  if(!devId){ toast('Select a device first',true); return; }
+  if(id) location.href=`/flow?flow=${id}&device=${devId}`;
+  else {
+    const name = prompt('Flow name:','My Flow');
+    if(!name) return;
+    const f = await api(`/me/devices/${devId}/flows`,{method:'POST',body:JSON.stringify({name})});
+    location.href = `/flow?flow=${f.id}&device=${devId}`;
   }
+}
+async function deleteFlow(id,devId){
+  if(!confirm('Delete this flow?')) return;
+  await api(`/me/flows/${id}`,{method:'DELETE'});
+  loadFlows();
+  toast('Flow deleted');
+}
 
-  // ===== Init =====
-  (async () => {
-    try {
-      ME = await api('/me');
-      document.getElementById('userName').textContent = ME.user.name;
-      document.getElementById('userEmail').textContent = ME.user.email;
-      await loadDevices();
+// ===== WEBHOOK =====
+async function loadWebhookSettings(){
+  const devId = document.getElementById('whDevice').value;
+  if(!devId) return;
+  const d = myDevices.find(x=>x.id==devId);
+  if(!d) return;
+  document.getElementById('whSettings').innerHTML = `
+    <div class="panel">
+      ${['webhook_url','webhook_connect_url','webhook_status_url','webhook_chaining_url'].map(k=>`
+        <div class="field">
+          <label>${k.replace(/_/g,' ').replace(/^\w/,c=>c.toUpperCase())}</label>
+          <input id="wh_${k}" value="${d[k]||''}" placeholder="https://...">
+        </div>
+      `).join('')}
+      <button class="btn btn-primary" onclick="saveWebhooks(${devId})"><span data-i18n="save">Save</span></button>
+    </div>`;
+}
+async function saveWebhooks(devId){
+  const body = {};
+  ['webhook_url','webhook_connect_url','webhook_status_url','webhook_chaining_url'].forEach(k=>{
+    body[k] = document.getElementById('wh_'+k).value.trim();
+  });
+  await api(`/me/devices/${devId}`,{method:'PUT',body:JSON.stringify(body)});
+  myDevices = await api('/me/devices');
+  toast('Webhooks saved!');
+}
 
-      // Restore halaman dari hash
-      const initPage = location.hash.replace('#','') || 'devices';
-      if (initPage !== 'devices') navigateTo(initPage);
+// ===== STATS =====
+async function loadStats(){
+  try {
+    const {summary,byDay} = await api('/me/stats');
+    document.getElementById('statSent').textContent = summary.total_sent||0;
+    document.getElementById('statRecv').textContent = summary.total_received||0;
+    document.getElementById('statSent7').textContent = summary.sent_7d||0;
+    document.getElementById('statTotal30').textContent = summary.total_30d||0;
+    
+    // Simple canvas chart
+    const canvas = document.getElementById('statsCanvas');
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio||1;
+    canvas.width = canvas.offsetWidth * dpr;
+    canvas.height = 200 * dpr;
+    ctx.scale(dpr,dpr);
+    
+    const days = [...new Set(byDay.map(r=>r.day))].sort().slice(-14);
+    const sentByDay = {}, recvByDay = {};
+    byDay.forEach(r=>{
+      if(r.direction==='out') sentByDay[r.day]=(Number(sentByDay[r.day]||0)+Number(r.cnt));
+      else recvByDay[r.day]=(Number(recvByDay[r.day]||0)+Number(r.cnt));
+    });
+    
+    if(!days.length){ ctx.fillStyle='#93a1b8'; ctx.font='14px Inter'; ctx.fillText('No data yet',10,100); return; }
+    
+    const maxVal = Math.max(...days.map(d=>Math.max(sentByDay[d]||0, recvByDay[d]||0)), 1);
+    const w = canvas.offsetWidth, h = 200;
+    const barW = (w-60)/(days.length*2+1);
+    const pad = 40;
+    
+    days.forEach((day,i)=>{
+      const x = 30 + i*(barW*2+barW*0.5);
+      const sent = sentByDay[day]||0;
+      const recv = recvByDay[day]||0;
+      
+      // sent bar
+      const sh = (sent/maxVal)*(h-pad);
+      ctx.fillStyle='rgba(59,130,246,.7)';
+      ctx.fillRect(x, h-pad-sh, barW, sh);
+      
+      // recv bar
+      const rh = (recv/maxVal)*(h-pad);
+      ctx.fillStyle='rgba(34,197,94,.6)';
+      ctx.fillRect(x+barW, h-pad-rh, barW, rh);
+      
+      // label
+      ctx.fillStyle='#93a1b8';
+      ctx.font='9px Inter';
+      ctx.textAlign='center';
+      ctx.fillText(day.slice(5), x+barW, h-pad+12);
+    });
+    
+    // legend
+    ctx.fillStyle='rgba(59,130,246,.7)'; ctx.fillRect(w-120,5,12,12);
+    ctx.fillStyle='#e9eef7'; ctx.font='11px Inter'; ctx.textAlign='left'; ctx.fillText('Sent', w-104,15);
+    ctx.fillStyle='rgba(34,197,94,.6)'; ctx.fillRect(w-120,22,12,12);
+    ctx.fillStyle='#e9eef7'; ctx.fillText('Received', w-104,32);
+  } catch(e){}
+}
 
-      setInterval(() => {
-        if (document.getElementById('page-devices').classList.contains('active')) loadDevices();
-      }, 4000);
-    } catch {}
-  })();
+// ===== API PAGE =====
+function renderApiPage(){
+  const el = document.getElementById('apiDeviceList');
+  el.innerHTML = myDevices.map(d=>`<div class="panel" style="padding:16px 18px">
+    <b>${esc(d.name)}</b>${d.number?` <span class="muted">(${d.number})</span>`:''}
+    <div class="token-box" style="margin-top:10px">
+      <code id="tok-${d.id}">${d.token}</code>
+      <button class="btn btn-ghost btn-sm" onclick="navigator.clipboard.writeText('${d.token}').then(()=>toast('Copied!'))">Copy</button>
+      <button class="btn btn-ghost btn-sm" onclick="regenToken(${d.id})">Regen</button>
+    </div>
+  </div>`).join('');
+}
+async function regenToken(id){
+  if(!confirm('Regenerate token? Old token will stop working.')) return;
+  const r = await api(`/me/devices/${id}/regenerate-token`,{method:'POST'});
+  myDevices = await api('/me/devices');
+  renderApiPage();
+  toast('Token regenerated!');
+}
+
+// ===== Page open hooks =====
+function onPageOpen(page){
+  if(page==='history') loadHistory();
+  else if(page==='inbox') loadInbox();
+  else if(page==='autoreply') loadAutoreplies();
+  else if(page==='template') loadTemplates();
+  else if(page==='groups') loadGroups();
+  else if(page==='schedule') loadSchedule();
+  else if(page==='recurring') loadRecurring();
+  else if(page==='flow') loadFlows();
+  else if(page==='webhook') loadWebhookSettings();
+  else if(page==='stats') loadStats();
+  else if(page==='api') renderApiPage();
+}
+
+// ===== Logout =====
+async function doLogout(){
+  await api('/auth/logout',{method:'POST'});
+  location.href='/login';
+}
+
+// ===== Utils =====
+function esc(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+function fmtDate(s){
+  if(!s) return '—';
+  const d = new Date(s);
+  return d.toLocaleDateString(currentLang,{month:'short',day:'numeric'})+' '+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+}
+
+// ===== Boot =====
+init();
 </script>
 </body>
 </html>

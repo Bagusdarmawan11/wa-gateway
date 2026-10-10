@@ -258,10 +258,14 @@ export async function connectAllSessions() {
   console.log(`[WA] ${rows.length} session tersimpan disambungkan ulang`);
 }
 
-/** Normalisasi nomor: 08xxx -> 628xxx@s.whatsapp.net */
+/** Normalisasi nomor: 08xxx -> 628xxx@s.whatsapp.net, group ID tetap @g.us */
 export function toJid(number) {
-  let n = String(number).replace(/[^0-9@.\-]/g, '');
-  if (n.includes('@')) return n; // sudah jid (personal/group)
+  let n = String(number).trim();
+  // Jika sudah JID lengkap (personal atau group), kembalikan apa adanya
+  if (n.endsWith('@g.us')) return n;       // group JID
+  if (n.endsWith('@s.whatsapp.net')) return n; // personal JID
+  // Strip karakter non-angka kecuali @ dan . untuk handle kasus lain
+  n = n.replace(/[^0-9]/g, '');
   if (n.startsWith('0')) n = '62' + n.slice(1);
   return `${n}@s.whatsapp.net`;
 }

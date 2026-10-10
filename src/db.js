@@ -251,3 +251,39 @@ export async function logMessage({ userId, deviceId, direction, jid, text, media
     console.error('logMessage error:', e.message);
   }
 }
+
+// Exported helper for new tables migration
+export async function migrateNewTables() {
+  await pool.query(`
+    -- Templates tabel
+    CREATE TABLE IF NOT EXISTS templates (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      name TEXT NOT NULL,
+      message TEXT NOT NULL,
+      created_at TIMESTAMPTZ DEFAULT now()
+    );
+    CREATE INDEX IF NOT EXISTS idx_templates_user ON templates (user_id);
+
+    -- Recurring messages tabel
+    CREATE TABLE IF NOT EXISTS recurring_messages (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      device_id INTEGER REFERENCES devices(id) ON DELETE CASCADE,
+      name TEXT NOT NULL DEFAULT 'Recurring',
+      target TEXT NOT NULL,
+      message TEXT NOT NULL,
+      cron_expr TEXT NOT NULL DEFAULT '0 9 * * *',
+      active BOOLEAN DEFAULT TRUE,
+      last_run TIMESTAMPTZ,
+      created_at TIMESTAMPTZ DEFAULT now()
+    );
+    CREATE INDEX IF NOT EXISTS idx_recurring_user ON recurring_messages (user_id);
+
+    -- Inbox tabel (incoming messages store)
+    ALTER TABLE message_logs ADD COLUMN IF NOT EXISTS sender_name TEXT;
+    ALTER TABLE message_logs ADD COLUMN IF NOT EXISTS is_group BOOLEAN DEFAULT FALSE;
+    CREATE INDEX IF NOT EXISTS idx_logs_direction ON message_logs (user_id, direction, id DESC);
+    CREATE INDEX IF NOT EXISTS idx_logs_created ON message_logs (created_at DESC);
+  `);
+}

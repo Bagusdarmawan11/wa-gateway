@@ -4,7 +4,7 @@ import cron from 'node-cron';
 import cookieParser from 'cookie-parser';
 import multer from 'multer';
 import crypto from 'node:crypto';
-import { initDb, pool, logMessage, createDevice, getDevice } from './db.js';
+import { initDb, pool, logMessage, createDevice, getDevice, migrateNewTables } from './db.js';
 import {
   register, login, logoutSession,
   requireLogin, tokenAuth, regenerateToken,
@@ -382,6 +382,130 @@ app.get('/api/device', tokenAuth, (req, res) => {
   });
 });
 
+
+// ---------- Templates ----------
+app.get('/me/templates', requireLogin, async (req, res) => {
+  const { rows } = await pool.query('SELECT * FROM templates WHERE user_id = $1 ORDER BY id DESC', [req.user.id]);
+  res.json(rows);
+});
+
+app.post('/me/templates', requireLogin, async (req, res) => {
+  const { name, message } = req.body || {};
+  if (!name || !message) return res.status(400).json({ error: 'name and message required' });
+  const { rows } = await pool.query(
+    'INSERT INTO templates (user_id, name, message) VALUES ($1,$2,$3) RETURNING *',
+    [req.user.id, name.trim(), message]
+  );
+  res.json(rows[0]);
+});
+
+app.put('/me/templates/:id', requireLogin, async (req, res) => {
+  const { name, message } = req.body || {};
+  const { rows } = await pool.query(
+    'UPDATE templates SET name=$2, message=$3 WHERE id=$1 AND user_id=$4 RETURNING *',
+    [req.params.id, name, message, req.user.id]
+  );
+  res.json(rows[0] || {});
+});
+
+app.delete('/me/templates/:id', requireLogin, async (req, res) => {
+  await pool.query('DELETE FROM templates WHERE id=$1 AND user_id=$2', [req.params.id, req.user.id]);
+  res.json({ status: true });
+});
+
+// ---------- Recurring ----------
+app.get('/me/recurring', requireLogin, async (req, res) => {
+  const { rows } = await pool.query(
+    'SELECT r.*, d.name as device_name FROM recurring_messages r LEFT JOIN devices d ON d.id=r.device_id WHERE r.user_id=$1 ORDER BY r.id DESC',
+    [req.user.id]
+  );
+  res.json(rows);
+});
+
+app.post('/me/recurring', requireLogin, async (req, res) => {
+  const { device_id, name, target, message, cron_expr } = req.body || {};
+  if (!device_id || !target || !message) return res.status(400).json({ error: 'device_id, target, message required' });
+  const d = await getDevice(Number(device_id));
+  if (!d || d.user_id !== req.user.id) return res.status(403).json({ error: 'Not your device' });
+  const { rows } = await pool.query(
+    'INSERT INTO recurring_messages (user_id, device_id, name, target, message, cron_expr) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *',
+    [req.user.id, d.id, name || 'Recurring', target, message, cron_expr || '0 9 * * *']
+  );
+  res.json(rows[0]);
+});
+
+app.post('/me/recurring/:id/toggle', requireLogin, async (req, res) => {
+  const { rows } = await pool.query(
+    'UPDATE recurring_messages SET active = NOT active WHERE id=$1 AND user_id=$2 RETURNING *',
+    [req.params.id, req.user.id]
+  );
+  res.json(rows[0] || {});
+});
+
+app.delete('/me/recurring/:id', requireLogin, async (req, res) => {
+  await pool.query('DELETE FROM recurring_messages WHERE id=$1 AND user_id=$2', [req.params.id, req.user.id]);
+  res.json({ status: true });
+});
+
+// ---------- Inbox (incoming messages) ----------
+app.get('/me/inbox', requireLogin, async (req, res) => {
+  const dev = deviceParam(req);
+  const { rows } = dev
+    ? await pool.query("SELECT * FROM message_logs WHERE device_id=$1 AND direction='in' ORDER BY id DESC LIMIT 200", [dev])
+    : await pool.query("SELECT * FROM message_logs WHERE user_id=$1 AND direction='in' ORDER BY id DESC LIMIT 200", [req.user.id]);
+  res.json(rows);
+});
+
+// ---------- Logs with filter & pagination ----------
+app.get('/me/logs/export', requireLogin, async (req, res) => {
+  const { device, direction, from, to } = req.query;
+  let q = 'SELECT * FROM message_logs WHERE user_id=$1';
+  const params = [req.user.id];
+  if (device) { params.push(Number(device)); q += ` AND device_id=$${params.length}`; }
+  if (direction) { params.push(direction); q += ` AND direction=$${params.length}`; }
+  if (from) { params.push(new Date(from)); q += ` AND created_at>=$${params.length}`; }
+  if (to) { params.push(new Date(to)); q += ` AND created_at<=$${params.length}`; }
+  q += ' ORDER BY id DESC LIMIT 5000';
+  const { rows } = await pool.query(q, params);
+  
+  const csv = ['id,direction,jid,text,media_type,status,created_at',
+    ...rows.map(r => [r.id, r.direction, r.jid, (r.text||'').replace(/,/g,'|'), r.media_type||'', r.status||'', r.created_at].join(','))
+  ].join('\n');
+  res.setHeader('Content-Type', 'text/csv');
+  res.setHeader('Content-Disposition', 'attachment; filename="history.csv"');
+  res.send(csv);
+});
+
+app.delete('/me/logs', requireLogin, async (req, res) => {
+  const { device, ids } = req.body || {};
+  if (ids && Array.isArray(ids) && ids.length) {
+    await pool.query('DELETE FROM message_logs WHERE id = ANY($1) AND user_id=$2', [ids.map(Number), req.user.id]);
+  } else if (device) {
+    await pool.query('DELETE FROM message_logs WHERE device_id=$1 AND user_id=$2', [Number(device), req.user.id]);
+  } else {
+    await pool.query('DELETE FROM message_logs WHERE user_id=$1', [req.user.id]);
+  }
+  res.json({ status: true });
+});
+
+// ---------- Statistics ----------
+app.get('/me/stats', requireLogin, async (req, res) => {
+  const { rows } = await pool.query(`
+    SELECT 
+      COUNT(*) FILTER (WHERE direction='out') as total_sent,
+      COUNT(*) FILTER (WHERE direction='in') as total_received,
+      COUNT(*) FILTER (WHERE direction='out' AND created_at > now() - interval '7 days') as sent_7d,
+      COUNT(*) FILTER (WHERE created_at > now() - interval '30 days') as total_30d
+    FROM message_logs WHERE user_id=$1
+  `, [req.user.id]);
+  const { rows: byDay } = await pool.query(`
+    SELECT DATE(created_at) as day, direction, COUNT(*) as cnt
+    FROM message_logs WHERE user_id=$1 AND created_at > now() - interval '14 days'
+    GROUP BY day, direction ORDER BY day
+  `, [req.user.id]);
+  res.json({ summary: rows[0], byDay });
+});
+
 // ---------- Cron: pesan terjadwal tiap menit ----------
 cron.schedule('* * * * *', async () => {
   try {
@@ -401,6 +525,34 @@ cron.schedule('* * * * *', async () => {
   } catch (e) {
     console.error('cron error:', e.message);
   }
+});
+
+// Cron: recurring messages - run every minute and check cron expressions
+cron.schedule('* * * * *', async () => {
+  try {
+    const { rows } = await pool.query(
+      "SELECT * FROM recurring_messages WHERE active = TRUE"
+    );
+    for (const r of rows) {
+      // Simple cron check: only handle "0 H * * *" daily patterns for now
+      const now = new Date();
+      const [min, hour] = r.cron_expr.split(' ').map(Number);
+      if (now.getMinutes() === min && now.getHours() === hour) {
+        const lastRun = r.last_run ? new Date(r.last_run) : null;
+        const today = now.toDateString();
+        if (!lastRun || lastRun.toDateString() !== today) {
+          try {
+            const jid = toJid(r.target);
+            await sendText(r.device_id, r.target, r.message);
+            await logMessage({ userId: r.user_id, deviceId: r.device_id, direction: 'out', jid, text: r.message, status: 'recurring' });
+            await pool.query('UPDATE recurring_messages SET last_run=now() WHERE id=$1', [r.id]);
+          } catch(e) {
+            console.error('[recurring] error:', e.message);
+          }
+        }
+      }
+    }
+  } catch(e) { console.error('recurring cron error:', e.message); }
 });
 
 // Cron: autodelete riwayat pesan (per jam, untuk device yang mengaktifkan)
@@ -434,6 +586,7 @@ process.on('uncaughtException', (err) => {
 // ---------- Start ----------
 const PORT = process.env.PORT || 3000;
 initDb()
+  .then(() => migrateNewTables())
   .then(() => connectAllSessions())
   .then(() => {
     app.listen(PORT, () => console.log(`Server jalan di port ${PORT}`));
