@@ -50,7 +50,6 @@ app.post('/auth/logout', logoutSession);
 app.post('/auth/forgot-password', forgotPassword);
 app.get('/auth/verify-reset-token', verifyResetToken);
 app.post('/auth/reset-password', resetPassword);
-app.get('/auth/test-email', testEmail); // debug endpoint — hapus setelah email berjalan normal
 
 app.get('/me', requireLogin, (req, res) => {
   res.json({
