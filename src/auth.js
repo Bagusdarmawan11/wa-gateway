@@ -21,7 +21,15 @@ async function sendMail({ to, subject, html }) {
     },
   });
   await transporter.sendMail({
-    from: process.env.SMTP_FROM || `"Synpera" <${process.env.SMTP_USER}>`,
+    from: (() => {
+      const raw = process.env.SMTP_FROM || '';
+      // Jika sudah ada format "Nama <email>", pakai langsung
+      if (raw.includes('<')) return raw;
+      // Jika hanya email, bungkus dengan nama
+      if (raw.includes('@')) return `"Synpera" <${raw}>`;
+      // Fallback ke SMTP_USER
+      return `"Synpera" <${process.env.SMTP_USER}>`;
+    })(),
     to,
     subject,
     html,

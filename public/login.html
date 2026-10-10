@@ -136,7 +136,7 @@
       </div>
 
       <div class="ts-wrap">
-        <div class="cf-turnstile" data-sitekey="0x4AAAAAAFR5QERU61mACiR6" data-theme="auto" id="tsTurnstileLogin"></div>
+        <div class="cf-turnstile" data-sitekey="0x4AAAAAAFR5QERU61mACiR6" data-theme="auto" id="tsTurnstileLogin" data-callback="onTurnstileLoginSuccess" data-expired-callback="onTurnstileLoginExpire"></div>
       </div>
 
       <button class="btn" type="submit" id="loginBtn">Masuk</button>
@@ -160,7 +160,7 @@
       </div>
 
       <div class="ts-wrap">
-        <div class="cf-turnstile" data-sitekey="0x4AAAAAAFR5QERU61mACiR6" data-theme="auto" id="tsTurnstileForgot"></div>
+        <div class="cf-turnstile" data-sitekey="0x4AAAAAAFR5QERU61mACiR6" data-theme="auto" id="tsTurnstileForgot" data-callback="onTurnstileForgotSuccess" data-expired-callback="onTurnstileForgotExpire"></div>
       </div>
 
       <button class="btn" type="submit" id="forgotBtn">Kirim Link Reset</button>
@@ -190,11 +190,18 @@
     document.getElementById('loginEmail').value = urlParams.get('email');
   }
 
-  // ===== Panggil Turnstile token =====
+  // ===== Turnstile: tunggu sampai widget siap =====
+  let tsLoginReady = false;
+  let tsForgotReady = false;
+
+  // Callback dipanggil Cloudflare saat widget selesai load & user verified
+  window.onTurnstileLoginSuccess  = () => { tsLoginReady  = true; };
+  window.onTurnstileLoginExpire   = () => { tsLoginReady  = false; };
+  window.onTurnstileForgotSuccess = () => { tsForgotReady = true; };
+  window.onTurnstileForgotExpire  = () => { tsForgotReady = false; };
+
   function getTurnstileToken(widgetId) {
-    try {
-      return turnstile.getResponse(widgetId) || '';
-    } catch { return ''; }
+    try { return turnstile.getResponse(widgetId) || ''; } catch { return ''; }
   }
 
   // ===== Tampilkan error/success =====
@@ -219,6 +226,13 @@
     const password = loginPw.value;
     const remember = document.getElementById('rememberMe').checked;
     const tsToken = getTurnstileToken('tsTurnstileLogin');
+
+    // Jika widget belum selesai diverifikasi, jangan kirim
+    if (!tsToken) {
+      showMsg('loginError', 'error', 'Verifikasi Cloudflare belum selesai, mohon tunggu lalu coba lagi.');
+      btn.disabled = false; btn.textContent = 'Masuk';
+      return;
+    }
 
     try {
       const r = await fetch('/auth/login', {
@@ -268,6 +282,12 @@
 
     const email = document.getElementById('forgotEmail').value.trim();
     const tsToken = getTurnstileToken('tsTurnstileForgot');
+
+    if (!tsToken) {
+      showMsg('forgotError', 'error', 'Verifikasi Cloudflare belum selesai, mohon tunggu lalu coba lagi.');
+      btn.disabled = false; btn.textContent = 'Kirim Link Reset';
+      return;
+    }
 
     try {
       const r = await fetch('/auth/forgot-password', {

@@ -129,7 +129,7 @@
     </div>
 
     <div class="ts-wrap">
-      <div class="cf-turnstile" data-sitekey="0x4AAAAAAFR5QERU61mACiR6" data-theme="auto" id="tsTurnstileReg"></div>
+      <div class="cf-turnstile" data-sitekey="0x4AAAAAAFR5QERU61mACiR6" data-theme="auto" id="tsTurnstileReg" data-callback="onTurnstileRegSuccess" data-expired-callback="onTurnstileRegExpire"></div>
     </div>
 
     <button class="btn" type="submit" id="regBtn">Daftar Sekarang</button>
@@ -141,6 +141,11 @@
 <script>
   // ===== Tema (dari localStorage) =====
   document.documentElement.setAttribute('data-theme', localStorage.getItem('synpera-theme') || 'dark');
+
+  // ===== Turnstile readiness =====
+  let tsRegReady = false;
+  window.onTurnstileRegSuccess = () => { tsRegReady = true; };
+  window.onTurnstileRegExpire  = () => { tsRegReady = false; };
 
   // ===== Pre-fill email dari URL param (dikirim dari halaman login) =====
   const urlParams = new URLSearchParams(location.search);
@@ -277,6 +282,11 @@
     }
 
     const tsToken = (() => { try { return turnstile.getResponse('tsTurnstileReg') || ''; } catch { return ''; } })();
+
+    if (!tsToken) {
+      regErr.textContent = 'Verifikasi Cloudflare belum selesai, mohon tunggu lalu coba lagi.';
+      regErr.style.display = 'block'; return;
+    }
 
     regBtn.disabled = true; regBtn.textContent = 'Memproses…';
     try {
