@@ -100,15 +100,37 @@ export async function connectDevice(deviceId) {
 
     if (connection === 'close') {
       const code = lastDisconnect?.error?.output?.statusCode;
+      const errMsg = lastDisconnect?.error?.message || '';
       s.status = 'disconnected';
       s.me = null;
       fireWebhook(device.webhook_connect_url, { event: 'disconnect', device_id: deviceId, status: 'disconnected' });
+
+      // Koneksi digantikan oleh perangkat lain (WhatsApp multi-device conflict)
+      // Jangan reconnect langsung — tunggu lebih lama agar tidak loop crash
+      const isConflict = code === DisconnectReason.connectionReplaced ||
+        errMsg.toLowerCase().includes('conflict') ||
+        errMsg.toLowerCase().includes('replaced');
 
       if (code === DisconnectReason.loggedOut) {
         console.log(`[device ${deviceId}] Logout, session dihapus`);
         await clearAuthState(deviceId);
         await pool.query('UPDATE devices SET number = NULL WHERE id = $1', [deviceId]);
+        // Setelah logout tidak perlu reconnect
+        return;
       }
+
+      if (isConflict) {
+        console.log(`[device ${deviceId}] Koneksi diambil alih perangkat lain, tunggu 15 detik sebelum reconnect...`);
+        s.reconnecting = true;
+        setTimeout(() => {
+          s.reconnecting = false;
+          connectDevice(deviceId).catch((e) =>
+            console.error(`[device ${deviceId}] reconnect error:`, e.message)
+          );
+        }, 15000); // tunggu 15 detik agar WhatsApp tidak anggap spam
+        return;
+      }
+
       if (!s.reconnecting) {
         s.reconnecting = true;
         setTimeout(() => {

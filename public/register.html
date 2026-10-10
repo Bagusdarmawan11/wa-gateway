@@ -142,10 +142,18 @@
   // ===== Tema (dari localStorage) =====
   document.documentElement.setAttribute('data-theme', localStorage.getItem('synpera-theme') || 'dark');
 
-  // ===== Turnstile readiness =====
-  let tsRegReady = false;
-  window.onTurnstileRegSuccess = () => { tsRegReady = true; };
-  window.onTurnstileRegExpire  = () => { tsRegReady = false; };
+  // ===== Turnstile helpers =====
+  window.onTurnstileRegSuccess = (t) => console.log('[TS] register ready', t?.slice(0,10));
+
+  function getTsToken(widgetId) {
+    try {
+      const t = turnstile.getResponse(widgetId);
+      if (t) return t;
+    } catch {}
+    const wrap = document.getElementById(widgetId);
+    const inp = wrap?.querySelector('input[name="cf-turnstile-response"]');
+    return inp?.value || '';
+  }
 
   // ===== Pre-fill email dari URL param (dikirim dari halaman login) =====
   const urlParams = new URLSearchParams(location.search);
@@ -281,11 +289,20 @@
       }
     }
 
-    const tsToken = (() => { try { return turnstile.getResponse('tsTurnstileReg') || ''; } catch { return ''; } })();
+    let tsToken = getTsToken('tsTurnstileReg');
 
     if (!tsToken) {
-      regErr.textContent = 'Verifikasi Cloudflare belum selesai, mohon tunggu lalu coba lagi.';
-      regErr.style.display = 'block'; return;
+      regBtn.textContent = 'Menunggu verifikasi…';
+      for (let i = 0; i < 10; i++) {
+        await new Promise(r => setTimeout(r, 500));
+        tsToken = getTsToken('tsTurnstileReg');
+        if (tsToken) break;
+      }
+    }
+    if (!tsToken) {
+      regErr.textContent = 'Verifikasi Cloudflare gagal. Coba refresh halaman lalu daftar kembali.';
+      regErr.style.display = 'block';
+      regBtn.disabled = false; regBtn.textContent = 'Daftar Sekarang'; return;
     }
 
     regBtn.disabled = true; regBtn.textContent = 'Memproses…';

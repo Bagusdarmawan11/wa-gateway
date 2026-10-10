@@ -415,6 +415,22 @@ cron.schedule('7 * * * *', async () => {
   }
 });
 
+// ===== Global error handler: jangan crash karena error di satu device =====
+process.on('unhandledRejection', (reason) => {
+  console.error('[unhandledRejection] Diabaikan agar server tidak crash:', reason?.message || reason);
+});
+process.on('uncaughtException', (err) => {
+  // Hanya crash jika bukan error Baileys/WA biasa
+  const baileysMsgs = ['Connection Closed', 'connection replaced', 'Stream Errored', 'conflict'];
+  const isBaileys = baileysMsgs.some(m => err?.message?.toLowerCase().includes(m.toLowerCase()));
+  if (isBaileys) {
+    console.error('[uncaughtException] Error Baileys diabaikan:', err.message);
+    return; // jangan exit
+  }
+  console.error('[uncaughtException] Fatal:', err);
+  process.exit(1);
+});
+
 // ---------- Start ----------
 const PORT = process.env.PORT || 3000;
 initDb()
