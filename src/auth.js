@@ -34,21 +34,6 @@ async function sendMail({ to, subject, html }) {
   await transporter.sendMail({ from: fromAddr, to, subject, html });
 }
 
-// ===== Debug: Test kirim email (hanya untuk diagnosa) =====
-export async function testEmail(req, res) {
-  const { to } = req.query;
-  if (!to) return res.status(400).json({ error: 'Tambahkan ?to=email@kamu.com di URL' });
-
-  const config = {
-    SMTP_HOST: process.env.SMTP_HOST || '(tidak diset)',
-    SMTP_PORT: process.env.SMTP_PORT || '(tidak diset)',
-    SMTP_SECURE: process.env.SMTP_SECURE || '(tidak diset)',
-    SMTP_USER: process.env.SMTP_USER || '(tidak diset)',
-    SMTP_PASS: process.env.SMTP_PASS ? '***' + process.env.SMTP_PASS.slice(-4) : '(tidak diset)',
-    SMTP_FROM: process.env.SMTP_FROM || '(tidak diset)',
-    APP_URL: APP_URL,
-  };
-
   try {
     const nodemailer = (await import('nodemailer')).default;
     const transporter = nodemailer.createTransport({
