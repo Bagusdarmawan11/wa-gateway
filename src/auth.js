@@ -66,23 +66,6 @@ async function sendMail({ to, subject, html }) {
   }
 }
 
-function getSmtpHint(e) {
-  const msg = e.message || '';
-  if (msg.includes('Invalid login') || msg.includes('Authentication')) {
-    return 'SMTP_USER atau SMTP_PASS salah. Untuk Brevo: SMTP_USER harus email akun Brevo kamu (bukan email lain), SMTP_PASS adalah SMTP key dari dashboard Brevo (SMTP & API → Generate SMTP key).';
-  }
-  if (msg.includes('ECONNREFUSED') || msg.includes('connect')) {
-    return 'Tidak bisa terhubung ke SMTP server. Pastikan SMTP_HOST dan SMTP_PORT benar.';
-  }
-  if (msg.includes('Sender') || msg.includes('sender') || msg.includes('not allowed')) {
-    return 'Sender email (SMTP_FROM) belum diverifikasi di Brevo. Buka Brevo → Senders & IP → tambah dan verifikasi domain/email pengirim.';
-  }
-  if (msg.includes('self signed') || msg.includes('certificate')) {
-    return 'SSL/TLS error. Coba set SMTP_SECURE=false dan SMTP_PORT=587.';
-  }
-  return 'Cek Render Logs untuk detail lebih lanjut.';
-}
-
 // ===== Verifikasi Cloudflare Turnstile =====
 async function verifyTurnstile(token, ip) {
   if (!TURNSTILE_SECRET) return true; // skip jika secret belum di-set (dev mode)
