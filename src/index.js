@@ -8,7 +8,7 @@ import { initDb, pool, logMessage, createDevice, getDevice } from './db.js';
 import {
   register, login, logoutSession,
   requireLogin, tokenAuth, regenerateToken,
-  forgotPassword, verifyResetToken, resetPassword, testEmail,
+  forgotPassword, verifyResetToken, resetPassword, 
 } from './auth.js';
 import {
   connectDevice, connectAllSessions, getState,
