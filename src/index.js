@@ -8,7 +8,7 @@ import { initDb, pool, logMessage, createDevice, getDevice } from './db.js';
 import {
   register, login, logoutSession,
   requireLogin, tokenAuth, regenerateToken,
-  forgotPassword, verifyResetToken, resetPassword,
+  forgotPassword, verifyResetToken, resetPassword, testEmail,
 } from './auth.js';
 import {
   connectDevice, connectAllSessions, getState,
@@ -50,6 +50,7 @@ app.post('/auth/logout', logoutSession);
 app.post('/auth/forgot-password', forgotPassword);
 app.get('/auth/verify-reset-token', verifyResetToken);
 app.post('/auth/reset-password', resetPassword);
+app.get('/auth/test-email', testEmail); // debug endpoint — hapus setelah email berjalan normal
 
 app.get('/me', requireLogin, (req, res) => {
   res.json({

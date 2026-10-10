@@ -20,20 +20,82 @@ async function sendMail({ to, subject, html }) {
       pass: process.env.SMTP_PASS,
     },
   });
-  await transporter.sendMail({
-    from: (() => {
-      const raw = process.env.SMTP_FROM || '';
-      // Jika sudah ada format "Nama <email>", pakai langsung
-      if (raw.includes('<')) return raw;
-      // Jika hanya email, bungkus dengan nama
-      if (raw.includes('@')) return `"Synpera" <${raw}>`;
-      // Fallback ke SMTP_USER
-      return `"Synpera" <${process.env.SMTP_USER}>`;
-    })(),
-    to,
-    subject,
-    html,
-  });
+
+  // Verifikasi koneksi SMTP sebelum kirim (lempar error jika credentials salah)
+  await transporter.verify();
+
+  const fromAddr = (() => {
+    const raw = process.env.SMTP_FROM || '';
+    if (raw.includes('<')) return raw;
+    if (raw.includes('@')) return `"Synpera" <${raw}>`;
+    return `"Synpera" <${process.env.SMTP_USER}>`;
+  })();
+
+  await transporter.sendMail({ from: fromAddr, to, subject, html });
+}
+
+// ===== Debug: Test kirim email (hanya untuk diagnosa) =====
+export async function testEmail(req, res) {
+  const { to } = req.query;
+  if (!to) return res.status(400).json({ error: 'Tambahkan ?to=email@kamu.com di URL' });
+
+  const config = {
+    SMTP_HOST: process.env.SMTP_HOST || '(tidak diset)',
+    SMTP_PORT: process.env.SMTP_PORT || '(tidak diset)',
+    SMTP_SECURE: process.env.SMTP_SECURE || '(tidak diset)',
+    SMTP_USER: process.env.SMTP_USER || '(tidak diset)',
+    SMTP_PASS: process.env.SMTP_PASS ? '***' + process.env.SMTP_PASS.slice(-4) : '(tidak diset)',
+    SMTP_FROM: process.env.SMTP_FROM || '(tidak diset)',
+    APP_URL: APP_URL,
+  };
+
+  try {
+    const nodemailer = (await import('nodemailer')).default;
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT) || 587,
+      secure: process.env.SMTP_SECURE === 'true',
+      auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+    });
+
+    // Step 1: verifikasi koneksi
+    await transporter.verify();
+
+    // Step 2: kirim email test
+    const info = await transporter.sendMail({
+      from: process.env.SMTP_FROM || process.env.SMTP_USER,
+      to,
+      subject: '✅ Test Email Synpera',
+      html: `<p>Email test berhasil dikirim dari Synpera.<br>Config: <pre>${JSON.stringify(config, null, 2)}</pre></p>`,
+    });
+
+    res.json({ status: true, message: 'Email berhasil dikirim!', messageId: info.messageId, config });
+  } catch (e) {
+    res.status(500).json({
+      status: false,
+      error: e.message,
+      errorCode: e.code,
+      config,
+      hint: getSmtpHint(e),
+    });
+  }
+}
+
+function getSmtpHint(e) {
+  const msg = e.message || '';
+  if (msg.includes('Invalid login') || msg.includes('Authentication')) {
+    return 'SMTP_USER atau SMTP_PASS salah. Untuk Brevo: SMTP_USER harus email akun Brevo kamu (bukan email lain), SMTP_PASS adalah SMTP key dari dashboard Brevo (SMTP & API → Generate SMTP key).';
+  }
+  if (msg.includes('ECONNREFUSED') || msg.includes('connect')) {
+    return 'Tidak bisa terhubung ke SMTP server. Pastikan SMTP_HOST dan SMTP_PORT benar.';
+  }
+  if (msg.includes('Sender') || msg.includes('sender') || msg.includes('not allowed')) {
+    return 'Sender email (SMTP_FROM) belum diverifikasi di Brevo. Buka Brevo → Senders & IP → tambah dan verifikasi domain/email pengirim.';
+  }
+  if (msg.includes('self signed') || msg.includes('certificate')) {
+    return 'SSL/TLS error. Coba set SMTP_SECURE=false dan SMTP_PORT=587.';
+  }
+  return 'Cek Render Logs untuk detail lebih lanjut.';
 }
 
 // ===== Verifikasi Cloudflare Turnstile =====
@@ -227,9 +289,10 @@ export async function forgotPassword(req, res) {
     const cleanEmail = email.trim().toLowerCase();
     const { rows } = await pool.query('SELECT id, name FROM users WHERE email = $1', [cleanEmail]);
 
-    // Selalu kembalikan sukses untuk mencegah email enumeration attack
-    res.json({ status: true });
-    if (!rows.length) return; // email tidak terdaftar, tapi kita tidak memberi tahu user
+    if (!rows.length) {
+      // Email tidak terdaftar — tetap balas sukses (anti email enumeration)
+      return res.json({ status: true });
+    }
 
     const user = rows[0];
     const resetToken = crypto.randomBytes(32).toString('hex');
@@ -310,8 +373,15 @@ export async function forgotPassword(req, res) {
         subject: '🔐 Atur Ulang Kata Sandi Synpera',
         html,
       });
+      // Email berhasil dikirim — baru balas sukses ke client
+      res.json({ status: true });
     } catch (mailErr) {
-      console.error('[auth] Gagal kirim email reset:', mailErr.message);
+      console.error('[auth] Gagal kirim email reset:', mailErr.message, mailErr.code);
+      // Balas error agar UI tidak tampil "Terkirim" padahal gagal
+      res.status(500).json({
+        error: 'Gagal mengirim email. Silakan coba lagi atau hubungi admin.',
+        detail: process.env.NODE_ENV !== 'production' ? mailErr.message : undefined,
+      });
     }
   } catch (e) {
     res.status(500).json({ error: e.message });
