@@ -34,38 +34,6 @@ async function sendMail({ to, subject, html }) {
   await transporter.sendMail({ from: fromAddr, to, subject, html });
 }
 
-  try {
-    const nodemailer = (await import('nodemailer')).default;
-    const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: Number(process.env.SMTP_PORT) || 587,
-      secure: process.env.SMTP_SECURE === 'true',
-      auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-    });
-
-    // Step 1: verifikasi koneksi
-    await transporter.verify();
-
-    // Step 2: kirim email test
-    const info = await transporter.sendMail({
-      from: process.env.SMTP_FROM || process.env.SMTP_USER,
-      to,
-      subject: '✅ Test Email Synpera',
-      html: `<p>Email test berhasil dikirim dari Synpera.<br>Config: <pre>${JSON.stringify(config, null, 2)}</pre></p>`,
-    });
-
-    res.json({ status: true, message: 'Email berhasil dikirim!', messageId: info.messageId, config });
-  } catch (e) {
-    res.status(500).json({
-      status: false,
-      error: e.message,
-      errorCode: e.code,
-      config,
-      hint: getSmtpHint(e),
-    });
-  }
-}
-
 // ===== Verifikasi Cloudflare Turnstile =====
 async function verifyTurnstile(token, ip) {
   if (!TURNSTILE_SECRET) return true; // skip jika secret belum di-set (dev mode)
