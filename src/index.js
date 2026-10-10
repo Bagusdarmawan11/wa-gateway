@@ -8,6 +8,7 @@ import { initDb, pool, logMessage, createDevice, getDevice } from './db.js';
 import {
   register, login, logoutSession,
   requireLogin, tokenAuth, regenerateToken,
+  forgotPassword, verifyResetToken, resetPassword,
 } from './auth.js';
 import {
   connectDevice, connectAllSessions, getState,
@@ -35,6 +36,7 @@ app.get('/login', (req, res) => res.sendFile('login.html', { root: 'public' }));
 app.get('/register', (req, res) => res.sendFile('register.html', { root: 'public' }));
 app.get('/dashboard', (req, res) => res.sendFile('dashboard.html', { root: 'public' }));
 app.get('/flow', (req, res) => res.sendFile('flow.html', { root: 'public' }));
+app.get('/reset-password', (req, res) => res.sendFile('reset-password.html', { root: 'public' }));
 
 // ---------- Health ----------
 app.get('/health', (req, res) => {
@@ -45,6 +47,9 @@ app.get('/health', (req, res) => {
 app.post('/auth/register', register);
 app.post('/auth/login', login);
 app.post('/auth/logout', logoutSession);
+app.post('/auth/forgot-password', forgotPassword);
+app.get('/auth/verify-reset-token', verifyResetToken);
+app.post('/auth/reset-password', resetPassword);
 
 app.get('/me', requireLogin, (req, res) => {
   res.json({

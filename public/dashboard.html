@@ -280,7 +280,7 @@
       <div class="panel">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
           <h2 style="margin:0">Daftar Grup</h2>
-          <button class="btn btn-ghost btn-sm" onclick="loadGroups()">Muat Ulang</button>
+          <button class="btn btn-ghost btn-sm" onclick="loadGroups(true)">Muat Ulang</button>
         </div>
         <div id="groupList"><div class="empty">Pilih device lalu klik Muat Ulang</div></div>
       </div>
@@ -441,15 +441,29 @@
     applyTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
 
   // ===== Nav =====
+  // ===== Hash-based routing (bertahan saat refresh) =====
+  const VALID_PAGES = ['devices','send','autoreply','flow','groups','schedule','logs','api'];
+
+  function navigateTo(page) {
+    if (!VALID_PAGES.includes(page)) page = 'devices';
+    document.querySelectorAll('.nav-item[data-page]').forEach(b => b.classList.remove('active'));
+    const btn = document.querySelector(`.nav-item[data-page="${page}"]`);
+    if (btn) btn.classList.add('active');
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + page).classList.add('active');
+    document.querySelector('aside').classList.remove('open');
+    location.hash = page;
+    loadPage(page);
+  }
+
   document.querySelectorAll('.nav-item[data-page]').forEach(btn => {
-    btn.onclick = () => {
-      document.querySelectorAll('.nav-item[data-page]').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-      document.getElementById('page-' + btn.dataset.page).classList.add('active');
-      document.querySelector('aside').classList.remove('open');
-      loadPage(btn.dataset.page);
-    };
+    btn.onclick = () => navigateTo(btn.dataset.page);
+  });
+
+  // Restore halaman dari hash saat load / refresh
+  window.addEventListener('hashchange', () => {
+    const page = location.hash.replace('#','') || 'devices';
+    navigateTo(page);
   });
 
   // ===== Devices =====
@@ -670,25 +684,50 @@
   }
   document.getElementById('flowDevice').onchange = loadFlows;
 
-  // ===== Groups =====
-  async function loadGroups() {
+  // ===== Groups (dengan cache localStorage + auto-refresh) =====
+  const GRP_CACHE_KEY = (devId) => `synpera_groups_${devId}`;
+
+  function renderGroups(rows, el) {
+    if (!rows.length) { el.innerHTML = '<div class="empty">Device ini belum tergabung di grup mana pun</div>'; return; }
+    el.innerHTML = '<table><tr><th>ID Grup</th><th>Nama</th><th>Anggota</th><th></th></tr>' +
+      rows.map(g => `<tr>
+        <td style="font-family:monospace;font-size:.8rem">${esc(g.id)}</td>
+        <td><b>${esc(g.name)}</b></td>
+        <td class="muted">${g.participants}</td>
+        <td><button class="btn btn-ghost btn-sm" onclick="navigator.clipboard.writeText('${esc(g.id)}').then(()=>toast('ID grup disalin'))">Salin ID</button></td>
+      </tr>`).join('') + '</table>';
+  }
+
+  async function loadGroups(forceRefresh = false) {
     const devId = document.getElementById('grpDevice').value;
     const el = document.getElementById('groupList');
     if (!devId) { el.innerHTML = '<div class="empty">Tambah device dulu</div>'; return; }
-    el.innerHTML = '<div class="empty">Memuat grup…</div>';
+
+    // Tampilkan cache dulu jika ada (agar tidak blank saat refresh halaman)
+    const cacheKey = GRP_CACHE_KEY(devId);
+    const cached = localStorage.getItem(cacheKey);
+    if (cached && !forceRefresh) {
+      try {
+        const { rows, ts } = JSON.parse(cached);
+        renderGroups(rows, el);
+        const age = Math.round((Date.now() - ts) / 1000);
+        el.insertAdjacentHTML('beforeend', `<p style="font-size:.75rem;color:var(--muted);margin-top:8px">Cache ${age}s lalu — memuat ulang…</p>`);
+      } catch {}
+    } else {
+      el.innerHTML = '<div class="empty">Memuat grup…</div>';
+    }
+
     try {
       const rows = await api(`/me/devices/${devId}/groups`);
-      if (!rows.length) { el.innerHTML = '<div class="empty">Device ini belum tergabung di grup mana pun</div>'; return; }
-      el.innerHTML = '<table><tr><th>ID Grup</th><th>Nama</th><th>Anggota</th><th></th></tr>' +
-        rows.map(g => `<tr>
-          <td style="font-family:monospace;font-size:.8rem">${esc(g.id)}</td>
-          <td><b>${esc(g.name)}</b></td>
-          <td class="muted">${g.participants}</td>
-          <td><button class="btn btn-ghost btn-sm" onclick="navigator.clipboard.writeText('${g.id}').then(()=>toast('ID grup disalin'))">Salin ID</button></td>
-        </tr>`).join('') + '</table>';
-    } catch (e) { el.innerHTML = `<div class="empty">${esc(e.message)}</div>`; }
+      // Simpan ke cache
+      localStorage.setItem(cacheKey, JSON.stringify({ rows, ts: Date.now() }));
+      renderGroups(rows, el);
+    } catch (e) {
+      if (!cached) el.innerHTML = `<div class="empty">${esc(e.message)}</div>`;
+    }
   }
-  document.getElementById('grpDevice').onchange = loadGroups;
+
+  document.getElementById('grpDevice').onchange = () => loadGroups(true);
 
   // ===== Schedules =====
   async function loadSchedules() {
@@ -782,6 +821,8 @@
     if (p === 'devices') loadDevices();
     if (p === 'autoreply') loadAutoreplies();
     if (p === 'flow') loadFlows();
+    // groups: tampilkan cache segera, refresh dari server di background
+    if (p === 'groups') loadGroups(false);
     if (p === 'schedule') loadSchedules();
     if (p === 'logs') loadLogs();
     if (p === 'api') renderApiDocs();
@@ -794,6 +835,11 @@
       document.getElementById('userName').textContent = ME.user.name;
       document.getElementById('userEmail').textContent = ME.user.email;
       await loadDevices();
+
+      // Restore halaman dari hash
+      const initPage = location.hash.replace('#','') || 'devices';
+      if (initPage !== 'devices') navigateTo(initPage);
+
       setInterval(() => {
         if (document.getElementById('page-devices').classList.contains('active')) loadDevices();
       }, 4000);

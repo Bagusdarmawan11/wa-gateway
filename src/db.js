@@ -164,6 +164,18 @@ export async function initDb() {
     ALTER TABLE autoreplies ADD COLUMN IF NOT EXISTS device_id INTEGER REFERENCES devices(id) ON DELETE CASCADE;
     ALTER TABLE schedules ADD COLUMN IF NOT EXISTS device_id INTEGER REFERENCES devices(id) ON DELETE CASCADE;
     CREATE INDEX IF NOT EXISTS idx_logs_device ON message_logs (device_id, id DESC);
+
+    -- ===== Reset kata sandi =====
+    CREATE TABLE IF NOT EXISTS password_resets (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      token TEXT NOT NULL,
+      expires_at TIMESTAMPTZ NOT NULL,
+      used BOOLEAN DEFAULT FALSE,
+      created_at TIMESTAMPTZ DEFAULT now(),
+      UNIQUE (user_id)
+    );
+    CREATE INDEX IF NOT EXISTS idx_pw_reset_token ON password_resets (token);
   `);
 
   // Migrasi session lama (per user) -> device pertama user tsb

@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Daftar — Synpera</title>
 <link rel="icon" type="image/png" href="/assets/favicon.png">
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <style>
   :root, [data-theme="dark"] {
     --bg:#070b16; --card:rgba(255,255,255,.05); --border:rgba(255,255,255,.12);
@@ -12,7 +13,7 @@
     --accent-soft:rgba(59,130,246,.12); --accent-border:rgba(59,130,246,.45); --accent-text:#93c5fd;
   }
   [data-theme="light"] {
-    --bg:#f6f8fc; --card:rgba(255,255,255,.75); --border:rgba(15,23,42,.12);
+    --bg:#f6f8fc; --card:rgba(255,255,255,.85); --border:rgba(15,23,42,.12);
     --text:#0f172a; --muted:#5b6b84; --input:rgba(15,23,42,.04);
     --accent-soft:rgba(29,78,216,.08); --accent-border:rgba(29,78,216,.4); --accent-text:#1d4ed8;
   }
@@ -20,130 +21,134 @@
   body {
     font-family:'Inter',system-ui,sans-serif; min-height:100vh;
     background:var(--bg); color:var(--text);
-    display:flex; align-items:center; justify-content:center; padding:24px;
-    position:relative; overflow:hidden; transition:background .35s, color .35s;
+    display:flex; align-items:flex-start; justify-content:center;
+    padding:32px 24px 48px; position:relative; overflow-x:hidden;
+    transition:background .35s, color .35s;
   }
-  .blob { position:absolute; border-radius:50%; filter:blur(130px); opacity:.26; animation:drift 16s ease-in-out infinite alternate; }
+  .blob { position:fixed; border-radius:50%; filter:blur(130px); opacity:.26; animation:drift 16s ease-in-out infinite alternate; pointer-events:none; z-index:0; }
   [data-theme="light"] .blob { opacity:.15; }
   .b1 { width:480px;height:480px; background:#1e3a8a; top:-140px; right:-120px; }
   .b2 { width:400px;height:400px; background:#0e7490; bottom:-120px; left:-100px; animation-delay:-8s; }
   @keyframes drift { from{transform:translate(0,0) scale(1);} to{transform:translate(50px,40px) scale(1.12);} }
   .card {
-    width:100%; max-width:420px; padding:40px 36px; border-radius:24px;
+    width:100%; max-width:420px; padding:36px 36px 32px; border-radius:24px;
     background:var(--card); border:1px solid var(--border);
     backdrop-filter:blur(22px) saturate(160%);
     box-shadow:0 24px 60px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.1);
-    animation:fadeUp .6s ease both; position:relative; z-index:1;
+    animation:fadeUp .6s ease both; position:relative; z-index:1; margin-top:16px;
   }
-  @keyframes fadeUp { from{opacity:0; transform:translateY(20px);} to{opacity:1; transform:translateY(0);} }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(20px);} to{opacity:1;transform:translateY(0);} }
   .logo { display:flex; align-items:center; justify-content:center; gap:11px; font-weight:800; font-size:1.25rem; text-decoration:none; color:var(--text); margin-bottom:6px; }
   .logo img { width:36px;height:36px; object-fit:contain; }
-  h1 { text-align:center; font-size:1.45rem; font-weight:800; margin:16px 0 6px; letter-spacing:-.02em; }
-  .sub { text-align:center; color:var(--muted); font-size:.92rem; margin-bottom:28px; }
+  h1 { text-align:center; font-size:1.38rem; font-weight:800; margin:14px 0 5px; letter-spacing:-.02em; }
+  .sub { text-align:center; color:var(--muted); font-size:.9rem; margin-bottom:24px; }
   label { display:block; font-size:.85rem; font-weight:600; margin-bottom:7px; }
-  .field { margin-bottom:18px; }
+  .field { margin-bottom:16px; }
   .input-wrap { position:relative; }
-  input {
-    width:100%; padding:13px 16px; border-radius:13px; font-size:.95rem; font-family:inherit;
+  input[type="email"], input[type="password"], input[type="text"] {
+    width:100%; padding:12px 16px; border-radius:13px; font-size:.93rem; font-family:inherit;
     background:var(--input); border:1px solid var(--border); color:var(--text); outline:none; transition:all .25s;
   }
   input:focus { border-color:var(--accent-border); box-shadow:0 0 0 3px var(--accent-soft); }
+  input.invalid { border-color:rgba(239,68,68,.6); box-shadow:0 0 0 3px rgba(239,68,68,.1); }
+  input.valid { border-color:rgba(34,197,94,.5); }
   .toggle-pw {
     position:absolute; right:8px; top:50%; transform:translateY(-50%);
     background:none; border:none; cursor:pointer; padding:8px; border-radius:8px;
     color:var(--muted); transition:color .2s; display:grid; place-items:center;
   }
   .toggle-pw:hover { color:var(--text); }
-  .hint { font-size:.78rem; color:var(--muted); margin-top:6px; }
+  .hint { font-size:.78rem; margin-top:5px; min-height:18px; transition:color .2s; }
+  .hint.ok { color:#4ade80; }
+  .hint.bad { color:#f87171; }
+  .hint.warn { color:#fb923c; }
+  /* password strength bar */
+  .pw-bar { height:4px; border-radius:2px; margin-top:8px; background:var(--border); overflow:hidden; }
+  .pw-fill { height:100%; border-radius:2px; width:0; transition:width .4s, background .4s; }
   .btn {
-    width:100%; padding:14px; border-radius:14px; border:none; cursor:pointer;
+    width:100%; padding:13px; border-radius:14px; border:none; cursor:pointer;
     font-weight:700; font-size:1rem; font-family:inherit; color:#fff;
     background:linear-gradient(135deg,#2563eb,#0891b2);
-    box-shadow:0 4px 20px rgba(37,99,235,.3); transition:all .25s;
+    box-shadow:0 4px 20px rgba(37,99,235,.3); transition:all .25s; margin-top:4px;
   }
   .btn:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(37,99,235,.4); }
   .btn:disabled { opacity:.6; cursor:not-allowed; transform:none; }
-  .error {
-    display:none; padding:12px 16px; border-radius:12px; margin-bottom:18px;
-    background:rgba(239,68,68,.12); border:1px solid rgba(239,68,68,.35);
-    color:#f87171; font-size:.88rem; animation:shake .4s;
+  .msg {
+    display:none; padding:12px 16px; border-radius:12px; margin-bottom:16px; font-size:.88rem;
+    animation:shake .4s;
   }
+  .msg.error { background:rgba(239,68,68,.12); border:1px solid rgba(239,68,68,.35); color:#f87171; }
   @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
-  .switch { text-align:center; margin-top:22px; color:var(--muted); font-size:.9rem; }
+  .switch { text-align:center; margin-top:18px; color:var(--muted); font-size:.9rem; }
   .switch a { color:var(--accent-text); text-decoration:none; font-weight:600; }
   .switch a:hover { text-decoration:underline; }
-  .back { position:absolute; top:20px; left:24px; color:var(--muted); text-decoration:none; font-size:.9rem; z-index:2; }
-  .back:hover { color:var(--text); }
-  .theme-fab {
-    position:absolute; top:16px; right:20px; z-index:2; width:40px;height:40px;
-    border-radius:12px; display:grid; place-items:center;
-    background:var(--card); border:1px solid var(--border); color:var(--text); cursor:pointer;
-  }
+  .ts-wrap { display:flex; justify-content:center; margin-bottom:14px; }
 </style>
 </head>
 <body>
 <div class="blob b1"></div><div class="blob b2"></div>
-<a href="/" class="back">← Kembali</a>
-<button class="theme-fab" id="themeBtn" title="Ganti tema">
-  <svg id="iconMoon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-  <svg id="iconSun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
-</button>
 
 <div class="card">
   <a href="/" class="logo"><img src="/assets/logo.png" alt="Synpera"> Synpera</a>
   <h1>Buat Akun Gratis</h1>
   <p class="sub">Langsung bisa menambahkan device setelah daftar</p>
 
-  <div class="error" id="error"></div>
+  <div class="msg error" id="regError"></div>
 
-  <form id="form">
+  <form id="regForm">
     <div class="field">
       <label>Nama</label>
-      <input type="text" id="name" placeholder="Nama kamu" required autocomplete="name">
+      <input type="text" id="regName" placeholder="Nama kamu" required autocomplete="name">
     </div>
     <div class="field">
       <label>Email</label>
-      <input type="email" id="email" placeholder="nama@email.com" required autocomplete="email">
+      <input type="email" id="regEmail" placeholder="nama@email.com" required autocomplete="email">
     </div>
     <div class="field">
-      <label>Password</label>
+      <label>Kata Sandi</label>
       <div class="input-wrap">
-        <input type="password" id="password" placeholder="Minimal 6 karakter" required minlength="6" autocomplete="new-password" style="padding-right:46px">
-        <button type="button" class="toggle-pw" data-for="password" title="Tampilkan password">
+        <input type="password" id="regPw" placeholder="Minimal 8 karakter" required autocomplete="new-password" style="padding-right:46px">
+        <button type="button" class="toggle-pw" data-for="regPw" aria-label="Tampilkan password">
           <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="eye-open"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
           <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="eye-closed" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
         </button>
       </div>
+      <div class="pw-bar"><div class="pw-fill" id="pwFill"></div></div>
+      <p class="hint" id="pwHint"></p>
     </div>
     <div class="field">
-      <label>Konfirmasi Password</label>
+      <label>Konfirmasi Kata Sandi</label>
       <div class="input-wrap">
-        <input type="password" id="password2" placeholder="Ulangi password" required autocomplete="new-password" style="padding-right:46px">
-        <button type="button" class="toggle-pw" data-for="password2" title="Tampilkan password">
+        <input type="password" id="regPw2" placeholder="Ulangi kata sandi" required autocomplete="new-password" style="padding-right:46px">
+        <button type="button" class="toggle-pw" data-for="regPw2" aria-label="Tampilkan password">
           <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="eye-open"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
           <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="eye-closed" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
         </button>
       </div>
       <p class="hint" id="matchHint"></p>
     </div>
-    <button class="btn" type="submit" id="submitBtn">Daftar Sekarang</button>
+
+    <div class="ts-wrap">
+      <div class="cf-turnstile" data-sitekey="0x4AAAAAAFR5QERU61mACiR6" data-theme="auto" id="tsTurnstileReg"></div>
+    </div>
+
+    <button class="btn" type="submit" id="regBtn">Daftar Sekarang</button>
   </form>
 
   <p class="switch">Sudah punya akun? <a href="/login">Masuk</a></p>
 </div>
 
 <script>
-  const root = document.documentElement;
-  function applyTheme(t) {
-    root.setAttribute('data-theme', t);
-    iconMoon.style.display = t === 'dark' ? 'block' : 'none';
-    iconSun.style.display = t === 'dark' ? 'none' : 'block';
-    localStorage.setItem('synpera-theme', t);
-  }
-  applyTheme(localStorage.getItem('synpera-theme') || 'dark');
-  themeBtn.onclick = () => applyTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  // ===== Tema (dari localStorage) =====
+  document.documentElement.setAttribute('data-theme', localStorage.getItem('synpera-theme') || 'dark');
 
-  // Hide / unhide password (kedua field)
+  // ===== Pre-fill email dari URL param (dikirim dari halaman login) =====
+  const urlParams = new URLSearchParams(location.search);
+  if (urlParams.get('email')) {
+    document.getElementById('regEmail').value = urlParams.get('email');
+  }
+
+  // ===== Toggle password =====
   document.querySelectorAll('.toggle-pw').forEach(btn => {
     btn.onclick = () => {
       const inp = document.getElementById(btn.dataset.for);
@@ -151,49 +156,148 @@
       inp.type = show ? 'text' : 'password';
       btn.querySelector('.eye-open').style.display = show ? 'none' : 'block';
       btn.querySelector('.eye-closed').style.display = show ? 'block' : 'none';
-      btn.title = show ? 'Sembunyikan password' : 'Tampilkan password';
     };
   });
 
-  const pw = document.getElementById('password');
-  const pw2 = document.getElementById('password2');
-  const hint = document.getElementById('matchHint');
-  pw2.oninput = () => {
-    if (!pw2.value) { hint.textContent = ''; return; }
-    const ok = pw.value === pw2.value;
-    hint.textContent = ok ? 'Password cocok' : 'Password belum sama';
-    hint.style.color = ok ? '#22c55e' : '#f87171';
+  // ===== Password strength + HIBP check =====
+  const regPw = document.getElementById('regPw');
+  const pwFill = document.getElementById('pwFill');
+  const pwHint = document.getElementById('pwHint');
+  let pwnedChecked = false;
+  let pwnedResult = false; // true = password bocor
+
+  function scorePassword(pw) {
+    if (!pw) return 0;
+    let s = 0;
+    if (pw.length >= 8) s++;
+    if (pw.length >= 12) s++;
+    if (/[A-Z]/.test(pw)) s++;
+    if (/[0-9]/.test(pw)) s++;
+    if (/[^A-Za-z0-9]/.test(pw)) s++;
+    return s;
+  }
+
+  function renderStrength(pw) {
+    const s = scorePassword(pw);
+    const colors = ['','#ef4444','#f97316','#eab308','#22c55e','#22c55e'];
+    const labels = ['','Sangat lemah','Lemah','Sedang','Kuat','Sangat kuat'];
+    pwFill.style.width = (s / 5 * 100) + '%';
+    pwFill.style.background = colors[s] || '';
+    if (pw.length > 0) {
+      pwHint.textContent = labels[s] || '';
+      pwHint.className = 'hint ' + (s <= 2 ? 'bad' : s === 3 ? 'warn' : 'ok');
+    } else {
+      pwHint.textContent = ''; pwHint.className = 'hint';
+    }
+  }
+
+  // HIBP k-Anonymity check (SHA-1 prefix, 5 huruf pertama)
+  async function checkHibp(pw) {
+    try {
+      const buf = await crypto.subtle.digest('SHA-1', new TextEncoder().encode(pw));
+      const hex = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+      const prefix = hex.slice(0, 5);
+      const suffix = hex.slice(5);
+      const r = await fetch(`https://api.pwnedpasswords.com/range/${prefix}`, {
+        headers: { 'Add-Padding': 'true' }
+      });
+      const text = await r.text();
+      const lines = text.split('\n');
+      return lines.some(line => line.split(':')[0].trim() === suffix);
+    } catch { return false; }
+  }
+
+  let hibpTimer;
+  regPw.oninput = () => {
+    renderStrength(regPw.value);
+    pwnedChecked = false; pwnedResult = false;
+    clearTimeout(hibpTimer);
+    if (regPw.value.length >= 8) {
+      hibpTimer = setTimeout(async () => {
+        pwHint.textContent = 'Memeriksa keamanan kata sandi…';
+        pwHint.className = 'hint';
+        const pwned = await checkHibp(regPw.value);
+        pwnedChecked = true;
+        pwnedResult = pwned;
+        if (pwned) {
+          pwHint.textContent = '⚠ Kata sandi ini pernah bocor dalam pelanggaran data. Gunakan kata sandi lain.';
+          pwHint.className = 'hint bad';
+          regPw.classList.add('invalid');
+        } else {
+          renderStrength(regPw.value);
+          regPw.classList.remove('invalid');
+        }
+      }, 700);
+    }
   };
 
-  const form = document.getElementById('form');
-  const err = document.getElementById('error');
-  const btn = document.getElementById('submitBtn');
-  form.onsubmit = async (e) => {
+  // ===== Konfirmasi password =====
+  const regPw2 = document.getElementById('regPw2');
+  const matchHint = document.getElementById('matchHint');
+  regPw2.oninput = () => {
+    if (!regPw2.value) { matchHint.textContent = ''; matchHint.className = 'hint'; return; }
+    const ok = regPw.value === regPw2.value;
+    matchHint.textContent = ok ? 'Kata sandi cocok' : 'Kata sandi belum sama';
+    matchHint.className = 'hint ' + (ok ? 'ok' : 'bad');
+  };
+
+  // ===== Submit =====
+  const regErr = document.getElementById('regError');
+  const regBtn = document.getElementById('regBtn');
+  document.getElementById('regForm').onsubmit = async (e) => {
     e.preventDefault();
-    err.style.display = 'none';
-    if (pw.value !== pw2.value) {
-      err.textContent = 'Konfirmasi password tidak sama';
-      err.style.display = 'block';
-      return;
+    regErr.style.display = 'none';
+
+    const pw = regPw.value;
+
+    if (pw.length < 8) {
+      regErr.textContent = 'Kata sandi minimal 8 karakter.';
+      regErr.style.display = 'block'; return;
     }
-    btn.disabled = true; btn.textContent = 'Memproses…';
+    if (pw !== regPw2.value) {
+      regErr.textContent = 'Konfirmasi kata sandi tidak sama.';
+      regErr.style.display = 'block'; return;
+    }
+    if (pwnedResult) {
+      regErr.textContent = 'Kata sandi ini pernah bocor dalam pelanggaran data. Silakan gunakan kata sandi lain.';
+      regErr.style.display = 'block'; return;
+    }
+    // Jika check HIBP belum selesai, lakukan sekarang
+    if (!pwnedChecked && pw.length >= 8) {
+      regBtn.disabled = true; regBtn.textContent = 'Memeriksa keamanan…';
+      const pwned = await checkHibp(pw);
+      pwnedChecked = true; pwnedResult = pwned;
+      if (pwned) {
+        regErr.textContent = 'Kata sandi ini pernah bocor. Gunakan kata sandi lain.';
+        regErr.style.display = 'block';
+        pwHint.textContent = '⚠ Kata sandi ini pernah bocor dalam pelanggaran data.';
+        pwHint.className = 'hint bad';
+        regBtn.disabled = false; regBtn.textContent = 'Daftar Sekarang'; return;
+      }
+    }
+
+    const tsToken = (() => { try { return turnstile.getResponse('tsTurnstileReg') || ''; } catch { return ''; } })();
+
+    regBtn.disabled = true; regBtn.textContent = 'Memproses…';
     try {
       const r = await fetch('/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: document.getElementById('name').value,
-          email: document.getElementById('email').value,
-          password: pw.value,
+          name: document.getElementById('regName').value.trim(),
+          email: document.getElementById('regEmail').value.trim(),
+          password: pw,
+          ts_token: tsToken,
         }),
       });
       const data = await r.json();
       if (!r.ok) throw new Error(data.error || 'Pendaftaran gagal');
       location.href = '/dashboard';
     } catch (e2) {
-      err.textContent = e2.message;
-      err.style.display = 'block';
-      btn.disabled = false; btn.textContent = 'Daftar Sekarang';
+      regErr.textContent = e2.message;
+      regErr.style.display = 'block';
+      regBtn.disabled = false; regBtn.textContent = 'Daftar Sekarang';
+      try { turnstile.reset('tsTurnstileReg'); } catch {}
     }
   };
 </script>
