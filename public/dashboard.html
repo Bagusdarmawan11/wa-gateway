@@ -72,15 +72,46 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 .navbar-user{display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:10px;background:var(--panel);border:1px solid var(--border);font-size:.82rem}
 .navbar-user .name{font-weight:600}
 .navbar-user .email{color:var(--muted);font-size:.74rem}
-.lang-select{
-  background:var(--panel);border:1px solid var(--border);color:var(--text);
-  padding:5px 8px;border-radius:8px;font-size:.8rem;cursor:pointer;font-family:inherit
-}
+/* .lang-select moved to settings page */
 .theme-btn{
   background:var(--panel);border:1px solid var(--border);color:var(--text);
   padding:7px 10px;border-radius:9px;cursor:pointer;font-size:.85rem;transition:all .2s
 }
 .theme-btn:hover{background:var(--accent-soft)}
+
+/* ===== USER DROPDOWN ===== */
+.navbar-user{position:relative;cursor:pointer;user-select:none}
+.navbar-user:hover{background:var(--accent-soft);border-color:var(--accent-border)}
+.user-dropdown{
+  display:none;position:absolute;top:calc(100% + 8px);right:0;
+  min-width:180px;background:var(--panel-solid);border:1px solid var(--border);
+  border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.3);z-index:300;overflow:hidden;
+}
+.user-dropdown.open{display:block}
+.user-dropdown-header{padding:12px 14px;border-bottom:1px solid var(--border)}
+.user-dropdown-header .name{font-weight:700;font-size:.88rem}
+.user-dropdown-header .email{color:var(--muted);font-size:.75rem;margin-top:2px}
+.user-dropdown-item{
+  display:flex;align-items:center;gap:10px;padding:10px 14px;
+  font-size:.84rem;cursor:pointer;transition:background .15s;color:var(--text)
+}
+.user-dropdown-item:hover{background:var(--panel)}
+.user-dropdown-item.danger{color:var(--red)}
+.user-dropdown-item.danger:hover{background:var(--red-soft)}
+.user-dropdown-item svg{width:15px;height:15px;flex-shrink:0}
+
+/* ===== SETTINGS PAGE ===== */
+.lang-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-top:16px}
+.lang-card{
+  display:flex;align-items:center;gap:10px;padding:14px 16px;
+  border-radius:12px;border:2px solid var(--border);background:var(--panel);
+  cursor:pointer;transition:all .2s;font-size:.9rem;font-weight:500
+}
+.lang-card:hover{border-color:var(--accent-border);background:var(--accent-soft)}
+.lang-card.active{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-text)}
+.lang-card .flag{font-size:1.4rem}
+.lang-card .check{margin-left:auto;color:var(--accent);display:none}
+.lang-card.active .check{display:block}
 
 /* ===== LAYOUT ===== */
 .layout{display:flex;min-height:calc(100vh - 58px);padding-top:58px}
@@ -307,22 +338,24 @@ pre.code-block{background:var(--code-bg);border:1px solid var(--border);border-r
     <a class="navbar-logo" href="/"><img src="/assets/logo.png" alt="Synpera">Synpera</a>
   </div>
   <div class="navbar-right">
-    <select class="lang-select" id="langSelect" onchange="setLang(this.value)">
-      <option value="en">🌐 EN</option>
-      <option value="id">🇮🇩 ID</option>
-      <option value="zh">🇨🇳 ZH</option>
-      <option value="ru">🇷🇺 RU</option>
-      <option value="ko">🇰🇷 KO</option>
-      <option value="ar">🇸🇦 AR</option>
-    </select>
     <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">🌙</button>
-    <div class="navbar-user" id="navUser">
+    <div class="navbar-user" id="navUser" onclick="toggleUserDropdown()">
       <div><div class="name" id="navName">User</div><div class="email" id="navEmail">—</div></div>
+      <div class="user-dropdown" id="userDropdown">
+        <div class="user-dropdown-header">
+          <div class="name" id="dropName">User</div>
+          <div class="email" id="dropEmail">—</div>
+        </div>
+        <div class="user-dropdown-item" onclick="goPage('settings');closeUserDropdown()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
+          <span data-i18n="settings">Settings</span>
+        </div>
+        <div class="user-dropdown-item danger" onclick="doLogout()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          <span data-i18n="logout">Logout</span>
+        </div>
+      </div>
     </div>
-    <button class="btn btn-ghost btn-sm" onclick="doLogout()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-      Logout
-    </button>
   </div>
 </nav>
 
@@ -331,27 +364,28 @@ pre.code-block{background:var(--code-bg);border:1px solid var(--border);border-r
 <div class="layout">
 <!-- SIDEBAR -->
 <aside id="sidebar">
-  <div class="nav-label">Main Feature</div>
-  <button class="nav-item active" data-page="devices"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>Device</button>
-  <button class="nav-item" data-page="phonebook"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Phonebook</button>
-  <button class="nav-item" data-page="history"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8"/></svg>Message History</button>
-  <button class="nav-item" data-page="send"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg>Send</button>
-  <button class="nav-item" data-page="inbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22,12 16,12 14,15 10,15 8,12 2,12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>Inbox</button>
-  <button class="nav-item" data-page="template"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Template</button>
-  <button class="nav-item" data-page="poll"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Poll</button>
-  <button class="nav-item" data-page="recurring"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23,4 23,10 17,10"/><polyline points="1,20 1,14 7,14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>Recurring</button>
-  <button class="nav-item" data-page="autoreply"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Autoreply</button>
-  <button class="nav-item" data-page="submission"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>Submission</button>
-  <button class="nav-item" data-page="rotator"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16,3 21,3 21,8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21,16 21,21 16,21"/><line x1="15" y1="15" x2="21" y2="21"/></svg>Rotator</button>
-  <button class="nav-item" data-page="followup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17,1 21,5 17,9"/><path d="M3 11V9a4 4 0 0 1 4-4h14M7,23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>Follow Up</button>
-  <button class="nav-item" data-page="chaining"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>Chaining</button>
-  <button class="nav-item" data-page="webhook"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>Webhook</button>
-  <button class="nav-item" data-page="invoices"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10,9 9,9 8,9"/></svg>Invoices</button>
-  <button class="nav-item" data-page="stats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>Statistics</button>
-  <div class="nav-label" style="margin-top:8px">Settings</div>
-  <button class="nav-item" data-page="groups"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Groups</button>
-  <button class="nav-item" data-page="schedule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Scheduled</button>
-  <button class="nav-item" data-page="api"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>API & Token</button>
+  <div class="nav-label" data-i18n="nav_main">Main Feature</div>
+  <button class="nav-item active" data-page="devices"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg><span data-i18n="nav_device">Device</span></button>
+  <button class="nav-item" data-page="phonebook"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg><span data-i18n="nav_phonebook">Phonebook</span></button>
+  <button class="nav-item" data-page="history"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8"/></svg><span data-i18n="nav_history">Message History</span></button>
+  <button class="nav-item" data-page="send"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg><span data-i18n="nav_send">Send</span></button>
+  <button class="nav-item" data-page="inbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22,12 16,12 14,15 10,15 8,12 2,12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg><span data-i18n="nav_inbox">Inbox</span></button>
+  <button class="nav-item" data-page="template"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg><span data-i18n="nav_template">Template</span></button>
+  <button class="nav-item" data-page="poll"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span data-i18n="nav_poll">Poll</span></button>
+  <button class="nav-item" data-page="recurring"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23,4 23,10 17,10"/><polyline points="1,20 1,14 7,14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg><span data-i18n="nav_recurring">Recurring</span></button>
+  <button class="nav-item" data-page="autoreply"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg><span data-i18n="nav_autoreply">Autoreply</span></button>
+  <button class="nav-item" data-page="submission"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg><span data-i18n="nav_submission">Submission</span></button>
+  <button class="nav-item" data-page="rotator"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16,3 21,3 21,8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21,16 21,21 16,21"/><line x1="15" y1="15" x2="21" y2="21"/></svg><span data-i18n="nav_rotator">Rotator</span></button>
+  <button class="nav-item" data-page="followup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17,1 21,5 17,9"/><path d="M3 11V9a4 4 0 0 1 4-4h14M7,23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg><span data-i18n="nav_followup">Follow Up</span></button>
+  <button class="nav-item" data-page="chaining"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg><span data-i18n="nav_chaining">Chaining</span></button>
+  <button class="nav-item" data-page="webhook"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg><span data-i18n="nav_webhook">Webhook</span></button>
+  <button class="nav-item" data-page="invoices"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10,9 9,9 8,9"/></svg><span data-i18n="nav_invoices">Invoices</span></button>
+  <button class="nav-item" data-page="stats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg><span data-i18n="nav_stats">Statistics</span></button>
+  <div class="nav-label" style="margin-top:8px" data-i18n="nav_settings_label">Settings</div>
+  <button class="nav-item" data-page="groups"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg><span data-i18n="nav_groups">Groups</span></button>
+  <button class="nav-item" data-page="schedule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span data-i18n="nav_schedule">Scheduled</span></button>
+  <button class="nav-item" data-page="api"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg><span data-i18n="nav_api">API & Token</span></button>
+  <button class="nav-item" data-page="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14M12 2v2M12 20v2M2 12h2M20 12h2"/></svg><span data-i18n="settings">Settings</span></button>
 </aside>
 
 <!-- MAIN -->
@@ -762,6 +796,53 @@ Authorization: Bearer {device_token}
   </div>
 </div>
 
+<div class="page" id="page-settings">
+  <h1 data-i18n="settings">Settings</h1>
+  <p class="sub" data-i18n="settings_sub">Customize your experience</p>
+
+  <div class="panel" style="max-width:560px">
+    <div class="panel-head"><h2 data-i18n="lang_title">Language / Bahasa</h2></div>
+    <p style="color:var(--muted);font-size:.85rem;margin-bottom:4px" data-i18n="lang_sub">Choose the display language for the interface</p>
+    <div class="lang-grid" id="langGrid">
+      <div class="lang-card" data-lang="en" onclick="setLang('en')">
+        <span class="flag">🌐</span><span>English</span>
+        <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="16" height="16"><polyline points="20,6 9,17 4,12"/></svg>
+      </div>
+      <div class="lang-card" data-lang="id" onclick="setLang('id')">
+        <span class="flag">🇮🇩</span><span>Indonesia</span>
+        <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="16" height="16"><polyline points="20,6 9,17 4,12"/></svg>
+      </div>
+      <div class="lang-card" data-lang="zh" onclick="setLang('zh')">
+        <span class="flag">🇨🇳</span><span>中文</span>
+        <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="16" height="16"><polyline points="20,6 9,17 4,12"/></svg>
+      </div>
+      <div class="lang-card" data-lang="ru" onclick="setLang('ru')">
+        <span class="flag">🇷🇺</span><span>Русский</span>
+        <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="16" height="16"><polyline points="20,6 9,17 4,12"/></svg>
+      </div>
+      <div class="lang-card" data-lang="ko" onclick="setLang('ko')">
+        <span class="flag">🇰🇷</span><span>한국어</span>
+        <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="16" height="16"><polyline points="20,6 9,17 4,12"/></svg>
+      </div>
+      <div class="lang-card" data-lang="ar" onclick="setLang('ar')">
+        <span class="flag">🇸🇦</span><span>العربية</span>
+        <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="16" height="16"><polyline points="20,6 9,17 4,12"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" style="max-width:560px;margin-top:16px">
+    <div class="panel-head"><h2 data-i18n="theme_title">Appearance</h2></div>
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-weight:600;font-size:.9rem" data-i18n="theme_label">Dark / Light Mode</div>
+        <div style="color:var(--muted);font-size:.82rem" data-i18n="theme_sub">Toggle the interface color scheme</div>
+      </div>
+      <button class="theme-btn" onclick="toggleTheme()" id="themeBtnSettings" style="font-size:1.1rem;padding:10px 14px">🌙</button>
+    </div>
+  </div>
+</div>
+
 </main>
 </div><!-- /.layout -->
 
@@ -829,7 +910,7 @@ let grpCache = [];
 async function boot(){
   applySavedTheme();
   const lang = localStorage.getItem('lang')||'en';
-  document.getElementById('langSelect').value = lang;
+  applyLang(lang);
 
   // Restore last page from hash
   const hash = location.hash.replace('#','');
@@ -838,6 +919,8 @@ async function boot(){
     me = await api('/me');
     document.getElementById('navName').textContent = me.user.name;
     document.getElementById('navEmail').textContent = me.user.email;
+    document.getElementById('dropName').textContent = me.user.name;
+    document.getElementById('dropEmail').textContent = me.user.email;
   } catch(e){ return; }
 
   devices = await api('/me/devices');
@@ -898,17 +981,137 @@ function closeSidebar(){
 function applySavedTheme(){
   const t = localStorage.getItem('theme')||'dark';
   document.documentElement.dataset.theme = t;
-  document.getElementById('themeBtn').textContent = t==='dark'?'☀️':'🌙';
+  const icon = t==='dark'?'☀️':'🌙';
+  document.getElementById('themeBtn').textContent = icon;
+  const sb = document.getElementById('themeBtnSettings');
+  if(sb) sb.textContent = icon;
 }
 function toggleTheme(){
   const isDark = document.documentElement.dataset.theme==='dark';
   document.documentElement.dataset.theme = isDark?'light':'dark';
-  document.getElementById('themeBtn').textContent = isDark?'🌙':'☀️';
+  const icon = isDark?'🌙':'☀️';
+  document.getElementById('themeBtn').textContent = icon;
+  const sb = document.getElementById('themeBtnSettings');
+  if(sb) sb.textContent = icon;
   localStorage.setItem('theme', isDark?'light':'dark');
 }
 
-// ─── Lang ───────────────────────────────────────────────
-function setLang(l){ localStorage.setItem('lang',l); }
+// ─── i18n ───────────────────────────────────────────────
+const T = {
+  en:{
+    nav_main:'Main Feature', nav_device:'Device', nav_phonebook:'Phonebook',
+    nav_history:'Message History', nav_send:'Send', nav_inbox:'Inbox',
+    nav_template:'Template', nav_poll:'Poll', nav_recurring:'Recurring',
+    nav_autoreply:'Autoreply', nav_submission:'Submission', nav_rotator:'Rotator',
+    nav_followup:'Follow Up', nav_chaining:'Chaining', nav_webhook:'Webhook',
+    nav_invoices:'Invoices', nav_stats:'Statistics', nav_settings_label:'Settings',
+    nav_groups:'Groups', nav_schedule:'Scheduled', nav_api:'API & Token',
+    settings:'Settings', logout:'Logout',
+    settings_sub:'Customize your experience',
+    lang_title:'Language / Bahasa', lang_sub:'Choose the display language for the interface',
+    theme_title:'Appearance', theme_label:'Dark / Light Mode', theme_sub:'Toggle the interface color scheme',
+  },
+  id:{
+    nav_main:'Fitur Utama', nav_device:'Perangkat', nav_phonebook:'Buku Telepon',
+    nav_history:'Riwayat Pesan', nav_send:'Kirim', nav_inbox:'Kotak Masuk',
+    nav_template:'Template', nav_poll:'Polling', nav_recurring:'Berulang',
+    nav_autoreply:'Balas Otomatis', nav_submission:'Pengiriman', nav_rotator:'Rotator',
+    nav_followup:'Tindak Lanjut', nav_chaining:'Chaining', nav_webhook:'Webhook',
+    nav_invoices:'Faktur', nav_stats:'Statistik', nav_settings_label:'Pengaturan',
+    nav_groups:'Grup', nav_schedule:'Terjadwal', nav_api:'API & Token',
+    settings:'Pengaturan', logout:'Keluar',
+    settings_sub:'Sesuaikan pengalaman Anda',
+    lang_title:'Bahasa / Language', lang_sub:'Pilih bahasa tampilan antarmuka',
+    theme_title:'Tampilan', theme_label:'Mode Gelap / Terang', theme_sub:'Ganti skema warna antarmuka',
+  },
+  zh:{
+    nav_main:'主要功能', nav_device:'设备', nav_phonebook:'电话簿',
+    nav_history:'消息历史', nav_send:'发送', nav_inbox:'收件箱',
+    nav_template:'模板', nav_poll:'投票', nav_recurring:'定期',
+    nav_autoreply:'自动回复', nav_submission:'提交', nav_rotator:'轮换',
+    nav_followup:'跟进', nav_chaining:'链接', nav_webhook:'Webhook',
+    nav_invoices:'发票', nav_stats:'统计', nav_settings_label:'设置',
+    nav_groups:'群组', nav_schedule:'已计划', nav_api:'API & 令牌',
+    settings:'设置', logout:'退出',
+    settings_sub:'自定义您的体验',
+    lang_title:'语言 / Language', lang_sub:'选择界面显示语言',
+    theme_title:'外观', theme_label:'深色 / 浅色模式', theme_sub:'切换界面配色方案',
+  },
+  ru:{
+    nav_main:'Основные функции', nav_device:'Устройство', nav_phonebook:'Телефонная книга',
+    nav_history:'История сообщений', nav_send:'Отправить', nav_inbox:'Входящие',
+    nav_template:'Шаблон', nav_poll:'Опрос', nav_recurring:'Повторяющееся',
+    nav_autoreply:'Автоответ', nav_submission:'Отправка', nav_rotator:'Ротатор',
+    nav_followup:'Последующие действия', nav_chaining:'Цепочка', nav_webhook:'Webhook',
+    nav_invoices:'Счета', nav_stats:'Статистика', nav_settings_label:'Настройки',
+    nav_groups:'Группы', nav_schedule:'Запланированное', nav_api:'API и Токен',
+    settings:'Настройки', logout:'Выйти',
+    settings_sub:'Настройте свой интерфейс',
+    lang_title:'Язык / Language', lang_sub:'Выберите язык отображения интерфейса',
+    theme_title:'Внешний вид', theme_label:'Тёмный / Светлый режим', theme_sub:'Переключить цветовую схему',
+  },
+  ko:{
+    nav_main:'주요 기능', nav_device:'기기', nav_phonebook:'전화번호부',
+    nav_history:'메시지 기록', nav_send:'보내기', nav_inbox:'받은 편지함',
+    nav_template:'템플릿', nav_poll:'투표', nav_recurring:'반복',
+    nav_autoreply:'자동 응답', nav_submission:'제출', nav_rotator:'로테이터',
+    nav_followup:'팔로우업', nav_chaining:'체이닝', nav_webhook:'웹훅',
+    nav_invoices:'청구서', nav_stats:'통계', nav_settings_label:'설정',
+    nav_groups:'그룹', nav_schedule:'예약됨', nav_api:'API & 토큰',
+    settings:'설정', logout:'로그아웃',
+    settings_sub:'인터페이스를 맞춤 설정하세요',
+    lang_title:'언어 / Language', lang_sub:'인터페이스 표시 언어를 선택하세요',
+    theme_title:'외관', theme_label:'다크 / 라이트 모드', theme_sub:'인터페이스 색 구성표 전환',
+  },
+  ar:{
+    nav_main:'الميزات الرئيسية', nav_device:'الجهاز', nav_phonebook:'دفتر الهاتف',
+    nav_history:'سجل الرسائل', nav_send:'إرسال', nav_inbox:'صندوق الوارد',
+    nav_template:'القالب', nav_poll:'استطلاع', nav_recurring:'متكرر',
+    nav_autoreply:'الرد التلقائي', nav_submission:'التقديم', nav_rotator:'الدوار',
+    nav_followup:'المتابعة', nav_chaining:'التسلسل', nav_webhook:'ويب هوك',
+    nav_invoices:'الفواتير', nav_stats:'الإحصائيات', nav_settings_label:'الإعدادات',
+    nav_groups:'المجموعات', nav_schedule:'المجدولة', nav_api:'API والرمز',
+    settings:'الإعدادات', logout:'تسجيل الخروج',
+    settings_sub:'تخصيص تجربتك',
+    lang_title:'اللغة / Language', lang_sub:'اختر لغة عرض الواجهة',
+    theme_title:'المظهر', theme_label:'الوضع الداكن / الفاتح', theme_sub:'تبديل نظام الألوان',
+  }
+};
+
+function applyLang(l){
+  const t = T[l] || T['en'];
+  // RTL for Arabic
+  document.documentElement.dir = l==='ar' ? 'rtl' : 'ltr';
+  // Update all data-i18n elements
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const key = el.dataset.i18n;
+    if(t[key]) el.textContent = t[key];
+  });
+  // Update lang cards active state
+  document.querySelectorAll('.lang-card').forEach(c=>{
+    c.classList.toggle('active', c.dataset.lang === l);
+  });
+}
+
+function setLang(l){
+  localStorage.setItem('lang', l);
+  applyLang(l);
+}
+
+// ─── User Dropdown ──────────────────────────────────────
+function toggleUserDropdown(e){
+  if(e) e.stopPropagation();
+  document.getElementById('userDropdown').classList.toggle('open');
+}
+function closeUserDropdown(){
+  document.getElementById('userDropdown').classList.remove('open');
+}
+document.addEventListener('click', function(e){
+  const dd = document.getElementById('userDropdown');
+  if(dd && !document.getElementById('navUser').contains(e.target)){
+    dd.classList.remove('open');
+  }
+});
 
 // ─── API ────────────────────────────────────────────────
 async function api(path,opts={}){
