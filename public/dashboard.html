@@ -6,7 +6,6 @@
 <title>Dashboard — Synpera</title>
 <link rel="icon" type="image/png" href="/assets/favicon.png">
 <style>
-/* ===== CSS VARIABLES (v4 style) ===== */
 :root,[data-theme="dark"]{
   --bg:#070b16;--panel:rgba(255,255,255,.04);--panel-solid:#101828;
   --border:rgba(255,255,255,.09);--text:#e9eef7;--muted:#93a1b8;
@@ -20,6 +19,7 @@
   --green:rgba(34,197,94,1);--green-soft:rgba(34,197,94,.13);--green-border:rgba(34,197,94,.3);
   --red:#f87171;--red-soft:rgba(239,68,68,.1);--red-border:rgba(239,68,68,.3);
   --yellow:#fbbf24;
+  --sidebar-w:240px;
 }
 [data-theme="light"]{
   --bg:#f0f4fb;--panel:rgba(15,23,42,.03);--panel-solid:#ffffff;
@@ -35,133 +35,124 @@
   --red:#dc2626;--red-soft:rgba(220,38,38,.08);--red-border:rgba(220,38,38,.3);
   --yellow:#b45309;
 }
-
-/* ===== SCROLLBAR ===== */
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:var(--scroll-track);border-radius:99px}
 ::-webkit-scrollbar-thumb{background:var(--scroll-thumb);border-radius:99px}
 ::-webkit-scrollbar-thumb:hover{background:var(--accent)}
-*{scrollbar-width:thin;scrollbar-color:var(--scroll-thumb) var(--scroll-track)}
-
-*{margin:0;padding:0;box-sizing:border-box}
+*{scrollbar-width:thin;scrollbar-color:var(--scroll-thumb) var(--scroll-track);margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%}
 body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background .35s,color .35s;overflow-x:hidden}
 
-/* ===== NAVBAR (Liquid Glass v4) ===== */
+/* NAVBAR */
 .navbar{
-  position:fixed;top:0;left:0;right:0;z-index:200;
-  height:58px;padding:0 20px;
-  display:flex;align-items:center;justify-content:space-between;gap:12px;
-  background:var(--navbar-bg);
-  backdrop-filter:blur(20px) saturate(1.8);
+  position:fixed;top:0;left:0;right:0;z-index:200;height:58px;padding:0 16px;
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  background:var(--navbar-bg);backdrop-filter:blur(20px) saturate(1.8);
   -webkit-backdrop-filter:blur(20px) saturate(1.8);
   border-bottom:1px solid var(--border);
   box-shadow:0 1px 0 rgba(255,255,255,.04), 0 4px 24px rgba(0,0,0,.15);
 }
-.navbar-left{display:flex;align-items:center;gap:10px}
+.navbar-left{display:flex;align-items:center;gap:8px}
+.sidebar-toggle-btn{
+  background:none;border:1px solid var(--border);color:var(--text);cursor:pointer;
+  padding:6px 8px;border-radius:9px;transition:all .2s;display:flex;align-items:center;
+  flex-shrink:0;
+}
+.sidebar-toggle-btn:hover{background:var(--accent-soft);border-color:var(--accent-border)}
+.sidebar-toggle-btn svg{width:18px;height:18px;display:block;transition:transform .3s}
+.sidebar-toggle-btn.collapsed svg{transform:rotate(180deg)}
 .hamburger-btn{
   background:none;border:none;color:var(--text);cursor:pointer;
-  padding:7px;border-radius:9px;transition:all .2s;
-  display:none;flex-shrink:0;
+  padding:7px;border-radius:9px;transition:all .2s;display:none;flex-shrink:0;
 }
 .hamburger-btn:hover{background:var(--panel)}
 .hamburger-btn svg{display:block;width:20px;height:20px}
 .navbar-logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:1.05rem;color:var(--text);text-decoration:none}
 .navbar-logo img{width:26px;height:26px;object-fit:contain}
 .navbar-right{display:flex;align-items:center;gap:8px}
-.navbar-user{display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:10px;background:var(--panel);border:1px solid var(--border);font-size:.82rem}
-.navbar-user .name{font-weight:600}
-.navbar-user .email{color:var(--muted);font-size:.74rem}
-/* .lang-select moved to settings page */
-.theme-btn{
-  background:var(--panel);border:1px solid var(--border);color:var(--text);
-  padding:7px 10px;border-radius:9px;cursor:pointer;font-size:.85rem;transition:all .2s
-}
+.theme-btn{background:var(--panel);border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:9px;cursor:pointer;font-size:.85rem;transition:all .2s}
 .theme-btn:hover{background:var(--accent-soft)}
 
-/* ===== USER DROPDOWN ===== */
-.navbar-user{position:relative;cursor:pointer;user-select:none}
+/* USER DROPDOWN */
+.navbar-user{position:relative;cursor:pointer;user-select:none;display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:10px;background:var(--panel);border:1px solid var(--border);font-size:.82rem;transition:all .2s}
 .navbar-user:hover{background:var(--accent-soft);border-color:var(--accent-border)}
-.user-dropdown{
-  display:none;position:absolute;top:calc(100% + 8px);right:0;
-  min-width:180px;background:var(--panel-solid);border:1px solid var(--border);
-  border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.3);z-index:300;overflow:hidden;
-}
+.navbar-user .name{font-weight:600}
+.navbar-user .email{color:var(--muted);font-size:.74rem}
+.user-dropdown{display:none;position:absolute;top:calc(100% + 8px);right:0;min-width:200px;background:var(--panel-solid);border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.3);z-index:300;overflow:hidden;}
 .user-dropdown.open{display:block}
 .user-dropdown-header{padding:12px 14px;border-bottom:1px solid var(--border)}
 .user-dropdown-header .name{font-weight:700;font-size:.88rem}
 .user-dropdown-header .email{color:var(--muted);font-size:.75rem;margin-top:2px}
-.user-dropdown-item{
-  display:flex;align-items:center;gap:10px;padding:10px 14px;
-  font-size:.84rem;cursor:pointer;transition:background .15s;color:var(--text)
-}
+.user-dropdown-item{display:flex;align-items:center;gap:10px;padding:10px 14px;font-size:.84rem;cursor:pointer;transition:background .15s;color:var(--text)}
 .user-dropdown-item:hover{background:var(--panel)}
 .user-dropdown-item.danger{color:var(--red)}
 .user-dropdown-item.danger:hover{background:var(--red-soft)}
 .user-dropdown-item svg{width:15px;height:15px;flex-shrink:0}
 
-/* ===== SETTINGS PAGE ===== */
-.lang-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-top:16px}
-.lang-card{
-  display:flex;align-items:center;gap:10px;padding:14px 16px;
-  border-radius:12px;border:2px solid var(--border);background:var(--panel);
-  cursor:pointer;transition:all .2s;font-size:.9rem;font-weight:500
-}
-.lang-card:hover{border-color:var(--accent-border);background:var(--accent-soft)}
-.lang-card.active{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-text)}
-.lang-card .flag{font-size:1.4rem}
-.lang-card .check{margin-left:auto;color:var(--accent);display:none}
-.lang-card.active .check{display:block}
-
-/* ===== LAYOUT ===== */
+/* LAYOUT */
 .layout{display:flex;min-height:calc(100vh - 58px);padding-top:58px}
 
-/* ===== SIDEBAR ===== */
+/* SIDEBAR */
 aside{
-  width:240px;padding:14px 10px;
-  border-right:1px solid var(--border);
+  width:var(--sidebar-w);padding:14px 10px;border-right:1px solid var(--border);
   display:flex;flex-direction:column;gap:2px;
   position:fixed;top:58px;left:0;bottom:0;
-  background:var(--sidebar-bg);
-  backdrop-filter:blur(20px);
-  -webkit-backdrop-filter:blur(20px);
+  background:var(--sidebar-bg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
   overflow-y:auto;z-index:110;
-  transition:transform .3s cubic-bezier(.4,0,.2,1);
+  transition:transform .3s cubic-bezier(.4,0,.2,1), width .3s;
 }
-.sidebar-overlay{
-  display:none;position:fixed;inset:0;z-index:109;
-  background:rgba(0,0,0,.5);backdrop-filter:blur(4px);
-}
+aside.sidebar-collapsed{width:56px;padding:14px 6px}
+aside.sidebar-collapsed .nav-label{opacity:0;height:0;margin:0;padding:0;overflow:hidden}
+aside.sidebar-collapsed .nav-item span{display:none}
+aside.sidebar-collapsed .nav-item{justify-content:center;padding:10px 0}
+.sidebar-overlay{display:none;position:fixed;inset:0;z-index:109;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);}
 .sidebar-overlay.open{display:block}
-.nav-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:12px 12px 5px}
-.nav-item{
-  display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;
-  color:var(--muted);font-size:.875rem;font-weight:550;
-  cursor:pointer;transition:all .2s;border:none;background:none;text-align:left;width:100%;font-family:inherit
-}
+.nav-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:12px 12px 5px;transition:all .2s;white-space:nowrap}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;color:var(--muted);font-size:.875rem;font-weight:550;cursor:pointer;transition:all .2s;border:none;background:none;text-align:left;width:100%;font-family:inherit;white-space:nowrap}
 .nav-item svg{width:16px;height:16px;flex-shrink:0}
 .nav-item:hover{background:var(--panel);color:var(--text)}
 .nav-item.active{background:var(--accent-soft);color:var(--accent-text)}
 
-/* ===== MAIN ===== */
-main{flex:1;padding:28px 28px 40px;margin-left:240px;min-width:0}
+/* MAIN */
+main{flex:1;padding:28px 28px 40px;margin-left:var(--sidebar-w);min-width:0;transition:margin-left .3s}
+main.sidebar-collapsed{margin-left:56px}
 .page{display:none;animation:fadeIn .3s ease}
 .page.active{display:block}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 h1{font-size:1.5rem;font-weight:800;margin-bottom:5px;letter-spacing:-.02em}
 .sub{color:var(--muted);font-size:.9rem;margin-bottom:22px}
 
-/* ===== PANELS ===== */
+/* PAGE HEADER */
+.page-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:22px}
+.page-header h1{margin-bottom:0}
+
+/* PANELS */
 .panel{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:18px}
 .panel h2{font-size:.98rem;font-weight:700;margin-bottom:14px}
 .panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px}
 .panel-head h2{margin-bottom:0}
 
-/* ===== BUTTONS ===== */
-.btn{
-  display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:10px;
-  font-weight:600;font-size:.84rem;border:none;cursor:pointer;font-family:inherit;transition:all .2s;white-space:nowrap
-}
+/* DASHBOARD CARDS */
+.dash-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;margin-bottom:24px}
+.dash-card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:20px;position:relative;overflow:hidden}
+.dash-card::before{content:'';position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;opacity:.07}
+.dash-card.blue::before{background:var(--accent)}
+.dash-card.green::before{background:var(--green)}
+.dash-card.yellow::before{background:var(--yellow)}
+.dash-card.cyan::before{background:var(--accent2)}
+.dash-card .dc-icon{font-size:1.6rem;margin-bottom:10px}
+.dash-card .dc-num{font-size:2rem;font-weight:800;color:var(--accent-text);line-height:1}
+.dash-card.green .dc-num{color:var(--green)}
+.dash-card.yellow .dc-num{color:var(--yellow)}
+.dash-card.cyan .dc-num{color:var(--accent2)}
+.dash-card .dc-lbl{font-size:.74rem;color:var(--muted);margin-top:4px;font-weight:500}
+.plan-panel{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.plan-badge{padding:4px 14px;border-radius:999px;font-size:.78rem;font-weight:700;background:var(--accent-soft);color:var(--accent-text);border:1px solid var(--accent-border)}
+.plan-info{font-size:.85rem;color:var(--muted)}
+.plan-info b{color:var(--text)}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:10px;font-weight:600;font-size:.84rem;border:none;cursor:pointer;font-family:inherit;transition:all .2s;white-space:nowrap}
 .btn svg{width:14px;height:14px}
 .btn-primary{background:linear-gradient(135deg,#2563eb,#0891b2);color:#fff}
 .btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(37,99,235,.35)}
@@ -174,74 +165,37 @@ h1{font-size:1.5rem;font-weight:800;margin-bottom:5px;letter-spacing:-.02em}
 .btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
 .btn-group{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
 
-/* ===== FORMS ===== */
-input,textarea,select{
-  width:100%;padding:10px 13px;border-radius:10px;font-size:.88rem;font-family:inherit;
-  background:var(--input);border:1px solid var(--border);color:var(--text);outline:none;transition:all .2s
-}
-input:focus,textarea:focus,select:focus{border-color:var(--accent-border);box-shadow:0 0 0 3px var(--accent-soft)}
-label{display:block;font-size:.8rem;font-weight:600;margin-bottom:5px}
-label .hint{font-weight:400;color:var(--muted);font-size:.74rem}
-.field{margin-bottom:14px}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
-textarea{resize:vertical;min-height:100px}
+/* CONNECT METHOD BUTTONS */
+.connect-methods{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0}
+.connect-method-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;border-radius:12px;border:1.5px solid var(--border);background:var(--panel);cursor:pointer;font-weight:600;font-size:.9rem;color:var(--text);transition:all .2s;font-family:inherit}
+.connect-method-btn:hover{border-color:var(--accent-border);background:var(--accent-soft);color:var(--accent-text)}
+.connect-method-btn svg{width:18px;height:18px;flex-shrink:0}
 
-/* ===== TABLES ===== */
-.table-wrap{overflow-x:auto;border-radius:12px;border:1px solid var(--border)}
-table{width:100%;border-collapse:collapse;font-size:.83rem}
-th{text-align:left;padding:9px 12px;color:var(--muted);font-weight:600;font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);white-space:nowrap;background:var(--panel)}
-td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
-tr:last-child td{border-bottom:none}
-tr:hover td{background:var(--panel)}
-.td-mono{font-family:monospace;font-size:.78rem;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.td-wrap{max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.empty-row{text-align:center;color:var(--muted);padding:30px!important;font-size:.88rem}
+/* STEP GUIDE (WA Web) */
+.step-guide{display:flex;flex-direction:column;gap:0}
+.step-item{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--border)}
+.step-item:last-child{border-bottom:none}
+.step-num{width:28px;height:28px;border-radius:50%;background:var(--text);color:var(--bg);font-weight:800;font-size:.84rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.step-body h4{font-size:.9rem;font-weight:700;margin-bottom:4px}
+.step-body p{font-size:.82rem;color:var(--muted);line-height:1.5}
+.step-body code{background:var(--code-bg);padding:2px 6px;border-radius:5px;font-family:monospace;font-size:.8rem}
+.bookmark-drag{border:1.5px dashed var(--border);border-radius:10px;padding:14px;text-align:center;margin:10px 0}
+.bookmark-drag p{font-size:.78rem;color:var(--muted);margin-bottom:8px}
+.bookmark-pill{display:inline-block;background:var(--text);color:var(--bg);padding:7px 20px;border-radius:8px;font-weight:700;font-size:.88rem;cursor:grab}
+.passkey-info{background:var(--accent-soft);border:1px solid var(--accent-border);border-radius:10px;padding:12px 14px;font-size:.83rem;color:var(--accent-text);margin:12px 0}
+.waiting-status{background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.25);border-radius:10px;padding:10px 14px;text-align:center;color:var(--yellow);font-size:.84rem;display:flex;align-items:center;justify-content:center;gap:8px}
+.waiver-check{display:flex;align-items:center;gap:8px;margin-top:14px;font-size:.8rem;color:var(--muted);cursor:pointer}
+.waiver-check input{cursor:pointer}
 
-/* ===== BADGES ===== */
-.badge{padding:2px 9px;border-radius:999px;font-size:.7rem;font-weight:600}
-.b-in,.b-blue{background:rgba(59,130,246,.14);color:var(--accent-text)}
-.b-out,.b-green{background:var(--green-soft);color:var(--green)}
-.b-fail,.b-red{background:var(--red-soft);color:var(--red)}
-.b-sched,.b-yellow{background:rgba(251,191,36,.12);color:var(--yellow)}
-.b-gray{background:var(--panel);color:var(--muted);border:1px solid var(--border)}
-
-/* ===== STATUS PILLS ===== */
-.status-pill{display:inline-flex;align-items:center;gap:7px;padding:4px 12px;border-radius:999px;font-size:.78rem;font-weight:600}
-.st-connected{background:var(--green-soft);color:var(--green);border:1px solid var(--green-border)}
-.st-qr{background:rgba(251,191,36,.12);color:var(--yellow);border:1px solid rgba(251,191,36,.3)}
-.st-off{background:var(--panel);color:var(--muted);border:1px solid var(--border)}
-.dot{width:7px;height:7px;border-radius:50%;background:currentColor;display:inline-block}
-.st-connected .dot{animation:pulse 2s infinite}
-@keyframes pulse{50%{opacity:.4}}
-
-/* ===== DEVICE CARDS ===== */
-.device-card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:14px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
-.device-avatar{width:44px;height:44px;border-radius:12px;background:var(--accent-soft);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0}
-.device-info{flex:1;min-width:0}
-.device-name{font-weight:700;font-size:1rem;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
-.device-num{color:var(--muted);font-size:.82rem;margin-top:3px;font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.device-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:0}
-
-/* ===== MODALS ===== */
-.modal{
-  display:none;position:fixed;inset:0;z-index:300;
-  background:rgba(0,0,0,.65);backdrop-filter:blur(8px);
-  align-items:center;justify-content:center;padding:20px
-}
-.modal.open{display:flex}
-.modal-box{
-  background:var(--panel-solid);border:1px solid var(--border);border-radius:18px;
-  padding:26px;width:100%;max-width:500px;max-height:88vh;overflow-y:auto;
-  animation:fadeIn .25s ease
-}
-.modal-box.wide{max-width:640px}
-.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
-.modal-head h3{font-size:1.1rem;font-weight:750}
-.modal-close{background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;padding:4px;border-radius:6px}
-.modal-close:hover{color:var(--text)}
-
-/* ===== SWITCHES ===== */
+/* ADD DEVICE FORM */
+.add-device-field{margin-bottom:16px}
+.add-device-field label{display:block;font-size:.8rem;font-weight:600;margin-bottom:6px}
+.input-with-icon{display:flex;align-items:center;border:1.5px solid var(--border);border-radius:10px;background:var(--input);overflow:hidden;transition:all .2s}
+.input-with-icon:focus-within{border-color:var(--accent-border);box-shadow:0 0 0 3px var(--accent-soft)}
+.input-with-icon .ico{padding:0 12px;color:var(--muted);flex-shrink:0}
+.input-with-icon .ico svg{width:16px;height:16px;display:block}
+.input-with-icon input{flex:1;padding:10px 12px 10px 0;background:none;border:none;color:var(--text);font-size:.88rem;font-family:inherit;outline:none}
+.input-err{border-color:var(--red)!important}
 .sw-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
 .sw-row:last-child{border-bottom:none}
 .sw-row .sw-info b{font-size:.88rem;display:block}
@@ -253,30 +207,82 @@ tr:hover td{background:var(--panel)}
 .sw input:checked+.sl{background:rgba(37,99,235,.35);border-color:var(--accent-border)}
 .sw input:checked+.sl::before{transform:translateX(19px);background:#3b82f6}
 
-/* ===== TOKEN / CODE ===== */
+/* CODE PAIRING */
+.pairing-code-display{text-align:center;padding:20px 0}
+.pairing-code{font-size:2.2rem;font-weight:900;letter-spacing:.25em;color:var(--accent-text);font-family:monospace;background:var(--accent-soft);border:1.5px solid var(--accent-border);border-radius:12px;padding:14px 24px;display:inline-block;margin:10px 0}
+.pairing-hint{font-size:.83rem;color:var(--muted);text-align:center}
+
+/* FORMS */
+input,textarea,select{width:100%;padding:10px 13px;border-radius:10px;font-size:.88rem;font-family:inherit;background:var(--input);border:1px solid var(--border);color:var(--text);outline:none;transition:all .2s}
+input:focus,textarea:focus,select:focus{border-color:var(--accent-border);box-shadow:0 0 0 3px var(--accent-soft)}
+label{display:block;font-size:.8rem;font-weight:600;margin-bottom:5px}
+label .hint{font-weight:400;color:var(--muted);font-size:.74rem}
+.field{margin-bottom:14px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+textarea{resize:vertical;min-height:100px}
+
+/* TABLES */
+.table-wrap{overflow-x:auto;border-radius:12px;border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:.83rem}
+th{text-align:left;padding:9px 12px;color:var(--muted);font-weight:600;font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);white-space:nowrap;background:var(--panel)}
+td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--panel)}
+.td-mono{font-family:monospace;font-size:.78rem;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.td-wrap{max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.empty-row{text-align:center;color:var(--muted);padding:30px!important;font-size:.88rem}
+
+/* BADGES */
+.badge{padding:2px 9px;border-radius:999px;font-size:.7rem;font-weight:600}
+.b-in,.b-blue{background:rgba(59,130,246,.14);color:var(--accent-text)}
+.b-out,.b-green{background:var(--green-soft);color:var(--green)}
+.b-fail,.b-red{background:var(--red-soft);color:var(--red)}
+.b-sched,.b-yellow{background:rgba(251,191,36,.12);color:var(--yellow)}
+.b-gray{background:var(--panel);color:var(--muted);border:1px solid var(--border)}
+
+/* STATUS PILLS */
+.status-pill{display:inline-flex;align-items:center;gap:7px;padding:4px 12px;border-radius:999px;font-size:.78rem;font-weight:600}
+.st-connected{background:var(--green-soft);color:var(--green);border:1px solid var(--green-border)}
+.st-qr{background:rgba(251,191,36,.12);color:var(--yellow);border:1px solid rgba(251,191,36,.3)}
+.st-off{background:var(--panel);color:var(--muted);border:1px solid var(--border)}
+.dot{width:7px;height:7px;border-radius:50%;background:currentColor;display:inline-block}
+.st-connected .dot{animation:pulse 2s infinite}
+@keyframes pulse{50%{opacity:.4}}
+
+/* DEVICE CARDS */
+.device-card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:14px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.device-avatar{width:44px;height:44px;border-radius:12px;background:var(--accent-soft);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0}
+.device-info{flex:1;min-width:0}
+.device-name{font-weight:700;font-size:1rem;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.device-num{color:var(--muted);font-size:.82rem;margin-top:3px;font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.device-actions{display:flex;gap:7px;flex-wrap:wrap}
+
+/* MODALS */
+.modal{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.65);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:20px}
+.modal.open{display:flex}
+.modal-box{background:var(--panel-solid);border:1px solid var(--border);border-radius:18px;padding:26px;width:100%;max-width:500px;max-height:88vh;overflow-y:auto;animation:fadeIn .25s ease}
+.modal-box.wide{max-width:640px}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.modal-head h3{font-size:1.1rem;font-weight:750}
+.modal-close{background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;padding:4px;border-radius:6px}
+.modal-close:hover{color:var(--text)}
+
+/* MISC */
 .token-box{display:flex;gap:8px;align-items:center;padding:11px 13px;border-radius:10px;background:var(--code-bg);border:1px solid var(--border);font-family:monospace;font-size:.82rem;word-break:break-all}
 .token-box code{flex:1;color:var(--accent-text)}
 pre.code-block{background:var(--code-bg);border:1px solid var(--border);border-radius:11px;padding:14px;font-size:.78rem;font-family:monospace;white-space:pre-wrap;word-break:break-all;color:var(--text);margin-bottom:14px;overflow-x:auto}
-
-/* ===== FILTER BAR ===== */
 .filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:flex-end}
 .filter-bar .field{flex:1;min-width:120px;margin-bottom:0}
-.filter-bar .btn{flex:none;align-self:flex-end}
-
-/* ===== STAT GRID ===== */
 .stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;margin-bottom:22px}
 .stat-card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:18px;text-align:center}
 .stat-card .num{font-size:2rem;font-weight:800;color:var(--accent-text)}
 .stat-card .lbl{font-size:.76rem;color:var(--muted);margin-top:3px}
-
-/* ===== PHONEBOOK ===== */
 .pb-contact{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
 .pb-contact:last-child{border-bottom:none}
 .pb-av{width:36px;height:36px;border-radius:50%;background:var(--accent-soft);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--accent-text);flex-shrink:0}
 .pb-name{font-weight:600;font-size:.88rem}
 .pb-num{font-size:.76rem;color:var(--muted);font-family:monospace}
-
-/* ===== GROUPS ===== */
 .groups-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
 .group-card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .2s}
 .group-card:hover{border-color:var(--accent-border);background:var(--accent-soft)}
@@ -284,53 +290,80 @@ pre.code-block{background:var(--code-bg);border:1px solid var(--border);border-r
 .group-info{min-width:0}
 .group-name{font-weight:600;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .group-sub{font-size:.72rem;color:var(--muted)}
-
-/* ===== MISC ===== */
 .chip{display:inline-block;padding:3px 10px;border-radius:999px;font-size:.7rem;font-weight:600;background:var(--accent-soft);color:var(--accent-text);border:1px solid var(--accent-border)}
 .cron-hint{font-size:.74rem;color:var(--muted);margin-top:4px}
 .typing-hint{font-size:.75rem;color:var(--muted);margin-top:4px}
-.file-drop{border:1.5px dashed var(--border);border-radius:10px;padding:16px;text-align:center;color:var(--muted);font-size:.84rem;cursor:pointer;transition:all .2s}
-.file-drop:hover{border-color:var(--accent-border);color:var(--text)}
-
-/* ===== TOAST ===== */
-.toast{
-  position:fixed;bottom:24px;right:24px;padding:13px 20px;border-radius:12px;
-  background:#052e16;border:1px solid rgba(34,197,94,.4);color:#d1fae5;
-  font-size:.88rem;font-weight:500;z-index:500;opacity:0;transform:translateY(14px);
-  transition:all .3s;pointer-events:none;box-shadow:0 12px 32px rgba(0,0,0,.4);max-width:320px
-}
+.toast{position:fixed;bottom:24px;right:24px;padding:13px 20px;border-radius:12px;background:#052e16;border:1px solid rgba(34,197,94,.4);color:#d1fae5;font-size:.88rem;font-weight:500;z-index:500;opacity:0;transform:translateY(14px);transition:all .3s;pointer-events:none;box-shadow:0 12px 32px rgba(0,0,0,.4);max-width:320px}
 .toast.show{opacity:1;transform:translateY(0)}
 .toast.err{background:#450a0a;border-color:var(--red-border);color:#fecaca}
-
-/* ===== CANVAS CHART ===== */
 #statsCanvas{width:100%;max-height:220px;display:block}
 
-/* ===== MOBILE ===== */
+/* LANG CARDS */
+.lang-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-top:16px}
+.lang-card{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;border:2px solid var(--border);background:var(--panel);cursor:pointer;transition:all .2s;font-size:.88rem;font-weight:500}
+.lang-card:hover{border-color:var(--accent-border);background:var(--accent-soft)}
+.lang-card.active{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-text)}
+.lang-card .flag{font-size:1.3rem}
+.lang-card .check{margin-left:auto;color:var(--accent);display:none}
+.lang-card.active .check{display:block}
+
+/* DOCS */
+.doc-section{margin-bottom:32px}
+.doc-section h2{font-size:1.15rem;font-weight:800;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.doc-section h3{font-size:.95rem;font-weight:700;margin:16px 0 6px}
+.doc-section p{font-size:.85rem;color:var(--muted);line-height:1.7;margin-bottom:10px}
+.method-badge{display:inline-block;padding:2px 8px;border-radius:5px;font-size:.72rem;font-weight:700;font-family:monospace;margin-right:6px}
+.m-post{background:rgba(34,197,94,.15);color:#4ade80}
+.m-get{background:rgba(59,130,246,.15);color:#93c5fd}
+.m-delete{background:rgba(239,68,68,.15);color:#f87171}
+.m-put{background:rgba(251,191,36,.15);color:#fbbf24}
+.endpoint-block{background:var(--code-bg);border:1px solid var(--border);border-radius:11px;padding:14px;margin-bottom:14px}
+.endpoint-title{font-weight:700;font-size:.85rem;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.video-placeholder{background:var(--panel);border:1.5px dashed var(--border);border-radius:12px;padding:32px;text-align:center;color:var(--muted);margin:14px 0;position:relative;overflow:hidden}
+.video-placeholder .play-btn{width:56px;height:56px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;cursor:pointer}
+.video-placeholder .play-btn svg{width:24px;height:24px;color:#fff;margin-left:3px}
+.video-placeholder p{font-size:.84rem;font-weight:600}
+.video-placeholder span{font-size:.76rem}
+
+/* MOBILE */
 @media(max-width:860px){
-  aside{transform:translateX(-260px)}
+  aside{transform:translateX(-100%)}
   aside.open{transform:translateX(0)}
-  main{margin-left:0;padding:16px;padding-top:22px}
+  aside.sidebar-collapsed{width:var(--sidebar-w);padding:14px 10px}
+  aside.sidebar-collapsed .nav-label{opacity:1;height:auto;margin:0;padding:12px 12px 5px}
+  aside.sidebar-collapsed .nav-item span{display:inline}
+  aside.sidebar-collapsed .nav-item{justify-content:flex-start;padding:10px 12px}
+  main{margin-left:0!important;padding:16px;padding-top:22px}
+  main.sidebar-collapsed{margin-left:0!important}
   .hamburger-btn{display:flex}
+  .sidebar-toggle-btn{display:none}
   .navbar-user .email{display:none}
   .row,.row3{grid-template-columns:1fr}
-  .stat-grid{grid-template-columns:1fr 1fr}
+  .stat-grid,.dash-grid{grid-template-columns:1fr 1fr}
   .filter-bar .field{min-width:100%}
   h1{font-size:1.25rem}
   .groups-grid{grid-template-columns:1fr}
   table{font-size:.78rem}
   td,th{padding:8px 9px}
   .device-card{flex-direction:column;align-items:flex-start}
+  .connect-methods{grid-template-columns:1fr 1fr}
 }
-
-/* ===== QR ===== */
+@media(max-width:480px){
+  .dash-grid,.stat-grid{grid-template-columns:1fr}
+  .connect-methods{grid-template-columns:1fr}
+  .lang-grid{grid-template-columns:repeat(2,1fr)}
+}
 #qrImg{border-radius:12px;background:#fff;padding:10px;max-width:220px;display:block;margin:0 auto}
 </style>
 </head>
 <body>
 
-<!-- NAVBAR (Liquid Glass) -->
+<!-- NAVBAR -->
 <nav class="navbar">
   <div class="navbar-left">
+    <button class="sidebar-toggle-btn" id="sidebarToggleBtn" onclick="toggleSidebarDesktop()" title="Toggle sidebar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg>
+    </button>
     <button class="hamburger-btn" id="menuBtn" onclick="toggleSidebar()">
       <svg id="menuIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
       <svg id="closeIcon" style="display:none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -362,10 +395,10 @@ pre.code-block{background:var(--code-bg);border:1px solid var(--border);border-r
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
 <div class="layout">
-<!-- SIDEBAR -->
 <aside id="sidebar">
   <div class="nav-label" data-i18n="nav_main">Main Feature</div>
-  <button class="nav-item active" data-page="devices"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg><span data-i18n="nav_device">Device</span></button>
+  <button class="nav-item active" data-page="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><span data-i18n="nav_dashboard">Dashboard</span></button>
+  <button class="nav-item" data-page="devices"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg><span data-i18n="nav_device">Device</span></button>
   <button class="nav-item" data-page="phonebook"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg><span data-i18n="nav_phonebook">Phonebook</span></button>
   <button class="nav-item" data-page="history"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8"/></svg><span data-i18n="nav_history">Message History</span></button>
   <button class="nav-item" data-page="send"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg><span data-i18n="nav_send">Send</span></button>
@@ -379,36 +412,57 @@ pre.code-block{background:var(--code-bg);border:1px solid var(--border);border-r
   <button class="nav-item" data-page="followup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17,1 21,5 17,9"/><path d="M3 11V9a4 4 0 0 1 4-4h14M7,23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg><span data-i18n="nav_followup">Follow Up</span></button>
   <button class="nav-item" data-page="chaining"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg><span data-i18n="nav_chaining">Chaining</span></button>
   <button class="nav-item" data-page="webhook"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg><span data-i18n="nav_webhook">Webhook</span></button>
-  <button class="nav-item" data-page="invoices"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10,9 9,9 8,9"/></svg><span data-i18n="nav_invoices">Invoices</span></button>
+  <button class="nav-item" data-page="invoices"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><span data-i18n="nav_invoices">Invoices</span></button>
   <button class="nav-item" data-page="stats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg><span data-i18n="nav_stats">Statistics</span></button>
   <div class="nav-label" style="margin-top:8px" data-i18n="nav_settings_label">Settings</div>
   <button class="nav-item" data-page="groups"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg><span data-i18n="nav_groups">Groups</span></button>
   <button class="nav-item" data-page="schedule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span data-i18n="nav_schedule">Scheduled</span></button>
   <button class="nav-item" data-page="api"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg><span data-i18n="nav_api">API & Token</span></button>
+  <button class="nav-item" data-page="docs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg><span data-i18n="nav_docs">Documentation</span></button>
   <button class="nav-item" data-page="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14M12 2v2M12 20v2M2 12h2M20 12h2"/></svg><span data-i18n="settings">Settings</span></button>
 </aside>
 
-<!-- MAIN -->
-<main>
+<main id="mainContent">
+
+<!-- ===== DASHBOARD PAGE ===== -->
+<div class="page active" id="page-dashboard">
+  <h1 data-i18n="nav_dashboard">Dashboard</h1>
+  <p class="sub" data-i18n="dashboard_sub">Overview of your Synpera account</p>
+  <div class="dash-grid">
+    <div class="dash-card blue"><div class="dc-icon">📱</div><div class="dc-num" id="dashDevices">—</div><div class="dc-lbl">Total Devices</div></div>
+    <div class="dash-card green"><div class="dc-icon">✅</div><div class="dc-num" id="dashConnected">—</div><div class="dc-lbl">Connected</div></div>
+    <div class="dash-card cyan"><div class="dc-icon">📤</div><div class="dc-num" id="dashSent">—</div><div class="dc-lbl">Messages Sent</div></div>
+    <div class="dash-card yellow"><div class="dc-icon">📥</div><div class="dc-num" id="dashReceived">—</div><div class="dc-lbl">Messages Received</div></div>
+  </div>
+  <div class="panel" style="max-width:520px">
+    <div class="panel-head"><h2>Subscription Plan</h2></div>
+    <div class="plan-panel">
+      <span class="plan-badge" id="dashPlan">Free</span>
+      <div class="plan-info">
+        <span id="dashDevLimit">Device limit: <b>5</b></span><br>
+        <span id="dashPending" style="color:var(--yellow)"></span>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- ===== DEVICES PAGE ===== -->
-<div class="page active" id="page-devices">
-  <h1>My Devices</h1>
-  <p class="sub">Manage connected WhatsApp devices</p>
+<div class="page" id="page-devices">
+  <div class="page-header">
+    <div><h1 data-i18n="nav_device">My Devices</h1><p class="sub" style="margin-bottom:0">Manage connected WhatsApp devices</p></div>
+    <button class="btn btn-primary" onclick="openAddDeviceModal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Add Device
+    </button>
+  </div>
   <div id="devicesList"></div>
-  <button class="btn btn-primary" onclick="addDevice()">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-    Add Device
-  </button>
 </div>
 
 <!-- ===== PHONEBOOK PAGE ===== -->
 <div class="page" id="page-phonebook">
-  <h1>Phonebook</h1>
-  <p class="sub">Manage your contacts list</p>
+  <h1 data-i18n="nav_phonebook">Phonebook</h1><p class="sub">Manage your contacts list</p>
   <div class="panel">
-    <div class="panel-head">
-      <h2>Contacts</h2>
+    <div class="panel-head"><h2>Contacts</h2>
       <div style="display:flex;gap:8px">
         <button class="btn btn-ghost btn-sm" onclick="exportContacts()">Export CSV</button>
         <button class="btn btn-primary btn-sm" onclick="openAddContact()">+ Add Contact</button>
@@ -421,167 +475,71 @@ pre.code-block{background:var(--code-bg);border:1px solid var(--border);border-r
 
 <!-- ===== HISTORY PAGE ===== -->
 <div class="page" id="page-history">
-  <h1>Message History</h1>
-  <p class="sub">100 most recent messages sent and received</p>
+  <h1 data-i18n="nav_history">Message History</h1><p class="sub">100 most recent messages</p>
   <div class="panel">
     <div class="filter-bar">
       <div class="field"><label>Device</label><select id="histDev" onchange="loadHistory()"><option value="">All</option></select></div>
       <div class="field"><label>Direction</label><select id="histStatus" onchange="loadHistory()"><option value="">All</option><option value="out">Outgoing</option><option value="in">Incoming</option></select></div>
       <div class="field"><label>Start Date</label><input type="date" id="histFrom" onchange="loadHistory()"></div>
       <div class="field"><label>End Date</label><input type="date" id="histTo" onchange="loadHistory()"></div>
-      <div class="field"><label>Search Target</label><input id="histTarget" placeholder="Search JID…" oninput="loadHistory()"></div>
-      <div class="field"><label>Search by ID</label><input id="histId" placeholder="Message ID…" oninput="loadHistory()"></div>
+      <div class="field"><label>Target JID</label><input id="histTarget" placeholder="Search JID…" oninput="loadHistory()"></div>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
       <button class="btn btn-danger btn-sm" onclick="deleteSelected()">Delete Selected</button>
       <button class="btn btn-danger btn-sm" onclick="deleteAllHistory()">Delete All</button>
       <button class="btn btn-ghost btn-sm" onclick="exportHistory()">⬇ Download CSV</button>
     </div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr>
-          <th><input type="checkbox" id="checkAll" onchange="toggleAll(this)"></th>
-          <th>ID</th><th>Time</th><th>Device</th><th>Target</th><th>Contact</th><th>Type</th><th>Message</th>
-        </tr></thead>
-        <tbody id="histBody"><tr><td colspan="8" class="empty-row">Loading…</td></tr></tbody>
-      </table>
-    </div>
+    <div class="table-wrap"><table>
+      <thead><tr><th><input type="checkbox" id="checkAll" onchange="toggleAll(this)"></th><th>ID</th><th>Time</th><th>Device</th><th>Target</th><th>Type</th><th>Message</th></tr></thead>
+      <tbody id="histBody"><tr><td colspan="7" class="empty-row">Loading…</td></tr></tbody>
+    </table></div>
   </div>
 </div>
 
 <!-- ===== SEND PAGE ===== -->
 <div class="page" id="page-send">
-  <h1>Send Message</h1>
-  <p class="sub">Send WhatsApp messages to numbers or groups</p>
+  <h1 data-i18n="nav_send">Send Message</h1><p class="sub">Send WhatsApp messages to numbers or groups</p>
   <div class="panel">
     <div class="field"><label>Device</label><select id="sendDev"></select></div>
-    <div class="field">
-      <label>Select Target</label>
-      <select id="sendTargetType" onchange="updateSendTarget()">
-        <option value="input">Manual Input</option>
-        <option value="group">Group</option>
-        <option value="phonebook">Phonebook</option>
-      </select>
-    </div>
-    <div class="field" id="stManual">
-      <label>Input Target <span class="hint">— 1 number per line, e.g. 628123456789</span></label>
-      <textarea id="sendTargets" rows="4" placeholder="628123456789&#10;628987654321"></textarea>
-    </div>
-    <div class="field" id="stGroup" style="display:none">
-      <label>Select Group</label>
-      <select id="sendGroupSel"><option>— Load groups first —</option></select>
-      <button class="btn btn-ghost btn-sm" style="margin-top:6px" onclick="loadGroupsForSend()">↻ Refresh Groups</button>
-    </div>
-    <div class="field" id="stPhonebook" style="display:none">
-      <label>Select Contact</label>
-      <select id="sendPbSel"><option value="">— choose —</option></select>
-    </div>
+    <div class="field"><label>Select Target</label><select id="sendTargetType" onchange="updateSendTarget()"><option value="input">Manual Input</option><option value="group">Group</option><option value="phonebook">Phonebook</option></select></div>
+    <div class="field" id="stManual"><label>Input Target <span class="hint">— 1 number per line</span></label><textarea id="sendTargets" rows="4" placeholder="628123456789&#10;628987654321"></textarea></div>
+    <div class="field" id="stGroup" style="display:none"><label>Select Group</label><select id="sendGroupSel"><option>— Load groups first —</option></select><button class="btn btn-ghost btn-sm" style="margin-top:6px" onclick="loadGroupsForSend()">↻ Refresh Groups</button></div>
+    <div class="field" id="stPhonebook" style="display:none"><label>Select Contact</label><select id="sendPbSel"><option value="">— choose —</option></select></div>
     <div class="row">
-      <div class="field">
-        <label>Country</label>
-        <select id="sendCountry">
-          <option value="62">🇮🇩 Indonesia (+62)</option>
-          <option value="1">🇺🇸 USA/Canada (+1)</option>
-          <option value="44">🇬🇧 UK (+44)</option>
-          <option value="91">🇮🇳 India (+91)</option>
-          <option value="86">🇨🇳 China (+86)</option>
-          <option value="60">🇲🇾 Malaysia (+60)</option>
-          <option value="65">🇸🇬 Singapore (+65)</option>
-          <option value="66">🇹🇭 Thailand (+66)</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Delay (seconds between targets)</label>
-        <input type="number" id="sendDelay" value="3" min="0">
-      </div>
+      <div class="field"><label>Country</label><select id="sendCountry"><option value="62">🇮🇩 Indonesia (+62)</option><option value="1">🇺🇸 USA/Canada (+1)</option><option value="44">🇬🇧 UK (+44)</option><option value="91">🇮🇳 India (+91)</option><option value="86">🇨🇳 China (+86)</option><option value="60">🇲🇾 Malaysia (+60)</option><option value="65">🇸🇬 Singapore (+65)</option></select></div>
+      <div class="field"><label>Delay (seconds)</label><input type="number" id="sendDelay" value="3" min="0"></div>
     </div>
-    <div class="field">
-      <label>File Source</label>
-      <select id="sendFileSrc" onchange="toggleFileSrc()">
-        <option value="">None</option>
-        <option value="upload">Upload File</option>
-        <option value="url">File URL</option>
-      </select>
-    </div>
-    <div class="field" id="fileUpField" style="display:none">
-      <label>File Upload</label>
-      <input type="file" id="sendFile">
-    </div>
-    <div class="field" id="fileUrlField" style="display:none">
-      <label>File URL</label>
-      <input type="url" id="sendFileUrl" placeholder="https://example.com/file.pdf">
-    </div>
-    <div class="field">
-      <label>Type Schedule</label>
-      <select id="sendSchedType" onchange="toggleSched()">
-        <option value="">Send Now</option>
-        <option value="schedule">Schedule</option>
-      </select>
-    </div>
-    <div class="field" id="schedField" style="display:none">
-      <label>Schedule Time</label>
-      <input type="datetime-local" id="sendSchedTime">
-    </div>
-    <div class="field">
-      <label>Message Source</label>
-      <select id="sendMsgSrc" onchange="toggleMsgSrc()">
-        <option value="manual">Manual</option>
-        <option value="template">From Template</option>
-      </select>
-    </div>
-    <div class="field" id="msgTplField" style="display:none">
-      <label>Template</label>
-      <select id="sendTplSel" onchange="applyTpl()"><option value="">— choose —</option></select>
-    </div>
-    <div class="field" id="msgManField">
-      <label>Message</label>
-      <textarea id="sendMsg" rows="5" placeholder="Write your message here…"></textarea>
-      <div class="typing-hint">Usable variable : {name}, {var1}, {var2},…</div>
-    </div>
-    <div class="field">
-      <label>Typing Simulation</label>
-      <div class="sw-row" style="padding:0;border:none">
-        <div class="sw-info"><span>Simulate typing before sending</span></div>
-        <label class="sw"><input type="checkbox" id="sendTyping"><span class="sl"></span></label>
-      </div>
-    </div>
-    <button class="btn btn-primary" id="sendBtn" onclick="doSend()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg>
-      Send
-    </button>
+    <div class="field"><label>File Source</label><select id="sendFileSrc" onchange="toggleFileSrc()"><option value="">None</option><option value="upload">Upload File</option><option value="url">File URL</option></select></div>
+    <div class="field" id="fileUpField" style="display:none"><label>File Upload</label><input type="file" id="sendFile"></div>
+    <div class="field" id="fileUrlField" style="display:none"><label>File URL</label><input type="url" id="sendFileUrl" placeholder="https://example.com/file.pdf"></div>
+    <div class="field"><label>Message Source</label><select id="sendMsgSrc" onchange="toggleMsgSrc()"><option value="manual">Manual</option><option value="template">From Template</option></select></div>
+    <div class="field" id="msgTplField" style="display:none"><label>Template</label><select id="sendTplSel" onchange="applyTpl()"><option value="">— choose —</option></select></div>
+    <div class="field" id="msgManField"><label>Message</label><textarea id="sendMsg" rows="5" placeholder="Write your message here…"></textarea><div class="typing-hint">Variables: {name}, {var1}, {var2}</div></div>
+    <div class="field"><label>Schedule</label><select id="sendSchedType" onchange="toggleSched()"><option value="">Send Now</option><option value="schedule">Schedule</option></select></div>
+    <div class="field" id="schedField" style="display:none"><label>Schedule Time</label><input type="datetime-local" id="sendSchedTime"></div>
+    <button class="btn btn-primary" id="sendBtn" onclick="doSend()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg>Send</button>
     <span id="sendStatus" style="margin-left:10px;color:var(--muted);font-size:.84rem"></span>
   </div>
 </div>
 
 <!-- ===== INBOX PAGE ===== -->
 <div class="page" id="page-inbox">
-  <h1>Inbox</h1>
-  <p class="sub">Incoming messages from your devices</p>
+  <h1 data-i18n="nav_inbox">Inbox</h1><p class="sub">Incoming messages from your devices</p>
   <div class="panel">
-    <div class="filter-bar">
-      <div class="field"><label>Device</label><select id="inboxDev" onchange="loadInbox()"><option value="">All</option></select></div>
-    </div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>ID</th><th>Device</th><th>Sender</th><th>Name</th><th>Message</th><th>Location</th><th>Timestamp</th><th>Reply ID</th><th>Action</th></tr></thead>
-        <tbody id="inboxBody"><tr><td colspan="9" class="empty-row">No data yet</td></tr></tbody>
-      </table>
-    </div>
+    <div class="filter-bar"><div class="field"><label>Device</label><select id="inboxDev" onchange="loadInbox()"><option value="">All</option></select></div></div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>ID</th><th>Device</th><th>Sender</th><th>Name</th><th>Message</th><th>Time</th><th>Action</th></tr></thead>
+      <tbody id="inboxBody"><tr><td colspan="7" class="empty-row">No data yet</td></tr></tbody>
+    </table></div>
   </div>
 </div>
 
 <!-- ===== TEMPLATE PAGE ===== -->
 <div class="page" id="page-template">
-  <h1>Template</h1>
-  <p class="sub">Save reusable message templates</p>
-  <div class="panel">
-    <h2>Add Template</h2>
+  <h1 data-i18n="nav_template">Template</h1><p class="sub">Save reusable message templates</p>
+  <div class="panel"><h2>Add Template</h2>
     <div class="field"><label>Name</label><input id="tplName" placeholder="Template name"></div>
-    <div class="field">
-      <label>Message</label>
-      <textarea id="tplMsg" rows="5" placeholder="Input your template message"></textarea>
-      <div class="typing-hint">Usable variable : {name}, {var1}, {var2},…</div>
-    </div>
+    <div class="field"><label>Message</label><textarea id="tplMsg" rows="5" placeholder="Input your template message"></textarea><div class="typing-hint">Variables: {name}, {var1}, {var2}</div></div>
     <button class="btn btn-primary" id="tplSaveBtn" onclick="saveTpl()">+ Add</button>
   </div>
   <div id="tplList"></div>
@@ -589,46 +547,31 @@ pre.code-block{background:var(--code-bg);border:1px solid var(--border);border-r
 
 <!-- ===== POLL PAGE ===== -->
 <div class="page" id="page-poll">
-  <h1>Poll</h1>
-  <p class="sub">Create and send WhatsApp polls</p>
-  <div class="panel">
-    <h2>Create Poll</h2>
+  <h1 data-i18n="nav_poll">Poll</h1><p class="sub">Create and send WhatsApp polls</p>
+  <div class="panel"><h2>Create Poll</h2>
     <div class="row">
       <div class="field"><label>Device</label><select id="pollDev"></select></div>
-      <div class="field"><label>Target (JID)</label><input id="pollTarget" placeholder="628123456789"></div>
+      <div class="field"><label>Target (number or JID)</label><input id="pollTarget" placeholder="628123456789 or group@g.us"></div>
     </div>
-    <div class="field"><label>Poll Name</label><input id="pollName" placeholder="poll name"></div>
-    <div class="field"><label>Message (optional)</label><textarea id="pollMsg" rows="2" placeholder="message"></textarea></div>
-    <div class="field"><label>Choices (one per line, max 12)</label><textarea id="pollChoices" rows="6" placeholder="choice 1&#10;choice 2&#10;choice 3"></textarea></div>
-    <div class="field"><label>Selection Type</label><select id="pollSelect"><option value="Single">Single</option><option value="Multiple">Multiple</option></select></div>
+    <div class="field"><label>Poll Name</label><input id="pollName" placeholder="e.g. What's your favorite color?"></div>
+    <div class="field"><label>Choices (one per line, max 12)</label><textarea id="pollChoices" rows="5" placeholder="Red&#10;Green&#10;Blue"></textarea></div>
+    <div class="field"><label>Selection Type</label><select id="pollSelect"><option value="Single">Single choice</option><option value="Multiple">Multiple choice</option></select></div>
     <button class="btn btn-primary" onclick="sendPoll()">Send Poll</button>
   </div>
   <div class="panel">
-    <h2>Polls List</h2>
-    <div class="table-wrap">
-      <table><thead><tr><th>Name</th><th>Message</th><th>Choices</th><th>Select</th><th>Action</th></tr></thead>
-      <tbody id="pollList"><tr><td colspan="5" class="empty-row">No polls yet</td></tr></tbody></table>
-    </div>
+    <h2>Poll History</h2>
+    <div class="table-wrap"><table><thead><tr><th>Name</th><th>Target</th><th>Device</th><th>Choices</th></tr></thead>
+    <tbody id="pollList"><tr><td colspan="4" class="empty-row">No polls yet</td></tr></tbody></table></div>
   </div>
 </div>
 
 <!-- ===== RECURRING PAGE ===== -->
 <div class="page" id="page-recurring">
-  <h1>Recurring</h1>
-  <p class="sub">Schedule messages to be sent automatically</p>
-  <div class="panel">
-    <h2>Add Recurring Message</h2>
-    <div class="row">
-      <div class="field"><label>Name</label><input id="recName" placeholder="My recurring message"></div>
-      <div class="field"><label>Device</label><select id="recDev"></select></div>
-    </div>
-    <div class="row">
-      <div class="field"><label>Target</label><input id="recTarget" placeholder="628123456789 or group@g.us"></div>
-      <div class="field">
-        <label>Cron Expression</label>
-        <input id="recCron" placeholder="0 9 * * 1-5" oninput="showCronHint()">
-        <div class="cron-hint" id="cronHint"></div>
-      </div>
+  <h1 data-i18n="nav_recurring">Recurring</h1><p class="sub">Schedule messages to be sent automatically</p>
+  <div class="panel"><h2>Add Recurring Message</h2>
+    <div class="row"><div class="field"><label>Name</label><input id="recName" placeholder="My recurring message"></div><div class="field"><label>Device</label><select id="recDev"></select></div></div>
+    <div class="row"><div class="field"><label>Target</label><input id="recTarget" placeholder="628123456789 or group@g.us"></div>
+      <div class="field"><label>Cron Expression</label><input id="recCron" placeholder="0 9 * * 1-5" oninput="showCronHint()"><div class="cron-hint" id="cronHint"></div></div>
     </div>
     <div class="field"><label>Message</label><textarea id="recMsg" rows="3" placeholder="Your recurring message…"></textarea></div>
     <button class="btn btn-primary" onclick="addRecurring()">+ Add Recurring</button>
@@ -638,14 +581,10 @@ pre.code-block{background:var(--code-bg);border:1px solid var(--border);border-r
 
 <!-- ===== AUTOREPLY PAGE ===== -->
 <div class="page" id="page-autoreply">
-  <h1>Autoreply</h1>
-  <p class="sub">Auto-respond to incoming messages</p>
+  <h1 data-i18n="nav_autoreply">Autoreply</h1><p class="sub">Auto-respond to incoming messages</p>
   <div class="panel">
     <div class="field"><label>Device</label><select id="arDev" onchange="loadAR()"></select></div>
-    <div class="row">
-      <div class="field"><label>Keyword</label><input id="arKw" placeholder="hello"></div>
-      <div class="field"><label>Match Mode</label><select id="arMode"><option value="exact">Exact</option><option value="contains">Contains</option><option value="startswith">Starts With</option></select></div>
-    </div>
+    <div class="row"><div class="field"><label>Keyword</label><input id="arKw" placeholder="hello"></div><div class="field"><label>Match Mode</label><select id="arMode"><option value="exact">Exact</option><option value="contains">Contains</option><option value="startswith">Starts With</option></select></div></div>
     <div class="field"><label>Response</label><textarea id="arResp" rows="3" placeholder="Hi! Thanks for your message…"></textarea></div>
     <button class="btn btn-primary" onclick="addAR()">+ Add Rule</button>
   </div>
@@ -654,90 +593,82 @@ pre.code-block{background:var(--code-bg);border:1px solid var(--border);border-r
 
 <!-- ===== SUBMISSION PAGE ===== -->
 <div class="page" id="page-submission">
-  <h1>Submission</h1>
-  <p class="sub">Collect form submissions via WhatsApp</p>
+  <h1 data-i18n="nav_submission">Submission</h1><p class="sub">Collect form submissions via WhatsApp</p>
   <div class="panel" style="text-align:center;color:var(--muted);padding:40px">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48" style="margin:0 auto 14px;display:block;opacity:.4"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
-    <p style="font-weight:600;margin-bottom:6px">Submission coming soon</p>
+    <p style="font-weight:600;margin-bottom:6px">Submission — Coming Soon</p>
     <p style="font-size:.84rem">This feature will allow collecting form data via WhatsApp flows.</p>
   </div>
 </div>
 
 <!-- ===== ROTATOR PAGE ===== -->
 <div class="page" id="page-rotator">
-  <h1>Rotator</h1>
-  <p class="sub">Rotate message sending across multiple devices</p>
+  <h1 data-i18n="nav_rotator">Rotator</h1><p class="sub">Rotate message sending across multiple devices</p>
   <div class="panel">
-    <div class="field"><label>Devices (select multiple)</label><select id="rotDevSel" multiple size="4"></select></div>
+    <div class="field"><label>Devices (hold Ctrl/Cmd to select multiple)</label><select id="rotDevSel" multiple size="4" style="min-height:100px"></select></div>
     <div class="field"><label>Targets (1 per line)</label><textarea id="rotTargets" rows="4" placeholder="628123456789&#10;628987654321"></textarea></div>
     <div class="field"><label>Message</label><textarea id="rotMsg" rows="3" placeholder="Your message…"></textarea></div>
-    <div class="field"><label>Delay (seconds)</label><input type="number" id="rotDelay" value="3" min="0"></div>
-    <button class="btn btn-primary" onclick="toast('Rotator: coming soon — backend endpoint pending','err')">Start Rotator</button>
+    <div class="field"><label>Delay between messages (seconds)</label><input type="number" id="rotDelay" value="3" min="2"></div>
+    <button class="btn btn-primary" onclick="doRotator()">▶ Start Rotator</button>
+    <span id="rotStatus" style="margin-left:10px;color:var(--muted);font-size:.84rem"></span>
   </div>
 </div>
 
 <!-- ===== FOLLOW UP PAGE ===== -->
 <div class="page" id="page-followup">
-  <h1>Follow Up</h1>
-  <p class="sub">Send follow-up messages automatically</p>
+  <h1 data-i18n="nav_followup">Follow Up</h1><p class="sub">Send follow-up messages automatically</p>
   <div class="panel">
-    <div class="field"><label>Device</label><select id="fuDev"></select></div>
-    <div class="field"><label>Target</label><input id="fuTarget" placeholder="628123456789"></div>
-    <div class="field"><label>Initial Message</label><textarea id="fuMsg1" rows="3" placeholder="Hello! Just following up…"></textarea></div>
+    <div class="row"><div class="field"><label>Device</label><select id="fuDev"></select></div><div class="field"><label>Target</label><input id="fuTarget" placeholder="628123456789"></div></div>
+    <div class="field"><label>Initial Message</label><textarea id="fuMsg1" rows="3" placeholder="Hello! Just reaching out…"></textarea></div>
     <div class="field"><label>Follow-up After (hours)</label><input type="number" id="fuHours" value="24" min="1"></div>
     <div class="field"><label>Follow-up Message</label><textarea id="fuMsg2" rows="3" placeholder="Hi! Did you have a chance to check my previous message?"></textarea></div>
-    <button class="btn btn-primary" onclick="toast('Follow Up: coming soon — backend endpoint pending','err')">Create Follow Up</button>
+    <button class="btn btn-primary" onclick="doFollowUp()">▶ Send & Schedule Follow-up</button>
+    <div id="fuStatus" style="margin-top:10px;font-size:.84rem;color:var(--muted)"></div>
   </div>
 </div>
 
 <!-- ===== CHAINING PAGE ===== -->
 <div class="page" id="page-chaining">
-  <h1>Chaining</h1>
-  <p class="sub">Send a sequence of messages with delays</p>
+  <h1 data-i18n="nav_chaining">Chaining</h1><p class="sub">Send a sequence of messages with delays</p>
   <div class="panel">
-    <div class="row">
-      <div class="field"><label>Device</label><select id="chainDev"></select></div>
-      <div class="field"><label>Target</label><input id="chainTarget" placeholder="628123456789"></div>
-    </div>
+    <div class="row"><div class="field"><label>Device</label><select id="chainDev"></select></div><div class="field"><label>Target</label><input id="chainTarget" placeholder="628123456789"></div></div>
     <div id="chainSteps"></div>
-    <button class="btn btn-ghost btn-sm" style="margin-bottom:12px" onclick="addChainStep()">+ Add Step</button>
-    <br>
-    <button class="btn btn-primary" onclick="toast('Chaining: coming soon — backend endpoint pending','err')">Start Chain</button>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+      <button class="btn btn-ghost btn-sm" onclick="addChainStep()">+ Add Step</button>
+      <button class="btn btn-danger btn-sm" onclick="clearChainSteps()">Clear All</button>
+    </div>
+    <button class="btn btn-primary" onclick="doChaining()">▶ Start Chain</button>
+    <div id="chainStatus" style="margin-top:10px;font-size:.84rem;color:var(--muted)"></div>
   </div>
 </div>
 
 <!-- ===== WEBHOOK PAGE ===== -->
 <div class="page" id="page-webhook">
-  <h1>Webhook Settings</h1>
-  <p class="sub">Configure webhook URLs for your devices</p>
+  <h1>Webhook Settings</h1><p class="sub">Configure webhook URLs for your devices</p>
   <div class="field"><label>Device</label><select id="whDev" onchange="loadWH()"></select></div>
   <div id="whSettings"></div>
 </div>
 
 <!-- ===== INVOICES PAGE ===== -->
 <div class="page" id="page-invoices">
-  <h1>Invoices</h1>
-  <p class="sub">Manage and send invoices via WhatsApp</p>
+  <h1 data-i18n="nav_invoices">Invoices</h1><p class="sub">Manage and send invoices via WhatsApp</p>
   <div class="panel" style="text-align:center;color:var(--muted);padding:40px">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48" style="margin:0 auto 14px;display:block;opacity:.4"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10,9 9,9 8,9"/></svg>
-    <p style="font-weight:600;margin-bottom:6px">Invoices coming soon</p>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48" style="margin:0 auto 14px;display:block;opacity:.4"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+    <p style="font-weight:600;margin-bottom:6px">Invoices — Coming Soon</p>
     <p style="font-size:.84rem">Create and send professional invoices directly through WhatsApp.</p>
   </div>
 </div>
 
 <!-- ===== STATISTICS PAGE ===== -->
 <div class="page" id="page-stats">
-  <h1>Statistics</h1>
-  <p class="sub">Message analytics for the last 30 days</p>
+  <h1 data-i18n="nav_stats">Statistics</h1><p class="sub">Message analytics for the last 30 days</p>
   <div class="stat-grid">
     <div class="stat-card"><div class="num" id="stSent">—</div><div class="lbl">Total Sent</div></div>
     <div class="stat-card"><div class="num" id="stRecv">—</div><div class="lbl">Total Received</div></div>
     <div class="stat-card"><div class="num" id="stSent7">—</div><div class="lbl">Sent (7 days)</div></div>
     <div class="stat-card"><div class="num" id="stAll30">—</div><div class="lbl">Total (30 days)</div></div>
   </div>
-  <div class="panel">
-    <h2>Daily Activity (14 days)</h2>
-    <canvas id="statsCanvas"></canvas>
+  <div class="panel"><h2>Daily Activity (14 days)</h2><canvas id="statsCanvas"></canvas>
     <div style="display:flex;gap:16px;margin-top:10px;font-size:.76rem;color:var(--muted)">
       <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:rgba(59,130,246,.75);margin-right:5px"></span>Sent</span>
       <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:rgba(34,197,94,.7);margin-right:5px"></span>Received</span>
@@ -747,8 +678,7 @@ pre.code-block{background:var(--code-bg);border:1px solid var(--border);border-r
 
 <!-- ===== GROUPS PAGE ===== -->
 <div class="page" id="page-groups">
-  <h1>Groups</h1>
-  <p class="sub">View and manage WhatsApp groups</p>
+  <h1 data-i18n="nav_groups">Groups</h1><p class="sub">View and manage WhatsApp groups</p>
   <div class="panel">
     <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:16px">
       <div class="field" style="flex:1;min-width:200px;margin-bottom:0"><label>Device</label><select id="grpDev" onchange="loadGroups()"></select></div>
@@ -760,23 +690,19 @@ pre.code-block{background:var(--code-bg);border:1px solid var(--border);border-r
 
 <!-- ===== SCHEDULE PAGE ===== -->
 <div class="page" id="page-schedule">
-  <h1>Scheduled Messages</h1>
-  <p class="sub">Pending and completed scheduled messages</p>
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th>ID</th><th>Target</th><th>Message</th><th>Schedule Time</th><th>Status</th><th>Action</th></tr></thead>
-      <tbody id="schedBody"><tr><td colspan="6" class="empty-row">Loading…</td></tr></tbody>
-    </table>
-  </div>
+  <h1 data-i18n="nav_schedule">Scheduled Messages</h1><p class="sub">Pending and completed scheduled messages</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>ID</th><th>Target</th><th>Message</th><th>Schedule Time</th><th>Status</th><th>Action</th></tr></thead>
+    <tbody id="schedBody"><tr><td colspan="6" class="empty-row">Loading…</td></tr></tbody>
+  </table></div>
 </div>
 
 <!-- ===== API PAGE ===== -->
 <div class="page" id="page-api">
-  <h1>API & Token</h1>
-  <p class="sub">Device tokens for API access</p>
+  <h1>API & Token</h1><p class="sub">Device tokens for API access</p>
   <div id="apiDevList"></div>
   <div class="panel" style="margin-top:20px">
-    <div class="panel-head"><h2>API Reference</h2></div>
+    <div class="panel-head"><h2>Quick Reference</h2></div>
     <div class="field"><label>Send Message</label>
 <pre class="code-block">POST /api/send
 Authorization: Bearer {device_token}
@@ -787,66 +713,306 @@ Content-Type: application/json
 <pre class="code-block">POST /api/broadcast
 Authorization: Bearer {device_token}
 
-{ "targets": ["628123…", "628456…"], "message": "Hello!", "delay_ms": 3000 }</pre></div>
-    <div class="field"><label>Schedule</label>
-<pre class="code-block">POST /api/schedule
-Authorization: Bearer {device_token}
-
-{ "target": "628123456789", "message": "Reminder!", "run_at": "2026-12-01T09:00:00Z" }</pre></div>
+{ "targets": ["628123…"], "message": "Hello!", "delay_ms": 3000 }</pre></div>
+    <p style="font-size:.82rem;color:var(--muted);margin-top:6px">→ See <a href="#" onclick="goPage('docs');return false" style="color:var(--accent-text)">Documentation</a> for full API reference</p>
   </div>
 </div>
 
-<div class="page" id="page-settings">
-  <h1 data-i18n="settings">Settings</h1>
-  <p class="sub" data-i18n="settings_sub">Customize your experience</p>
+<!-- ===== DOCS PAGE ===== -->
+<div class="page" id="page-docs">
+  <h1 data-i18n="nav_docs">Documentation</h1><p class="sub">Complete API guide for developers</p>
 
-  <div class="panel" style="max-width:560px">
-    <div class="panel-head"><h2 data-i18n="lang_title">Language / Bahasa</h2></div>
-    <p style="color:var(--muted);font-size:.85rem;margin-bottom:4px" data-i18n="lang_sub">Choose the display language for the interface</p>
-    <div class="lang-grid" id="langGrid">
-      <div class="lang-card" data-lang="en" onclick="setLang('en')">
-        <span class="flag">🌐</span><span>English</span>
-        <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="16" height="16"><polyline points="20,6 9,17 4,12"/></svg>
-      </div>
-      <div class="lang-card" data-lang="id" onclick="setLang('id')">
-        <span class="flag">🇮🇩</span><span>Indonesia</span>
-        <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="16" height="16"><polyline points="20,6 9,17 4,12"/></svg>
-      </div>
-      <div class="lang-card" data-lang="zh" onclick="setLang('zh')">
-        <span class="flag">🇨🇳</span><span>中文</span>
-        <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="16" height="16"><polyline points="20,6 9,17 4,12"/></svg>
-      </div>
-      <div class="lang-card" data-lang="ru" onclick="setLang('ru')">
-        <span class="flag">🇷🇺</span><span>Русский</span>
-        <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="16" height="16"><polyline points="20,6 9,17 4,12"/></svg>
-      </div>
-      <div class="lang-card" data-lang="ko" onclick="setLang('ko')">
-        <span class="flag">🇰🇷</span><span>한국어</span>
-        <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="16" height="16"><polyline points="20,6 9,17 4,12"/></svg>
-      </div>
-      <div class="lang-card" data-lang="ar" onclick="setLang('ar')">
-        <span class="flag">🇸🇦</span><span>العربية</span>
-        <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="16" height="16"><polyline points="20,6 9,17 4,12"/></svg>
-      </div>
+  <div class="doc-section">
+    <h2>🚀 Getting Started</h2>
+    <p>Synpera provides a REST API that lets you send and receive WhatsApp messages programmatically. Every request requires a device token, which you can find in the <b>API & Token</b> section.</p>
+    <div class="video-placeholder">
+      <div class="play-btn" onclick="toast('Replace this with your actual YouTube embed URL','err')"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg></div>
+      <p>Getting Started with Synpera API</p>
+      <span>Watch this tutorial to get up and running in 5 minutes</span>
+    </div>
+    <h3>Base URL</h3>
+    <pre class="code-block">https://your-synpera-domain.com</pre>
+    <h3>Authentication</h3>
+    <p>Use your device token in the Authorization header for all API requests:</p>
+    <pre class="code-block">Authorization: Bearer syn_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</pre>
+  </div>
+
+  <div class="doc-section">
+    <h2>📤 Send Messages</h2>
+    <div class="endpoint-block">
+      <div class="endpoint-title"><span class="method-badge m-post">POST</span>/api/send</div>
+      <p style="color:var(--muted);font-size:.82rem;margin-bottom:10px">Send a text or media message to a single recipient.</p>
+      <pre class="code-block">// Request Body
+{
+  "target": "628123456789",      // required: number or group JID
+  "message": "Hello!",           // required (if no media_url)
+  "media_url": "https://...",    // optional: file URL
+  "filename": "document.pdf"     // optional: override filename
+}
+
+// Success Response
+{ "status": true, "target": "628123456789@s.whatsapp.net" }</pre>
+    </div>
+    <div class="video-placeholder">
+      <div class="play-btn" onclick="toast('Replace with YouTube embed for Send API','err')"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg></div>
+      <p>How to Send Messages via API</p>
+      <span>Text messages, images, documents and more</span>
+    </div>
+
+    <div class="endpoint-block">
+      <div class="endpoint-title"><span class="method-badge m-post">POST</span>/api/broadcast</div>
+      <p style="color:var(--muted);font-size:.82rem;margin-bottom:10px">Send a message to multiple recipients (max 100 per request). Runs in background.</p>
+      <pre class="code-block">// Request Body
+{
+  "targets": ["628123456789", "628987654321"],
+  "message": "Hello everyone!",
+  "delay_ms": 3000    // delay between each message (min 2000ms)
+}
+
+// Success Response
+{ "status": true, "message": "Broadcast ke 2 nomor dimulai di background" }</pre>
     </div>
   </div>
 
-  <div class="panel" style="max-width:560px;margin-top:16px">
+  <div class="doc-section">
+    <h2>📅 Schedule Messages</h2>
+    <div class="endpoint-block">
+      <div class="endpoint-title"><span class="method-badge m-post">POST</span>/api/schedule</div>
+      <pre class="code-block">// Request Body
+{
+  "target": "628123456789",
+  "message": "Your scheduled reminder!",
+  "run_at": "2026-12-01T09:00:00Z"   // ISO 8601 format
+}
+
+// Success Response
+{ "status": true, "schedule_id": 42 }</pre>
+    </div>
+    <div class="video-placeholder">
+      <div class="play-btn" onclick="toast('Replace with YouTube embed for Schedule API','err')"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg></div>
+      <p>Scheduling Messages with Synpera</p>
+      <span>Automate your WhatsApp messaging workflow</span>
+    </div>
+  </div>
+
+  <div class="doc-section">
+    <h2>📱 Device Status</h2>
+    <div class="endpoint-block">
+      <div class="endpoint-title"><span class="method-badge m-get">GET</span>/api/device</div>
+      <pre class="code-block">// Success Response
+{
+  "status": true,
+  "device": { "id": 1, "name": "My Device", "number": "628123456789" },
+  "wa": "connected"    // connected | qr | idle | disconnected
+}</pre>
+    </div>
+  </div>
+
+  <div class="doc-section">
+    <h2>🔔 Webhooks</h2>
+    <p>Configure webhook URLs in your device settings to receive real-time notifications.</p>
+    <div class="endpoint-block">
+      <div class="endpoint-title">Incoming Message Payload</div>
+      <pre class="code-block">{
+  "event": "message",
+  "device_id": 1,
+  "sender": "628123456789@s.whatsapp.net",
+  "name": "John Doe",
+  "message": "Hello!",
+  "is_group": false
+}</pre>
+    </div>
+    <div class="endpoint-block">
+      <div class="endpoint-title">Connection Status Payload</div>
+      <pre class="code-block">{
+  "event": "connect",      // or "disconnect"
+  "device_id": 1,
+  "number": "628123456789",
+  "status": "connected"
+}</pre>
+    </div>
+    <div class="video-placeholder">
+      <div class="play-btn" onclick="toast('Replace with YouTube embed for Webhooks','err')"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg></div>
+      <p>Setting Up Webhooks</p>
+      <span>Receive real-time WhatsApp events in your application</span>
+    </div>
+  </div>
+
+  <div class="doc-section">
+    <h2>⚠️ Rate Limits & Best Practices</h2>
+    <p>To avoid WhatsApp bans, follow these guidelines:</p>
+    <div class="endpoint-block">
+      <pre class="code-block">✓ Use delay_ms >= 3000 between broadcast messages
+✓ Don't send more than 100 messages per hour per device  
+✓ Use human-like delays (3–10 seconds recommended)
+✓ Avoid sending identical messages repeatedly
+✓ Always get consent before messaging contacts
+✗ Don't use for spam or unsolicited messages</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SETTINGS PAGE ===== -->
+<div class="page" id="page-settings">
+  <h1 data-i18n="settings">Settings</h1><p class="sub" data-i18n="settings_sub">Customize your experience</p>
+  <div class="panel" style="max-width:580px">
+    <div class="panel-head"><h2 data-i18n="lang_title">Language / Bahasa</h2></div>
+    <p style="color:var(--muted);font-size:.85rem;margin-bottom:4px" data-i18n="lang_sub">Choose the display language</p>
+    <div class="lang-grid" id="langGrid">
+      <div class="lang-card" data-lang="en" onclick="setLang('en')"><span class="flag">🌐</span><span>English</span><svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="14" height="14"><polyline points="20,6 9,17 4,12"/></svg></div>
+      <div class="lang-card" data-lang="id" onclick="setLang('id')"><span class="flag">🇮🇩</span><span>Indonesia</span><svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="14" height="14"><polyline points="20,6 9,17 4,12"/></svg></div>
+      <div class="lang-card" data-lang="zh" onclick="setLang('zh')"><span class="flag">🇨🇳</span><span>中文</span><svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="14" height="14"><polyline points="20,6 9,17 4,12"/></svg></div>
+      <div class="lang-card" data-lang="ru" onclick="setLang('ru')"><span class="flag">🇷🇺</span><span>Русский</span><svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="14" height="14"><polyline points="20,6 9,17 4,12"/></svg></div>
+      <div class="lang-card" data-lang="ko" onclick="setLang('ko')"><span class="flag">🇰🇷</span><span>한국어</span><svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="14" height="14"><polyline points="20,6 9,17 4,12"/></svg></div>
+      <div class="lang-card" data-lang="ar" onclick="setLang('ar')"><span class="flag">🇸🇦</span><span>العربية</span><svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="14" height="14"><polyline points="20,6 9,17 4,12"/></svg></div>
+      <div class="lang-card" data-lang="es" onclick="setLang('es')"><span class="flag">🇪🇸</span><span>Español</span><svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="14" height="14"><polyline points="20,6 9,17 4,12"/></svg></div>
+      <div class="lang-card" data-lang="fr" onclick="setLang('fr')"><span class="flag">🇫🇷</span><span>Français</span><svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="14" height="14"><polyline points="20,6 9,17 4,12"/></svg></div>
+      <div class="lang-card" data-lang="de" onclick="setLang('de')"><span class="flag">🇩🇪</span><span>Deutsch</span><svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="14" height="14"><polyline points="20,6 9,17 4,12"/></svg></div>
+      <div class="lang-card" data-lang="pt" onclick="setLang('pt')"><span class="flag">🇧🇷</span><span>Português</span><svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="14" height="14"><polyline points="20,6 9,17 4,12"/></svg></div>
+      <div class="lang-card" data-lang="ja" onclick="setLang('ja')"><span class="flag">🇯🇵</span><span>日本語</span><svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="14" height="14"><polyline points="20,6 9,17 4,12"/></svg></div>
+      <div class="lang-card" data-lang="hi" onclick="setLang('hi')"><span class="flag">🇮🇳</span><span>हिन्दी</span><svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="14" height="14"><polyline points="20,6 9,17 4,12"/></svg></div>
+    </div>
+  </div>
+  <div class="panel" style="max-width:580px;margin-top:16px">
     <div class="panel-head"><h2 data-i18n="theme_title">Appearance</h2></div>
     <div style="display:flex;align-items:center;justify-content:space-between">
-      <div>
-        <div style="font-weight:600;font-size:.9rem" data-i18n="theme_label">Dark / Light Mode</div>
-        <div style="color:var(--muted);font-size:.82rem" data-i18n="theme_sub">Toggle the interface color scheme</div>
-      </div>
+      <div><div style="font-weight:600;font-size:.9rem" data-i18n="theme_label">Dark / Light Mode</div><div style="color:var(--muted);font-size:.82rem" data-i18n="theme_sub">Toggle the interface color scheme</div></div>
       <button class="theme-btn" onclick="toggleTheme()" id="themeBtnSettings" style="font-size:1.1rem;padding:10px 14px">🌙</button>
     </div>
   </div>
 </div>
 
 </main>
-</div><!-- /.layout -->
+</div>
 
-<!-- MODALS -->
+<!-- ===== MODALS ===== -->
+
+<!-- Add Device Modal -->
+<div class="modal" id="addDeviceModal">
+  <div class="modal-box">
+    <div class="modal-head"><h3>Add Device</h3><button class="modal-close" onclick="closeM('addDeviceModal')">✕</button></div>
+    <div class="add-device-field">
+      <label>Device Name</label>
+      <div class="input-with-icon"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div><input id="addDevName" placeholder="e.g. Fonnte, My WA" autocomplete="off"></div>
+    </div>
+    <div class="add-device-field">
+      <label>WhatsApp Number <span style="color:var(--muted);font-weight:400;font-size:.74rem">— full format including country code</span></label>
+      <div class="input-with-icon" id="addDevNumWrap"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 11.61 19a19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 3.09 4.18 2 2 0 0 1 5.07 2h3a2 2 0 0 1 2 1.72 12.8 12.8 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L9.91 9.91A16 16 0 0 0 16 16l1.27-1.27a2 2 0 0 1 2.11-.45 12.8 12.8 0 0 0 2.81.7A2 2 0 0 1 24 17z"/></svg></div><input id="addDevNum" placeholder="6282222097005" type="tel" autocomplete="off"></div>
+      <div style="font-size:.74rem;color:var(--muted);margin-top:4px">e.g. 628xxx (Indonesia), 1xxx (US)</div>
+    </div>
+    <div class="add-device-field" style="border:1px solid var(--border);border-radius:12px;padding:14px">
+      <div class="sw-row"><div class="sw-info"><b>Chatbot Mode</b><span>Set to on if you are building a chatbot</span></div><label class="sw"><input type="checkbox" id="addDevChatbot"><span class="sl"></span></label></div>
+      <div class="sw-row"><div class="sw-info"><b>Personal Autoreply</b><span>Autoreply to individual chats</span></div><label class="sw"><input type="checkbox" id="addDevPersonal"><span class="sl"></span></label></div>
+      <div class="sw-row"><div class="sw-info"><b>Group Autoreply</b><span>Autoreply to WhatsApp groups</span></div><label class="sw"><input type="checkbox" id="addDevGroup"><span class="sl"></span></label></div>
+    </div>
+    <button class="btn btn-primary" style="width:100%;margin-top:16px;justify-content:center" onclick="submitAddDevice()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Add Device
+    </button>
+  </div>
+</div>
+
+<!-- Connect Method Modal -->
+<div class="modal" id="connectMethodModal">
+  <div class="modal-box">
+    <div class="modal-head"><h3>Connect Method</h3><button class="modal-close" onclick="closeM('connectMethodModal')">✕</button></div>
+    <p style="color:var(--muted);font-size:.85rem;margin-bottom:4px">Choose how you want to link this device to WhatsApp.</p>
+    <div class="connect-methods">
+      <button class="connect-method-btn" onclick="doConnectQR()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h.01M14 17h.01M17 14h.01M17 17h3v3h-3z"/></svg>QR</button>
+      <button class="connect-method-btn" onclick="showCodeMethod()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>Code</button>
+      <button class="connect-method-btn" onclick="showPasskeyInfo()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Passkey</button>
+      <button class="connect-method-btn" onclick="showWAWebGuide()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>WA Web</button>
+    </div>
+    <p style="font-size:.78rem;color:var(--muted);margin-top:8px;padding:10px 12px;background:var(--panel);border-radius:8px">💡 If your account uses a passkey, try <b>Passkey</b> or <b>WA Web</b> instead of QR.</p>
+  </div>
+</div>
+
+<!-- Code Pairing Modal -->
+<div class="modal" id="codePairingModal">
+  <div class="modal-box">
+    <div class="modal-head"><h3 id="codePairingTitle">Connect via Code</h3><button class="modal-close" onclick="closeM('codePairingModal')">✕</button></div>
+    <p style="color:var(--muted);font-size:.84rem;margin-bottom:16px">Enter your WhatsApp number to receive an 8-digit pairing code.</p>
+    <div class="field">
+      <label>WhatsApp Number (full format)</label>
+      <input id="codePhone" placeholder="e.g. 6282222097005" type="tel">
+      <div style="font-size:.74rem;color:var(--muted);margin-top:4px">Include country code, no + or spaces</div>
+    </div>
+    <button class="btn btn-primary" id="getCodeBtn" onclick="requestCode()" style="width:100%;justify-content:center">Get Pairing Code</button>
+    <div id="codePairingResult" style="display:none;margin-top:18px">
+      <div class="pairing-code-display">
+        <p style="font-size:.84rem;color:var(--muted);margin-bottom:4px">Your 8-digit pairing code:</p>
+        <div class="pairing-code" id="pairingCodeDisplay">——————</div>
+        <p class="pairing-hint">Open WhatsApp → Linked Devices → Link with phone number<br>Enter this code on your phone</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- WA Web Guide Modal -->
+<div class="modal" id="waWebModal">
+  <div class="modal-box wide">
+    <div class="modal-head">
+      <h3 id="waWebTitle">Connect via WA Web</h3>
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="btn btn-primary btn-sm" onclick="toast('Watch tutorial: replace with your YouTube link','err')">Watch tutorial</button>
+        <button class="modal-close" onclick="closeM('waWebModal')">✕</button>
+      </div>
+    </div>
+    <p style="color:var(--muted);font-size:.84rem;margin-bottom:4px">Use this when your WhatsApp account asks for a passkey during login. It takes about 2 minutes.</p>
+    <div class="step-guide">
+      <div class="step-item">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h4>Save this bookmark</h4>
+          <p>Drag the button below to your browser's bookmarks bar. Press <code>Ctrl+Shift+B</code> (Windows) or <code>⌘+Shift+B</code> (Mac) if you don't see it.</p>
+          <div class="bookmark-drag">
+            <p>↓ Drag to bookmarks bar</p>
+            <span class="bookmark-pill" id="waWebBookmarkBtn" draggable="true">Connecting…</span>
+          </div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h4>Log in on WhatsApp Web</h4>
+          <p>Open <a href="https://web.whatsapp.com" target="_blank" style="color:var(--accent-text)">web.whatsapp.com</a> in a new tab. Scan the QR code with your phone and approve the passkey if asked. Wait until you see your chat list.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h4>Click the bookmark</h4>
+          <p>Go back to the WhatsApp Web tab and click the bookmark you saved. A small Synpera window will pop up — leave it open. This page will refresh automatically when done.</p>
+          <p style="font-size:.78rem;margin-top:6px;color:var(--muted)">Popup blocked? Click the icon in your browser's address bar and allow popups for WhatsApp Web, then click the bookmark again.</p>
+        </div>
+      </div>
+    </div>
+    <div class="waiting-status">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="animation:spin 1.5s linear infinite"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+      Waiting for you to click the bookmark on WhatsApp Web…
+    </div>
+    <label class="waiver-check"><input type="checkbox" id="waWebWaiver"> I understand my WhatsApp might get banned and Synpera is not responsible for it</label>
+    <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+  </div>
+</div>
+
+<!-- Passkey Info Modal -->
+<div class="modal" id="passkeyModal">
+  <div class="modal-box">
+    <div class="modal-head"><h3>Connect via Passkey</h3><button class="modal-close" onclick="closeM('passkeyModal')">✕</button></div>
+    <div class="passkey-info">
+      <b>ℹ️ Passkey accounts</b><br>
+      If your WhatsApp account uses a passkey during login, use <b>Passkey</b> or <b>WA Web</b> method instead of QR. The QR method won't work for passkey-protected accounts.
+    </div>
+    <p style="font-size:.85rem;color:var(--muted);margin-bottom:16px">For Passkey method, use the <b>WA Web</b> option — it guides you through linking your device using your browser's WhatsApp Web session.</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="closeM('passkeyModal');showWAWebGuide()">→ Use WA Web Method</button>
+      <button class="btn btn-ghost" onclick="closeM('passkeyModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- QR Modal -->
 <div class="modal" id="qrModal">
   <div class="modal-box" style="text-align:center">
     <div class="modal-head"><h3>Scan QR Code</h3><button class="modal-close" onclick="closeM('qrModal')">✕</button></div>
@@ -856,6 +1022,7 @@ Authorization: Bearer {device_token}
   </div>
 </div>
 
+<!-- Device Edit Modal -->
 <div class="modal" id="devEditModal">
   <div class="modal-box wide">
     <div class="modal-head"><h3>Device Settings</h3><button class="modal-close" onclick="closeM('devEditModal')">✕</button></div>
@@ -870,20 +1037,16 @@ Authorization: Bearer {device_token}
       <div class="sw-row"><div class="sw-info"><b>Auto-delete Logs</b><span>Delete logs after 24 hours</span></div><label class="sw"><input type="checkbox" id="eAutodel"><span class="sl"></span></label></div>
     </div>
     <input type="hidden" id="eDevId">
-    <div class="btn-group">
-      <button class="btn btn-primary" onclick="saveDevEdit()">Save</button>
-      <button class="btn btn-ghost" onclick="closeM('devEditModal')">Cancel</button>
-    </div>
+    <div class="btn-group"><button class="btn btn-primary" onclick="saveDevEdit()">Save</button><button class="btn btn-ghost" onclick="closeM('devEditModal')">Cancel</button></div>
   </div>
 </div>
 
+<!-- Group Detail Modal -->
 <div class="modal" id="grpModal">
-  <div class="modal-box">
-    <div class="modal-head"><h3>Group Detail</h3><button class="modal-close" onclick="closeM('grpModal')">✕</button></div>
-    <div id="grpModalContent"></div>
-  </div>
+  <div class="modal-box"><div class="modal-head"><h3>Group Detail</h3><button class="modal-close" onclick="closeM('grpModal')">✕</button></div><div id="grpModalContent"></div></div>
 </div>
 
+<!-- Phonebook Modal -->
 <div class="modal" id="pbModal">
   <div class="modal-box">
     <div class="modal-head"><h3 id="pbModalTitle">Add Contact</h3><button class="modal-close" onclick="closeM('pbModal')">✕</button></div>
@@ -891,29 +1054,25 @@ Authorization: Bearer {device_token}
     <div class="field"><label>Number</label><input id="pbMNum" placeholder="628123456789"></div>
     <div class="field"><label>Notes</label><input id="pbMNote" placeholder="optional…"></div>
     <input type="hidden" id="pbMId">
-    <div class="btn-group">
-      <button class="btn btn-primary" onclick="savePbContact()">Save</button>
-      <button class="btn btn-ghost" onclick="closeM('pbModal')">Cancel</button>
-    </div>
+    <div class="btn-group"><button class="btn btn-primary" onclick="savePbContact()">Save</button><button class="btn btn-ghost" onclick="closeM('pbModal')">Cancel</button></div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-// ─── State ─────────────────────────────────────────────
+// ─── State ──────────────────────────────────────────────
 let me = null, devices = [], phonebook = JSON.parse(localStorage.getItem('pb')||'[]'), selectedIds = new Set();
-let tplEditId = null, qrPoll;
-let grpCache = [];
+let tplEditId = null, qrPoll = null, currentConnectDeviceId = null, grpCache = [];
 
 // ─── Boot ───────────────────────────────────────────────
 async function boot(){
   applySavedTheme();
   const lang = localStorage.getItem('lang')||'en';
   applyLang(lang);
-
-  // Restore last page from hash
-  const hash = location.hash.replace('#','');
+  // Restore sidebar state
+  const sc = localStorage.getItem('sidebarCollapsed')==='true';
+  if(sc && window.innerWidth > 860) setSidebarCollapsed(true);
 
   try {
     me = await api('/me');
@@ -927,11 +1086,11 @@ async function boot(){
   populateDevSelects();
   renderDevices();
 
-  // Navigate to saved hash or default
+  const hash = location.hash.replace('#','');
   if(hash && document.querySelector(`.nav-item[data-page="${hash}"]`)){
     document.querySelector(`.nav-item[data-page="${hash}"]`).click();
   } else {
-    loadHistory();
+    goPage('dashboard');
   }
 }
 
@@ -943,33 +1102,46 @@ document.querySelectorAll('.nav-item[data-page]').forEach(btn=>{
     btn.classList.add('active');
     document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
     document.getElementById('page-'+page).classList.add('active');
-    location.hash = page; // persist page state
+    location.hash = page;
     if(window.innerWidth<=860) closeSidebar();
     onOpen(page);
   });
 });
 
 function onOpen(p){
-  const m = {history:loadHistory,inbox:loadInbox,autoreply:loadAR,template:loadTpls,
-    groups:loadGroups,schedule:loadSched,recurring:loadRecurring,stats:loadStats,
-    api:renderApiPage,webhook:loadWH,phonebook:renderPhonebook,poll:renderPollList};
+  const m = {
+    dashboard:loadDashboard, history:loadHistory, inbox:loadInbox,
+    autoreply:loadAR, template:loadTpls, groups:loadGroups,
+    schedule:loadSched, recurring:loadRecurring, stats:loadStats,
+    api:renderApiPage, webhook:loadWH, phonebook:renderPhonebook,
+    poll:()=>{}, devices:renderDevices
+  };
   if(m[p]) m[p]();
   if(p==='send') loadTplsForSend();
 }
-
 function goPage(name){ document.querySelector(`.nav-item[data-page="${name}"]`)?.click(); }
 
-// ─── Sidebar (hamburger ↔ X icon) ───────────────────────
+// ─── Sidebar Desktop Toggle ──────────────────────────────
+function toggleSidebarDesktop(){
+  const collapsed = document.getElementById('sidebar').classList.contains('sidebar-collapsed');
+  setSidebarCollapsed(!collapsed);
+  localStorage.setItem('sidebarCollapsed', !collapsed);
+}
+function setSidebarCollapsed(c){
+  document.getElementById('sidebar').classList.toggle('sidebar-collapsed', c);
+  document.getElementById('mainContent').classList.toggle('sidebar-collapsed', c);
+  document.getElementById('sidebarToggleBtn').classList.toggle('collapsed', c);
+}
+
+// ─── Sidebar Mobile ──────────────────────────────────────
 function toggleSidebar(){
   const sidebar = document.getElementById('sidebar');
   const overlay = document.getElementById('sidebarOverlay');
   const isOpen = sidebar.classList.toggle('open');
   overlay.classList.toggle('open', isOpen);
-  // Swap hamburger ↔ X icon
   document.getElementById('menuIcon').style.display = isOpen ? 'none' : 'block';
   document.getElementById('closeIcon').style.display = isOpen ? 'block' : 'none';
 }
-
 function closeSidebar(){
   document.getElementById('sidebar').classList.remove('open');
   document.getElementById('sidebarOverlay').classList.remove('open');
@@ -998,134 +1170,42 @@ function toggleTheme(){
 
 // ─── i18n ───────────────────────────────────────────────
 const T = {
-  en:{
-    nav_main:'Main Feature', nav_device:'Device', nav_phonebook:'Phonebook',
-    nav_history:'Message History', nav_send:'Send', nav_inbox:'Inbox',
-    nav_template:'Template', nav_poll:'Poll', nav_recurring:'Recurring',
-    nav_autoreply:'Autoreply', nav_submission:'Submission', nav_rotator:'Rotator',
-    nav_followup:'Follow Up', nav_chaining:'Chaining', nav_webhook:'Webhook',
-    nav_invoices:'Invoices', nav_stats:'Statistics', nav_settings_label:'Settings',
-    nav_groups:'Groups', nav_schedule:'Scheduled', nav_api:'API & Token',
-    settings:'Settings', logout:'Logout',
-    settings_sub:'Customize your experience',
-    lang_title:'Language / Bahasa', lang_sub:'Choose the display language for the interface',
-    theme_title:'Appearance', theme_label:'Dark / Light Mode', theme_sub:'Toggle the interface color scheme',
-  },
-  id:{
-    nav_main:'Fitur Utama', nav_device:'Perangkat', nav_phonebook:'Buku Telepon',
-    nav_history:'Riwayat Pesan', nav_send:'Kirim', nav_inbox:'Kotak Masuk',
-    nav_template:'Template', nav_poll:'Polling', nav_recurring:'Berulang',
-    nav_autoreply:'Balas Otomatis', nav_submission:'Pengiriman', nav_rotator:'Rotator',
-    nav_followup:'Tindak Lanjut', nav_chaining:'Chaining', nav_webhook:'Webhook',
-    nav_invoices:'Faktur', nav_stats:'Statistik', nav_settings_label:'Pengaturan',
-    nav_groups:'Grup', nav_schedule:'Terjadwal', nav_api:'API & Token',
-    settings:'Pengaturan', logout:'Keluar',
-    settings_sub:'Sesuaikan pengalaman Anda',
-    lang_title:'Bahasa / Language', lang_sub:'Pilih bahasa tampilan antarmuka',
-    theme_title:'Tampilan', theme_label:'Mode Gelap / Terang', theme_sub:'Ganti skema warna antarmuka',
-  },
-  zh:{
-    nav_main:'主要功能', nav_device:'设备', nav_phonebook:'电话簿',
-    nav_history:'消息历史', nav_send:'发送', nav_inbox:'收件箱',
-    nav_template:'模板', nav_poll:'投票', nav_recurring:'定期',
-    nav_autoreply:'自动回复', nav_submission:'提交', nav_rotator:'轮换',
-    nav_followup:'跟进', nav_chaining:'链接', nav_webhook:'Webhook',
-    nav_invoices:'发票', nav_stats:'统计', nav_settings_label:'设置',
-    nav_groups:'群组', nav_schedule:'已计划', nav_api:'API & 令牌',
-    settings:'设置', logout:'退出',
-    settings_sub:'自定义您的体验',
-    lang_title:'语言 / Language', lang_sub:'选择界面显示语言',
-    theme_title:'外观', theme_label:'深色 / 浅色模式', theme_sub:'切换界面配色方案',
-  },
-  ru:{
-    nav_main:'Основные функции', nav_device:'Устройство', nav_phonebook:'Телефонная книга',
-    nav_history:'История сообщений', nav_send:'Отправить', nav_inbox:'Входящие',
-    nav_template:'Шаблон', nav_poll:'Опрос', nav_recurring:'Повторяющееся',
-    nav_autoreply:'Автоответ', nav_submission:'Отправка', nav_rotator:'Ротатор',
-    nav_followup:'Последующие действия', nav_chaining:'Цепочка', nav_webhook:'Webhook',
-    nav_invoices:'Счета', nav_stats:'Статистика', nav_settings_label:'Настройки',
-    nav_groups:'Группы', nav_schedule:'Запланированное', nav_api:'API и Токен',
-    settings:'Настройки', logout:'Выйти',
-    settings_sub:'Настройте свой интерфейс',
-    lang_title:'Язык / Language', lang_sub:'Выберите язык отображения интерфейса',
-    theme_title:'Внешний вид', theme_label:'Тёмный / Светлый режим', theme_sub:'Переключить цветовую схему',
-  },
-  ko:{
-    nav_main:'주요 기능', nav_device:'기기', nav_phonebook:'전화번호부',
-    nav_history:'메시지 기록', nav_send:'보내기', nav_inbox:'받은 편지함',
-    nav_template:'템플릿', nav_poll:'투표', nav_recurring:'반복',
-    nav_autoreply:'자동 응답', nav_submission:'제출', nav_rotator:'로테이터',
-    nav_followup:'팔로우업', nav_chaining:'체이닝', nav_webhook:'웹훅',
-    nav_invoices:'청구서', nav_stats:'통계', nav_settings_label:'설정',
-    nav_groups:'그룹', nav_schedule:'예약됨', nav_api:'API & 토큰',
-    settings:'설정', logout:'로그아웃',
-    settings_sub:'인터페이스를 맞춤 설정하세요',
-    lang_title:'언어 / Language', lang_sub:'인터페이스 표시 언어를 선택하세요',
-    theme_title:'외관', theme_label:'다크 / 라이트 모드', theme_sub:'인터페이스 색 구성표 전환',
-  },
-  ar:{
-    nav_main:'الميزات الرئيسية', nav_device:'الجهاز', nav_phonebook:'دفتر الهاتف',
-    nav_history:'سجل الرسائل', nav_send:'إرسال', nav_inbox:'صندوق الوارد',
-    nav_template:'القالب', nav_poll:'استطلاع', nav_recurring:'متكرر',
-    nav_autoreply:'الرد التلقائي', nav_submission:'التقديم', nav_rotator:'الدوار',
-    nav_followup:'المتابعة', nav_chaining:'التسلسل', nav_webhook:'ويب هوك',
-    nav_invoices:'الفواتير', nav_stats:'الإحصائيات', nav_settings_label:'الإعدادات',
-    nav_groups:'المجموعات', nav_schedule:'المجدولة', nav_api:'API والرمز',
-    settings:'الإعدادات', logout:'تسجيل الخروج',
-    settings_sub:'تخصيص تجربتك',
-    lang_title:'اللغة / Language', lang_sub:'اختر لغة عرض الواجهة',
-    theme_title:'المظهر', theme_label:'الوضع الداكن / الفاتح', theme_sub:'تبديل نظام الألوان',
-  }
+  en:{ nav_main:'Main Feature',nav_dashboard:'Dashboard',dashboard_sub:'Overview of your account',nav_device:'Device',nav_phonebook:'Phonebook',nav_history:'Message History',nav_send:'Send',nav_inbox:'Inbox',nav_template:'Template',nav_poll:'Poll',nav_recurring:'Recurring',nav_autoreply:'Autoreply',nav_submission:'Submission',nav_rotator:'Rotator',nav_followup:'Follow Up',nav_chaining:'Chaining',nav_webhook:'Webhook',nav_invoices:'Invoices',nav_stats:'Statistics',nav_settings_label:'Settings',nav_groups:'Groups',nav_schedule:'Scheduled',nav_api:'API & Token',nav_docs:'Documentation',settings:'Settings',logout:'Logout',settings_sub:'Customize your experience',lang_title:'Language / Bahasa',lang_sub:'Choose the display language for the interface',theme_title:'Appearance',theme_label:'Dark / Light Mode',theme_sub:'Toggle the interface color scheme' },
+  id:{ nav_main:'Fitur Utama',nav_dashboard:'Beranda',dashboard_sub:'Ringkasan akun Anda',nav_device:'Perangkat',nav_phonebook:'Buku Telepon',nav_history:'Riwayat Pesan',nav_send:'Kirim',nav_inbox:'Kotak Masuk',nav_template:'Template',nav_poll:'Polling',nav_recurring:'Berulang',nav_autoreply:'Balas Otomatis',nav_submission:'Pengiriman',nav_rotator:'Rotator',nav_followup:'Tindak Lanjut',nav_chaining:'Chaining',nav_webhook:'Webhook',nav_invoices:'Faktur',nav_stats:'Statistik',nav_settings_label:'Pengaturan',nav_groups:'Grup',nav_schedule:'Terjadwal',nav_api:'API & Token',nav_docs:'Dokumentasi',settings:'Pengaturan',logout:'Keluar',settings_sub:'Sesuaikan pengalaman Anda',lang_title:'Bahasa / Language',lang_sub:'Pilih bahasa tampilan antarmuka',theme_title:'Tampilan',theme_label:'Mode Gelap / Terang',theme_sub:'Ganti skema warna antarmuka' },
+  zh:{ nav_main:'主要功能',nav_dashboard:'仪表盘',dashboard_sub:'账户概览',nav_device:'设备',nav_phonebook:'电话簿',nav_history:'消息历史',nav_send:'发送',nav_inbox:'收件箱',nav_template:'模板',nav_poll:'投票',nav_recurring:'定期',nav_autoreply:'自动回复',nav_submission:'提交',nav_rotator:'轮换',nav_followup:'跟进',nav_chaining:'链接',nav_webhook:'Webhook',nav_invoices:'发票',nav_stats:'统计',nav_settings_label:'设置',nav_groups:'群组',nav_schedule:'已计划',nav_api:'API & 令牌',nav_docs:'文档',settings:'设置',logout:'退出',settings_sub:'自定义您的体验',lang_title:'语言',lang_sub:'选择界面显示语言',theme_title:'外观',theme_label:'深色 / 浅色模式',theme_sub:'切换界面配色方案' },
+  ru:{ nav_main:'Функции',nav_dashboard:'Главная',dashboard_sub:'Обзор аккаунта',nav_device:'Устройство',nav_phonebook:'Телефонная книга',nav_history:'История сообщений',nav_send:'Отправить',nav_inbox:'Входящие',nav_template:'Шаблон',nav_poll:'Опрос',nav_recurring:'Повторяющееся',nav_autoreply:'Автоответ',nav_submission:'Отправка',nav_rotator:'Ротатор',nav_followup:'Последующие',nav_chaining:'Цепочка',nav_webhook:'Webhook',nav_invoices:'Счета',nav_stats:'Статистика',nav_settings_label:'Настройки',nav_groups:'Группы',nav_schedule:'Запланированное',nav_api:'API и Токен',nav_docs:'Документация',settings:'Настройки',logout:'Выйти',settings_sub:'Настройте интерфейс',lang_title:'Язык',lang_sub:'Выберите язык отображения',theme_title:'Внешний вид',theme_label:'Тёмный / Светлый',theme_sub:'Переключить цветовую схему' },
+  ko:{ nav_main:'주요 기능',nav_dashboard:'대시보드',dashboard_sub:'계정 개요',nav_device:'기기',nav_phonebook:'전화번호부',nav_history:'메시지 기록',nav_send:'보내기',nav_inbox:'받은 편지함',nav_template:'템플릿',nav_poll:'투표',nav_recurring:'반복',nav_autoreply:'자동 응답',nav_submission:'제출',nav_rotator:'로테이터',nav_followup:'팔로우업',nav_chaining:'체이닝',nav_webhook:'웹훅',nav_invoices:'청구서',nav_stats:'통계',nav_settings_label:'설정',nav_groups:'그룹',nav_schedule:'예약됨',nav_api:'API & 토큰',nav_docs:'문서',settings:'설정',logout:'로그아웃',settings_sub:'인터페이스 설정',lang_title:'언어',lang_sub:'표시 언어 선택',theme_title:'외관',theme_label:'다크 / 라이트 모드',theme_sub:'색 구성표 전환' },
+  ar:{ nav_main:'الميزات',nav_dashboard:'لوحة التحكم',dashboard_sub:'نظرة عامة على حسابك',nav_device:'الجهاز',nav_phonebook:'دفتر الهاتف',nav_history:'سجل الرسائل',nav_send:'إرسال',nav_inbox:'الوارد',nav_template:'القالب',nav_poll:'استطلاع',nav_recurring:'متكرر',nav_autoreply:'الرد التلقائي',nav_submission:'التقديم',nav_rotator:'الدوار',nav_followup:'المتابعة',nav_chaining:'التسلسل',nav_webhook:'ويب هوك',nav_invoices:'الفواتير',nav_stats:'الإحصائيات',nav_settings_label:'الإعدادات',nav_groups:'المجموعات',nav_schedule:'المجدولة',nav_api:'API والرمز',nav_docs:'الوثائق',settings:'الإعدادات',logout:'تسجيل الخروج',settings_sub:'تخصيص تجربتك',lang_title:'اللغة',lang_sub:'اختر لغة الواجهة',theme_title:'المظهر',theme_label:'الوضع الداكن / الفاتح',theme_sub:'تبديل نظام الألوان' },
+  es:{ nav_main:'Funciones',nav_dashboard:'Panel',dashboard_sub:'Resumen de tu cuenta',nav_device:'Dispositivo',nav_docs:'Documentación',settings:'Configuración',logout:'Cerrar sesión',lang_title:'Idioma',lang_sub:'Elige el idioma de la interfaz',theme_title:'Apariencia',theme_label:'Modo oscuro/claro',theme_sub:'Cambiar esquema de colores' },
+  fr:{ nav_main:'Fonctionnalités',nav_dashboard:'Tableau de bord',dashboard_sub:"Vue d'ensemble",nav_device:'Appareil',nav_docs:'Documentation',settings:'Paramètres',logout:'Déconnexion',lang_title:'Langue',lang_sub:"Choisissez la langue de l'interface",theme_title:'Apparence',theme_label:'Mode sombre/clair',theme_sub:'Changer le thème' },
+  de:{ nav_main:'Funktionen',nav_dashboard:'Dashboard',dashboard_sub:'Kontoübersicht',nav_device:'Gerät',nav_docs:'Dokumentation',settings:'Einstellungen',logout:'Abmelden',lang_title:'Sprache',lang_sub:'Wählen Sie die Anzeigesprache',theme_title:'Erscheinungsbild',theme_label:'Dunkel-/Hellmodus',theme_sub:'Farbschema umschalten' },
+  pt:{ nav_main:'Recursos',nav_dashboard:'Painel',dashboard_sub:'Visão geral da conta',nav_device:'Dispositivo',nav_docs:'Documentação',settings:'Configurações',logout:'Sair',lang_title:'Idioma',lang_sub:'Escolha o idioma da interface',theme_title:'Aparência',theme_label:'Modo escuro/claro',theme_sub:'Alternar esquema de cores' },
+  ja:{ nav_main:'機能',nav_dashboard:'ダッシュボード',dashboard_sub:'アカウント概要',nav_device:'デバイス',nav_docs:'ドキュメント',settings:'設定',logout:'ログアウト',lang_title:'言語',lang_sub:'表示言語を選択',theme_title:'外観',theme_label:'ダーク/ライトモード',theme_sub:'カラースキームを切替' },
+  hi:{ nav_main:'सुविधाएँ',nav_dashboard:'डैशबोर्ड',dashboard_sub:'खाता अवलोकन',nav_device:'डिवाइस',nav_docs:'दस्तावेज़',settings:'सेटिंग्स',logout:'लॉग आउट',lang_title:'भाषा',lang_sub:'इंटरफ़ेस भाषा चुनें',theme_title:'दिखावट',theme_label:'डार्क/लाइट मोड',theme_sub:'रंग थीम बदलें' },
 };
 
 function applyLang(l){
-  const t = T[l] || T['en'];
-  // RTL for Arabic
+  const t = {...T['en'], ...(T[l]||{})};
   document.documentElement.dir = l==='ar' ? 'rtl' : 'ltr';
-  // Update all data-i18n elements
-  document.querySelectorAll('[data-i18n]').forEach(el=>{
-    const key = el.dataset.i18n;
-    if(t[key]) el.textContent = t[key];
-  });
-  // Update lang cards active state
-  document.querySelectorAll('.lang-card').forEach(c=>{
-    c.classList.toggle('active', c.dataset.lang === l);
-  });
+  document.querySelectorAll('[data-i18n]').forEach(el=>{ const k=el.dataset.i18n; if(t[k]) el.textContent=t[k]; });
+  document.querySelectorAll('.lang-card').forEach(c=>c.classList.toggle('active', c.dataset.lang===l));
 }
+function setLang(l){ localStorage.setItem('lang',l); applyLang(l); }
 
-function setLang(l){
-  localStorage.setItem('lang', l);
-  applyLang(l);
-}
-
-// ─── User Dropdown ──────────────────────────────────────
-function toggleUserDropdown(e){
-  if(e) e.stopPropagation();
-  document.getElementById('userDropdown').classList.toggle('open');
-}
-function closeUserDropdown(){
-  document.getElementById('userDropdown').classList.remove('open');
-}
-document.addEventListener('click', function(e){
-  const dd = document.getElementById('userDropdown');
-  if(dd && !document.getElementById('navUser').contains(e.target)){
-    dd.classList.remove('open');
-  }
-});
+// ─── User Dropdown ───────────────────────────────────────
+function toggleUserDropdown(){ document.getElementById('userDropdown').classList.toggle('open'); }
+function closeUserDropdown(){ document.getElementById('userDropdown').classList.remove('open'); }
+document.addEventListener('click',function(e){ const dd=document.getElementById('userDropdown'); if(dd&&!document.getElementById('navUser').contains(e.target)) dd.classList.remove('open'); });
 
 // ─── API ────────────────────────────────────────────────
 async function api(path,opts={}){
-  const r = await fetch(path,{headers:{'Content-Type':'application/json'},credentials:'include',...opts});
-  if(r.status===401){ location.href='/login'; throw new Error('401'); }
+  const r=await fetch(path,{headers:{'Content-Type':'application/json'},credentials:'include',...opts});
+  if(r.status===401){location.href='/login';throw new Error('401');}
   return r.json();
 }
 
 // ─── Toast ──────────────────────────────────────────────
-function toast(msg,type='ok'){
-  const el=document.getElementById('toast');
-  el.textContent=msg; el.className=`toast ${type} show`;
-  clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('show'),3200);
-}
+function toast(msg,type='ok'){ const el=document.getElementById('toast'); el.textContent=msg; el.className=`toast ${type} show`; clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('show'),3500); }
 
 // ─── Modal ──────────────────────────────────────────────
 function openM(id){ document.getElementById(id).classList.add('open'); }
@@ -1136,7 +1216,133 @@ function populateDevSelects(){
   const opts = devices.map(d=>`<option value="${d.id}">${d.name}${d.number?` (${d.number})`:''}</option>`).join('');
   const allOpt = `<option value="">All</option>`;
   ['histDev','inboxDev'].forEach(id=>{ const e=document.getElementById(id); if(e) e.innerHTML=allOpt+opts; });
-  ['sendDev','arDev','recDev','pollDev','grpDev','whDev','fuDev','chainDev','rotDevSel'].forEach(id=>{ const e=document.getElementById(id); if(e) e.innerHTML=opts; });
+  ['sendDev','arDev','recDev','pollDev','grpDev','whDev','fuDev','chainDev'].forEach(id=>{ const e=document.getElementById(id); if(e) e.innerHTML=opts; });
+  // Rotator: multi-select
+  const rs=document.getElementById('rotDevSel'); if(rs) rs.innerHTML=devices.map(d=>`<option value="${d.id}">${d.name}${d.number?` (${d.number})`:''}</option>`).join('');
+}
+
+// ─── Dashboard ──────────────────────────────────────────
+async function loadDashboard(){
+  try {
+    const d = await api('/me/dashboard');
+    document.getElementById('dashDevices').textContent = d.total_devices;
+    document.getElementById('dashConnected').textContent = d.connected_devices;
+    document.getElementById('dashSent').textContent = d.total_sent;
+    document.getElementById('dashReceived').textContent = d.total_received;
+    document.getElementById('dashPlan').textContent = d.plan || 'Free';
+    document.getElementById('dashDevLimit').innerHTML = `Device limit: <b>${d.plan_devices_limit}</b>`;
+    if(d.pending_schedules>0) document.getElementById('dashPending').textContent = `⏰ ${d.pending_schedules} pending schedule(s)`;
+  } catch(e){ console.error('dashboard error',e); }
+}
+
+// ─── Add Device Flow ────────────────────────────────────
+function openAddDeviceModal(){
+  document.getElementById('addDevName').value='';
+  document.getElementById('addDevNum').value='';
+  document.getElementById('addDevChatbot').checked=false;
+  document.getElementById('addDevPersonal').checked=false;
+  document.getElementById('addDevGroup').checked=false;
+  openM('addDeviceModal');
+}
+
+async function submitAddDevice(){
+  const name = document.getElementById('addDevName').value.trim();
+  if(!name){ toast('Device name is required','err'); return; }
+  try {
+    const d = await api('/me/devices',{method:'POST',body:JSON.stringify({name})});
+    // Update device settings (chatbot, personal, group)
+    const ar_personal = document.getElementById('addDevPersonal').checked;
+    const ar_group = document.getElementById('addDevGroup').checked;
+    if(ar_personal || ar_group){
+      await api(`/me/devices/${d.id}`,{method:'PUT',body:JSON.stringify({name,ar_personal,ar_group})});
+    }
+    devices = await api('/me/devices');
+    renderDevices(); populateDevSelects();
+    currentConnectDeviceId = d.id;
+    closeM('addDeviceModal');
+    openM('connectMethodModal');
+    toast('Device added! Now choose a connection method.');
+  } catch(e){ toast('Error: '+e.message,'err'); }
+}
+
+// ─── Connect Methods ─────────────────────────────────────
+async function doConnectQR(){
+  if(!currentConnectDeviceId) return;
+  closeM('connectMethodModal');
+  await api(`/me/devices/${currentConnectDeviceId}/connect`,{method:'POST'});
+  toast('Connecting… QR will appear shortly');
+  setTimeout(async()=>{
+    devices = await api('/me/devices');
+    const d = devices.find(x=>x.id===currentConnectDeviceId);
+    if(d?.state?.status==='qr') showQr(currentConnectDeviceId);
+    renderDevices();
+  },2500);
+}
+
+function showCodeMethod(){
+  closeM('connectMethodModal');
+  // Pre-fill phone from add device form
+  const num = document.getElementById('addDevNum')?.value || '';
+  document.getElementById('codePhone').value = num;
+  document.getElementById('codePairingResult').style.display='none';
+  document.getElementById('pairingCodeDisplay').textContent='——————';
+  document.getElementById('codePairingTitle').textContent = 'Connect via Code';
+  openM('codePairingModal');
+}
+
+async function requestCode(){
+  const phone = document.getElementById('codePhone').value.trim().replace(/[^0-9]/g,'');
+  if(!phone || phone.length < 10){ toast('Enter a valid phone number','err'); return; }
+  if(!currentConnectDeviceId){ toast('No device selected','err'); return; }
+  const btn = document.getElementById('getCodeBtn');
+  btn.disabled=true; btn.textContent='Requesting…';
+  try {
+    const res = await api(`/me/devices/${currentConnectDeviceId}/pairing-code`,{method:'POST',body:JSON.stringify({phone_number:phone})});
+    if(res.error) throw new Error(res.error);
+    document.getElementById('pairingCodeDisplay').textContent = res.code;
+    document.getElementById('codePairingResult').style.display='block';
+    toast('Pairing code received! Enter it on your phone.');
+    // Poll for connection
+    qrPoll = setInterval(async()=>{
+      devices = await api('/me/devices');
+      const d = devices.find(x=>x.id===currentConnectDeviceId);
+      if(d?.state?.status==='connected'){
+        clearInterval(qrPoll);
+        closeM('codePairingModal');
+        renderDevices();
+        toast('Device connected! ✅');
+      }
+    },3000);
+  } catch(e){ toast('Error: '+e.message,'err'); }
+  btn.disabled=false; btn.textContent='Get Pairing Code';
+}
+
+function showPasskeyInfo(){ closeM('connectMethodModal'); openM('passkeyModal'); }
+
+function showWAWebGuide(){
+  closeM('connectMethodModal');
+  closeM('passkeyModal');
+  // Set bookmark button with device number
+  const num = document.getElementById('addDevNum')?.value || 'Synpera';
+  const btn = document.getElementById('waWebBookmarkBtn');
+  btn.textContent = num || 'Synpera';
+  // Draggable bookmark
+  btn.setAttribute('href','javascript:(function(){window.open("'+location.origin+'/wa-link?device='+currentConnectDeviceId+'","_blank","width=400,height=500");})()');
+  openM('waWebModal');
+  // Poll for connection
+  if(currentConnectDeviceId){
+    clearInterval(qrPoll);
+    qrPoll = setInterval(async()=>{
+      devices = await api('/me/devices');
+      const d = devices.find(x=>x.id===currentConnectDeviceId);
+      if(d?.state?.status==='connected'){
+        clearInterval(qrPoll);
+        closeM('waWebModal');
+        renderDevices();
+        toast('Device connected via WA Web! ✅');
+      }
+    },3000);
+  }
 }
 
 // ─── Devices ────────────────────────────────────────────
@@ -1154,7 +1360,7 @@ function renderDevices(){
         <div class="device-num">${d.number||'Not connected'} · Token: ${d.token?.slice(0,12)}…</div>
       </div>
       <div class="device-actions">
-        ${st!=='connected'?`<button class="btn btn-primary btn-sm" onclick="connectDev(${d.id})">⚡ Connect</button>`:''}
+        ${st!=='connected'?`<button class="btn btn-primary btn-sm" onclick="connectExisting(${d.id})">⚡ Connect</button>`:''}
         ${st==='qr'?`<button class="btn btn-ghost btn-sm" onclick="showQr(${d.id})">Show QR</button>`:''}
         ${st==='connected'?`<button class="btn btn-ghost btn-sm" onclick="disconnectDev(${d.id})">Disconnect</button>`:''}
         <button class="btn btn-ghost btn-sm" onclick="openDevEdit(${d.id})">⚙ Settings</button>
@@ -1165,22 +1371,20 @@ function renderDevices(){
   }).join('');
 }
 
-async function addDevice(){
-  const name = prompt('Device name:','My Device'); if(!name) return;
-  const d = await api('/me/devices',{method:'POST',body:JSON.stringify({name})});
-  devices.push(d); renderDevices(); populateDevSelects(); toast('Device added!');
+function connectExisting(id){
+  currentConnectDeviceId = id;
+  openM('connectMethodModal');
 }
-async function connectDev(id){
-  await api(`/me/devices/${id}/connect`,{method:'POST'}); toast('Connecting…');
-  setTimeout(async()=>{ devices=await api('/me/devices'); renderDevices(); const d=devices.find(x=>x.id===id); if(d?.state?.status==='qr') showQr(id); },2500);
-}
+
 async function disconnectDev(id){
   if(!confirm('Disconnect?')) return;
-  await api(`/me/devices/${id}/disconnect`,{method:'POST'}); devices=await api('/me/devices'); renderDevices(); toast('Disconnected');
+  await api(`/me/devices/${id}/disconnect`,{method:'POST'});
+  devices = await api('/me/devices'); renderDevices(); toast('Disconnected');
 }
 async function deleteDev(id){
-  if(!confirm('Delete this device? This cannot be undone.')) return;
-  await api(`/me/devices/${id}`,{method:'DELETE'}); devices=devices.filter(d=>d.id!==id); renderDevices(); populateDevSelects(); toast('Deleted');
+  if(!confirm('Delete this device?')) return;
+  await api(`/me/devices/${id}`,{method:'DELETE'});
+  devices = devices.filter(d=>d.id!==id); renderDevices(); populateDevSelects(); toast('Deleted');
 }
 function openDevEdit(id){
   const d=devices.find(x=>x.id===id); if(!d) return;
@@ -1217,8 +1421,7 @@ async function showQr(id){
   const d=devices.find(x=>x.id===id);
   if(d?.state?.qr) document.getElementById('qrImg').src=d.state.qr;
   document.getElementById('qrStatus').textContent='Waiting for scan…';
-  openM('qrModal');
-  clearInterval(qrPoll);
+  openM('qrModal'); clearInterval(qrPoll);
   qrPoll=setInterval(async()=>{
     devices=await api('/me/devices'); const dd=devices.find(x=>x.id===id); if(!dd){clearInterval(qrPoll);return;}
     if(dd.state?.qr) document.getElementById('qrImg').src=dd.state.qr;
@@ -1235,11 +1438,8 @@ function renderPhonebook(){
   if(!filtered.length){el.innerHTML='<p style="padding:20px;color:var(--muted);font-size:.84rem">No contacts found.</p>';return;}
   el.innerHTML=filtered.map(c=>`<div class="pb-contact">
     <div class="pb-av">${c.name.charAt(0).toUpperCase()}</div>
-    <div class="pb-info"><div class="pb-name">${esc(c.name)}</div><div class="pb-num">${c.number}</div></div>
-    <div style="margin-left:auto;display:flex;gap:6px">
-      <button class="btn btn-ghost btn-sm" onclick="editPb('${c.id}')">Edit</button>
-      <button class="btn btn-danger btn-sm" onclick="deletePb('${c.id}')">✕</button>
-    </div>
+    <div style="flex:1"><div class="pb-name">${esc(c.name)}</div><div class="pb-num">${c.number}</div></div>
+    <div style="display:flex;gap:6px"><button class="btn btn-ghost btn-sm" onclick="editPb('${c.id}')">Edit</button><button class="btn btn-danger btn-sm" onclick="deletePb('${c.id}')">✕</button></div>
   </div>`).join('');
   const sel=document.getElementById('sendPbSel');
   if(sel) sel.innerHTML='<option value="">— select —</option>'+phonebook.map(c=>`<option value="${c.number}">${c.name} (${c.number})</option>`).join('');
@@ -1264,28 +1464,21 @@ async function loadHistory(){
   const from=document.getElementById('histFrom')?.value;
   const to=document.getElementById('histTo')?.value;
   const target=(document.getElementById('histTarget')?.value||'').trim();
-  const msgId=(document.getElementById('histId')?.value||'').trim();
-
-  let url='/me/logs?limit=200';
-  if(dev) url+=`&device=${dev}`;
+  let url='/me/logs?limit=200'; if(dev) url+=`&device=${dev}`;
   let rows=await api(url);
-
   if(dir) rows=rows.filter(r=>r.direction===dir);
   if(from) rows=rows.filter(r=>new Date(r.created_at)>=new Date(from));
   if(to) rows=rows.filter(r=>new Date(r.created_at)<=new Date(to+' 23:59:59'));
   if(target) rows=rows.filter(r=>(r.jid||'').includes(target));
-  if(msgId) rows=rows.filter(r=>String(r.id)===msgId);
-
   selectedIds.clear();
   const tbody=document.getElementById('histBody');
-  if(!rows.length){tbody.innerHTML=`<tr><td colspan="8" class="empty-row">No messages found</td></tr>`;return;}
+  if(!rows.length){tbody.innerHTML=`<tr><td colspan="7" class="empty-row">No messages found</td></tr>`;return;}
   tbody.innerHTML=rows.map(r=>`<tr>
     <td><input type="checkbox" onchange="toggleSel(${r.id},this.checked)"></td>
     <td style="color:var(--muted);font-size:.74rem">${r.id}</td>
     <td style="white-space:nowrap;font-size:.74rem;color:var(--muted)">${fmtDate(r.created_at)}</td>
-    <td style="font-size:.74rem">${devices.find(d=>d.id===r.device_id)?.name||r.device_id||'—'}</td>
+    <td style="font-size:.74rem">${devices.find(d=>d.id===r.device_id)?.name||'—'}</td>
     <td class="td-mono">${r.jid||'—'}</td>
-    <td style="font-size:.74rem;color:var(--muted)">unknown</td>
     <td><span class="badge ${r.media_type?'b-yellow':'b-gray'}">${r.media_type||'text'}</span></td>
     <td class="td-wrap">${esc(r.text||'[media]')}</td>
   </tr>`).join('');
@@ -1293,25 +1486,22 @@ async function loadHistory(){
 function toggleSel(id,checked){ if(checked) selectedIds.add(id); else selectedIds.delete(id); }
 function toggleAll(cb){ document.querySelectorAll('#histBody input[type=checkbox]').forEach(c=>{ c.checked=cb.checked; const id=Number(c.closest('tr').cells[1].textContent); if(cb.checked) selectedIds.add(id); else selectedIds.delete(id); }); }
 async function deleteSelected(){ if(!selectedIds.size){toast('Select messages first','err');return;} if(!confirm(`Delete ${selectedIds.size} messages?`)) return; await api('/me/logs',{method:'DELETE',body:JSON.stringify({ids:[...selectedIds]})}); toast('Deleted'); loadHistory(); }
-async function deleteAllHistory(){ if(!confirm('Delete ALL history? Cannot be undone.')) return; const dev=document.getElementById('histDev')?.value; await api('/me/logs',{method:'DELETE',body:JSON.stringify(dev?{device:dev}:{})}); toast('All deleted'); loadHistory(); }
+async function deleteAllHistory(){ if(!confirm('Delete ALL history?')) return; const dev=document.getElementById('histDev')?.value; await api('/me/logs',{method:'DELETE',body:JSON.stringify(dev?{device:dev}:{})}); toast('All deleted'); loadHistory(); }
 function exportHistory(){ const dev=document.getElementById('histDev')?.value; const dir=document.getElementById('histStatus')?.value; let url='/me/logs/export?'; if(dev) url+=`device=${dev}&`; if(dir) url+=`direction=${dir}&`; location.href=url; }
 
 // ─── Inbox ──────────────────────────────────────────────
 async function loadInbox(){
   const dev=document.getElementById('inboxDev')?.value;
-  const url='/me/inbox'+(dev?`?device=${dev}`:'');
-  const rows=await api(url);
+  const rows=await api('/me/inbox'+(dev?`?device=${dev}`:''));
   const tbody=document.getElementById('inboxBody');
-  if(!rows.length){tbody.innerHTML=`<tr><td colspan="9" class="empty-row">No data yet</td></tr>`;return;}
+  if(!rows.length){tbody.innerHTML=`<tr><td colspan="7" class="empty-row">No data yet</td></tr>`;return;}
   tbody.innerHTML=rows.map(r=>`<tr>
     <td style="color:var(--muted);font-size:.74rem">${r.id}</td>
     <td style="font-size:.74rem">${devices.find(d=>d.id===r.device_id)?.name||'—'}</td>
     <td class="td-mono">${r.jid||'—'}</td>
-    <td style="color:var(--muted);font-size:.74rem">${r.sender_name||'unknown'}</td>
+    <td style="font-size:.74rem;color:var(--muted)">${r.sender_name||'unknown'}</td>
     <td class="td-wrap">${esc(r.text||'[media]')}</td>
-    <td style="color:var(--muted);font-size:.74rem">—</td>
-    <td style="white-space:nowrap;font-size:.74rem;color:var(--muted)">${fmtDate(r.created_at)}</td>
-    <td class="td-mono" style="font-size:.72rem">${r.reply_id||'—'}</td>
+    <td style="font-size:.74rem;color:var(--muted)">${fmtDate(r.created_at)}</td>
     <td><button class="btn btn-ghost btn-sm" onclick="replyInbox('${r.jid}')">Reply</button></td>
   </tr>`).join('');
 }
@@ -1320,20 +1510,15 @@ function replyInbox(jid){ goPage('send'); setTimeout(()=>{ document.getElementBy
 // ─── Templates ──────────────────────────────────────────
 let tpls=[];
 async function loadTpls(){
-  tpls=await api('/me/templates');
-  const el=document.getElementById('tplList');
+  tpls=await api('/me/templates'); const el=document.getElementById('tplList');
   if(!tpls.length){el.innerHTML='<div class="panel" style="color:var(--muted);font-size:.84rem">No templates yet.</div>';return;}
   el.innerHTML=tpls.map(t=>`<div class="panel" style="padding:14px 16px;display:flex;align-items:center;gap:12px;margin-bottom:10px">
-    <div style="flex:1"><div style="font-weight:600;margin-bottom:3px">${esc(t.name)}</div>
-    <div style="font-size:.79rem;color:var(--muted);white-space:pre-wrap">${esc(t.message.slice(0,120))}${t.message.length>120?'…':''}</div></div>
+    <div style="flex:1"><div style="font-weight:600;margin-bottom:3px">${esc(t.name)}</div><div style="font-size:.79rem;color:var(--muted)">${esc(t.message.slice(0,120))}${t.message.length>120?'…':''}</div></div>
     <button class="btn btn-ghost btn-sm" onclick="editTpl(${t.id})">Edit</button>
     <button class="btn btn-danger btn-sm" onclick="deleteTpl(${t.id})">✕</button>
   </div>`).join('');
 }
-function editTpl(id){
-  const t=tpls.find(x=>x.id===id); if(!t) return;
-  tplEditId=id; document.getElementById('tplName').value=t.name; document.getElementById('tplMsg').value=t.message; document.getElementById('tplSaveBtn').textContent='Update';
-}
+function editTpl(id){ const t=tpls.find(x=>x.id===id); if(!t) return; tplEditId=id; document.getElementById('tplName').value=t.name; document.getElementById('tplMsg').value=t.message; document.getElementById('tplSaveBtn').textContent='Update'; }
 async function saveTpl(){
   const name=document.getElementById('tplName').value.trim(); const message=document.getElementById('tplMsg').value.trim();
   if(!name||!message){toast('Fill all fields','err');return;}
@@ -1350,12 +1535,7 @@ async function loadTplsForSend(){
 function applyTpl(){ const v=document.getElementById('sendTplSel').value; if(v) document.getElementById('sendMsg').value=decodeURIComponent(v); }
 
 // ─── Send ───────────────────────────────────────────────
-function updateSendTarget(){
-  const v=document.getElementById('sendTargetType').value;
-  document.getElementById('stManual').style.display=v==='input'?'':'none';
-  document.getElementById('stGroup').style.display=v==='group'?'':'none';
-  document.getElementById('stPhonebook').style.display=v==='phonebook'?'':'none';
-}
+function updateSendTarget(){ const v=document.getElementById('sendTargetType').value; document.getElementById('stManual').style.display=v==='input'?'':'none'; document.getElementById('stGroup').style.display=v==='group'?'':'none'; document.getElementById('stPhonebook').style.display=v==='phonebook'?'':'none'; }
 function toggleFileSrc(){ const v=document.getElementById('sendFileSrc').value; document.getElementById('fileUpField').style.display=v==='upload'?'':'none'; document.getElementById('fileUrlField').style.display=v==='url'?'':'none'; }
 function toggleSched(){ document.getElementById('schedField').style.display=document.getElementById('sendSchedType').value==='schedule'?'':'none'; }
 function toggleMsgSrc(){ const v=document.getElementById('sendMsgSrc').value; document.getElementById('msgManField').style.display=v==='template'?'none':''; document.getElementById('msgTplField').style.display=v==='template'?'':'none'; }
@@ -1376,7 +1556,7 @@ async function doSend(){
   const msg=document.getElementById('sendMsg').value.trim();
   const schedType=document.getElementById('sendSchedType').value;
   const btn=document.getElementById('sendBtn'); btn.disabled=true; document.getElementById('sendStatus').textContent='Sending…';
-  try{
+  try {
     if(schedType==='schedule'){
       const runAt=document.getElementById('sendSchedTime').value; if(!runAt){toast('Set schedule time','err');btn.disabled=false;return;}
       const tok=devices.find(d=>d.id==devId)?.token;
@@ -1399,7 +1579,7 @@ async function doSend(){
       }
     }
     document.getElementById('sendStatus').textContent='';
-  } catch(e){ toast('Error: '+e.message,'err'); document.getElementById('sendStatus').textContent='Error: '+e.message; }
+  } catch(e){ toast('Error: '+e.message,'err'); document.getElementById('sendStatus').textContent=''; }
   btn.disabled=false;
 }
 
@@ -1409,23 +1589,27 @@ async function sendPoll(){
   const target=document.getElementById('pollTarget').value.trim();
   const name=document.getElementById('pollName').value.trim();
   const choices=document.getElementById('pollChoices').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  const select_type=document.getElementById('pollSelect').value;
   if(!devId||!target||!name||choices.length<2){toast('Fill all fields (min 2 choices)','err');return;}
-  const pollList=JSON.parse(localStorage.getItem('polls')||'[]');
-  pollList.push({id:Date.now(),name,message:document.getElementById('pollMsg').value,choices,select:document.getElementById('pollSelect').value,target,device:devId});
-  localStorage.setItem('polls',JSON.stringify(pollList));
-  renderPollList(); toast('Poll created!');
+  try {
+    const res = await api('/me/polls/send',{method:'POST',body:JSON.stringify({device_id:devId,target,name,choices,select_type})});
+    if(res.error) throw new Error(res.error);
+    toast('Poll sent! ✅');
+    document.getElementById('pollTarget').value='';
+    document.getElementById('pollName').value='';
+    document.getElementById('pollChoices').value='';
+    loadPollHistory();
+  } catch(e){ toast('Error: '+e.message,'err'); }
 }
-function renderPollList(){
-  const polls=JSON.parse(localStorage.getItem('polls')||'[]');
-  const tb=document.getElementById('pollList');
-  if(!polls.length){tb.innerHTML='<tr><td colspan="5" class="empty-row">No polls yet</td></tr>';return;}
-  tb.innerHTML=polls.map(p=>`<tr>
-    <td>${esc(p.name)}</td><td class="td-wrap">${esc(p.message||'—')}</td>
-    <td>${p.choices.length} choices</td><td>${p.select}</td>
-    <td><button class="btn btn-danger btn-sm" onclick="deletePoll(${p.id})">✕</button></td>
-  </tr>`).join('');
+async function loadPollHistory(){
+  try {
+    const rows = await api('/me/logs?limit=50');
+    const polls = rows.filter(r=>r.status==='poll');
+    const tb=document.getElementById('pollList');
+    if(!polls.length){tb.innerHTML='<tr><td colspan="4" class="empty-row">No polls yet</td></tr>';return;}
+    tb.innerHTML=polls.map(r=>`<tr><td class="td-wrap">${esc(r.text||'')}</td><td class="td-mono">${r.jid||'—'}</td><td style="font-size:.74rem">${devices.find(d=>d.id===r.device_id)?.name||'—'}</td><td style="font-size:.74rem;color:var(--muted)">${fmtDate(r.created_at)}</td></tr>`).join('');
+  } catch(e){}
 }
-function deletePoll(id){ let p=JSON.parse(localStorage.getItem('polls')||'[]'); p=p.filter(x=>x.id!==id); localStorage.setItem('polls',JSON.stringify(p)); renderPollList(); }
 
 // ─── Recurring ──────────────────────────────────────────
 async function loadRecurring(){
@@ -1449,13 +1633,7 @@ async function addRecurring(){
 }
 async function toggleRec(id){ await api(`/me/recurring/${id}/toggle`,{method:'POST'}); loadRecurring(); }
 async function deleteRec(id){ await api(`/me/recurring/${id}`,{method:'DELETE'}); loadRecurring(); toast('Deleted'); }
-function showCronHint(){
-  const parts=document.getElementById('recCron').value.trim().split(' '); if(parts.length!==5){document.getElementById('cronHint').textContent='';return;}
-  const [min,hour,,, dow]=parts; let h='';
-  if(dow==='*') h=`Every day at ${hour.padStart(2,'0')}:${min.padStart(2,'0')}`;
-  else h=`Every week on day ${dow} at ${hour}:${min}`;
-  document.getElementById('cronHint').textContent=h;
-}
+function showCronHint(){ const parts=document.getElementById('recCron').value.trim().split(' '); if(parts.length!==5){document.getElementById('cronHint').textContent='';return;} const [min,hour,,,dow]=parts; let h=''; if(dow==='*') h=`Every day at ${hour.padStart(2,'0')}:${min.padStart(2,'0')}`; else h=`Weekly (day ${dow}) at ${hour}:${min}`; document.getElementById('cronHint').textContent=h; }
 
 // ─── Autoreply ──────────────────────────────────────────
 async function loadAR(){
@@ -1479,21 +1657,80 @@ async function addAR(){
 async function toggleAR(id){ await api(`/me/autoreplies/${id}/toggle`,{method:'POST'}); loadAR(); }
 async function deleteAR(id){ await api(`/me/autoreplies/${id}`,{method:'DELETE'}); loadAR(); toast('Deleted'); }
 
+// ─── Rotator ────────────────────────────────────────────
+async function doRotator(){
+  const sel=document.getElementById('rotDevSel');
+  const device_ids=[...sel.selectedOptions].map(o=>Number(o.value));
+  const targets=document.getElementById('rotTargets').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  const message=document.getElementById('rotMsg').value.trim();
+  const delay_ms=Number(document.getElementById('rotDelay').value)*1000;
+  if(!device_ids.length){toast('Select at least one device','err');return;}
+  if(!targets.length){toast('Enter at least one target','err');return;}
+  if(!message){toast('Enter a message','err');return;}
+  try {
+    const res=await api('/me/rotator/send',{method:'POST',body:JSON.stringify({device_ids,targets,message,delay_ms})});
+    if(res.error) throw new Error(res.error);
+    toast(res.message||'Rotator started! ✅');
+    document.getElementById('rotStatus').textContent='✅ '+res.message;
+  } catch(e){ toast('Error: '+e.message,'err'); }
+}
+
+// ─── Follow Up ──────────────────────────────────────────
+async function doFollowUp(){
+  const device_id=document.getElementById('fuDev').value;
+  const target=document.getElementById('fuTarget').value.trim();
+  const message1=document.getElementById('fuMsg1').value.trim();
+  const message2=document.getElementById('fuMsg2').value.trim();
+  const delay_hours=document.getElementById('fuHours').value;
+  if(!device_id||!target||!message1||!message2){toast('Fill all fields','err');return;}
+  try {
+    const res=await api('/me/followup',{method:'POST',body:JSON.stringify({device_id,target,message1,message2,delay_hours})});
+    if(res.error) throw new Error(res.error);
+    toast('First message sent! Follow-up scheduled ✅');
+    document.getElementById('fuStatus').textContent=`✅ Follow-up scheduled for: ${fmtDate(res.scheduled_at)}`;
+  } catch(e){ toast('Error: '+e.message,'err'); }
+}
+
+// ─── Chaining ───────────────────────────────────────────
+function addChainStep(){
+  const n=document.getElementById('chainSteps').children.length+1;
+  const div=document.createElement('div');
+  div.className='panel'; div.style.cssText='padding:14px;margin-bottom:10px;background:var(--panel)';
+  div.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><b style="font-size:.85rem">Step ${n}</b><button class="btn btn-danger btn-sm" onclick="this.closest('.panel').remove();renumberChain()">Remove</button></div>
+    <div class="field"><label>Message</label><textarea rows="2" placeholder="Step ${n} message…" class="chain-msg"></textarea></div>
+    <div class="field" style="margin-bottom:0"><label>Wait before NEXT step (minutes)</label><input type="number" value="60" min="0" class="chain-wait"></div>`;
+  document.getElementById('chainSteps').appendChild(div);
+}
+function clearChainSteps(){ document.getElementById('chainSteps').innerHTML=''; }
+function renumberChain(){ document.querySelectorAll('#chainSteps .panel').forEach((p,i)=>{ p.querySelector('b').textContent=`Step ${i+1}`; }); }
+async function doChaining(){
+  const device_id=document.getElementById('chainDev').value;
+  const target=document.getElementById('chainTarget').value.trim();
+  if(!device_id||!target){toast('Select device and enter target','err');return;}
+  const panels=[...document.getElementById('chainSteps').children];
+  if(!panels.length){toast('Add at least one step','err');return;}
+  const steps=panels.map(p=>({ message:p.querySelector('.chain-msg').value.trim(), wait_minutes:Number(p.querySelector('.chain-wait').value)||0 }));
+  if(steps.some(s=>!s.message)){toast('Fill all step messages','err');return;}
+  try {
+    const res=await api('/me/chaining',{method:'POST',body:JSON.stringify({device_id,target,steps})});
+    if(res.error) throw new Error(res.error);
+    toast(res.message||'Chain started! ✅');
+    document.getElementById('chainStatus').textContent='✅ '+res.message;
+  } catch(e){ toast('Error: '+e.message,'err'); }
+}
+
 // ─── Webhook ────────────────────────────────────────────
 async function loadWH(){
   const devId=document.getElementById('whDev')?.value; if(!devId) return;
   const d=devices.find(x=>x.id==devId); if(!d) return;
   document.getElementById('whSettings').innerHTML=`<div class="panel">
     ${['webhook_url','webhook_connect_url','webhook_status_url','webhook_chaining_url'].map(k=>`
-      <div class="field"><label>${k.replace(/_/g,' ')}</label>
-        <input id="wh_${k}" value="${d[k]||''}" placeholder="https://…">
-      </div>`).join('')}
+      <div class="field"><label>${k.replace(/_/g,' ')}</label><input id="wh_${k}" value="${d[k]||''}" placeholder="https://…"></div>`).join('')}
     <button class="btn btn-primary" onclick="saveWH(${devId})">Save Webhooks</button>
   </div>`;
 }
 async function saveWH(devId){
-  const body={};
-  ['webhook_url','webhook_connect_url','webhook_status_url','webhook_chaining_url'].forEach(k=>{body[k]=document.getElementById('wh_'+k).value.trim();});
+  const body={}; ['webhook_url','webhook_connect_url','webhook_status_url','webhook_chaining_url'].forEach(k=>{body[k]=document.getElementById('wh_'+k).value.trim();});
   await api(`/me/devices/${devId}`,{method:'PUT',body:JSON.stringify(body)}); devices=await api('/me/devices'); toast('Webhooks saved!');
 }
 
@@ -1502,14 +1739,12 @@ async function loadGroups(){
   const devId=document.getElementById('grpDev')?.value;
   if(!devId){document.getElementById('grpGrid').innerHTML='<p style="color:var(--muted)">Select a device above</p>';return;}
   document.getElementById('grpGrid').innerHTML='<p style="color:var(--muted)">Loading…</p>';
-  try{
+  try {
     grpCache=await api(`/me/devices/${devId}/groups`);
-    // Cache for persistence across refresh
-    localStorage.setItem('grpCache_'+devId, JSON.stringify(grpCache));
+    localStorage.setItem('grpCache_'+devId,JSON.stringify(grpCache));
     renderGroupGrid();
-  }catch(e){document.getElementById('grpGrid').innerHTML=`<p style="color:var(--red)">Error: ${e.message}</p>`;}
+  } catch(e){ document.getElementById('grpGrid').innerHTML=`<p style="color:var(--red)">Error: ${e.message}</p>`; }
 }
-
 function renderGroupGrid(){
   if(!grpCache.length){document.getElementById('grpGrid').innerHTML='<p style="color:var(--muted)">No groups found</p>';return;}
   document.getElementById('grpGrid').innerHTML=grpCache.map(g=>`<div class="group-card" onclick="showGrpDetail('${g.id}')">
@@ -1517,28 +1752,13 @@ function renderGroupGrid(){
     <div class="group-info"><div class="group-name">${esc(g.name)}</div><div class="group-sub">${g.participants} members</div></div>
   </div>`).join('');
 }
-
-// On open groups page: load from cache first, then refresh in background
-const _origLoadGroups = loadGroups;
-function onOpenGroups(){
-  const devId=document.getElementById('grpDev')?.value;
-  if(devId){
-    const cached=localStorage.getItem('grpCache_'+devId);
-    if(cached){ grpCache=JSON.parse(cached); renderGroupGrid(); }
-  }
-  _origLoadGroups();
-}
-
 function showGrpDetail(id){
   const g=grpCache.find(x=>x.id===id); if(!g) return;
   document.getElementById('grpModalContent').innerHTML=`
     <div class="field"><label>Group Name</label><div style="padding:8px;background:var(--panel);border-radius:8px">${esc(g.name)}</div></div>
-    <div class="field"><label>JID (Group ID)</label>
-      <div class="token-box"><code>${g.id}</code><button class="btn btn-ghost btn-sm" onclick="navigator.clipboard.writeText('${g.id}').then(()=>toast('Copied!'))">Copy</button></div>
-    </div>
+    <div class="field"><label>JID (Group ID)</label><div class="token-box"><code>${g.id}</code><button class="btn btn-ghost btn-sm" onclick="navigator.clipboard.writeText('${g.id}').then(()=>toast('Copied!'))">Copy</button></div></div>
     <div class="field"><label>Members</label><div style="padding:8px;background:var(--panel);border-radius:8px">${g.participants}</div></div>
-    <button class="btn btn-primary" style="margin-top:6px" onclick="sendToGroup('${g.id}')">Send to this Group</button>
-  `;
+    <button class="btn btn-primary" style="margin-top:6px" onclick="sendToGroup('${g.id}')">Send to this Group</button>`;
   openM('grpModal');
 }
 function sendToGroup(jid){ closeM('grpModal'); goPage('send'); setTimeout(()=>{ document.getElementById('sendTargetType').value='input'; updateSendTarget(); document.getElementById('sendTargets').value=jid; },200); }
@@ -1560,17 +1780,15 @@ async function deleteSched(id){ await api(`/me/schedules/${id}`,{method:'DELETE'
 
 // ─── Statistics ─────────────────────────────────────────
 async function loadStats(){
-  try{
+  try {
     const {summary,byDay}=await api('/me/stats');
     document.getElementById('stSent').textContent=summary.total_sent||0;
     document.getElementById('stRecv').textContent=summary.total_received||0;
     document.getElementById('stSent7').textContent=summary.sent_7d||0;
     document.getElementById('stAll30').textContent=summary.total_30d||0;
-
     const canvas=document.getElementById('statsCanvas'); const ctx=canvas.getContext('2d');
     const dpr=window.devicePixelRatio||1; const W=canvas.parentElement.clientWidth-40; const H=200;
     canvas.style.width=W+'px'; canvas.style.height=H+'px'; canvas.width=W*dpr; canvas.height=H*dpr; ctx.scale(dpr,dpr);
-
     const days=[...new Set(byDay.map(r=>r.day))].sort().slice(-14);
     if(!days.length){ctx.fillStyle='#93a1b8';ctx.font='13px sans-serif';ctx.fillText('No data yet',W/2-40,H/2);return;}
     const sentMap={},recvMap={};
@@ -1584,12 +1802,12 @@ async function loadStats(){
       const sh=sv/maxV*(H-pad.t-pad.b),rh=rv/maxV*(H-pad.t-pad.b);
       ctx.fillStyle='rgba(59,130,246,.75)'; ctx.beginPath();ctx.roundRect(x,H-pad.b-sh,bw,sh,2);ctx.fill();
       ctx.fillStyle='rgba(34,197,94,.7)'; ctx.beginPath();ctx.roundRect(x+bw+1,H-pad.b-rh,bw,rh,2);ctx.fill();
-      ctx.fillStyle='#93a1b8';ctx.font=`9px sans-serif`;ctx.textAlign='center'; ctx.fillText(day.slice(5),x+bw,H-pad.b+12);
+      ctx.fillStyle='#93a1b8';ctx.font='9px sans-serif';ctx.textAlign='center'; ctx.fillText(day.slice(5),x+bw,H-pad.b+12);
     });
-  }catch(e){}
+  } catch(e){}
 }
 
-// ─── API Page ───────────────────────────────────────────
+// ─── API Page ────────────────────────────────────────────
 function renderApiPage(){
   document.getElementById('apiDevList').innerHTML=devices.map(d=>`<div class="panel" style="padding:14px 16px;margin-bottom:10px">
     <div style="font-weight:700;margin-bottom:8px">${esc(d.name)}<span style="color:var(--muted);font-weight:400;margin-left:8px;font-size:.8rem">${d.number||''}</span></div>
@@ -1601,28 +1819,12 @@ function renderApiPage(){
 }
 
 // ─── Misc UI ────────────────────────────────────────────
-function addChainStep(){
-  const n=document.getElementById('chainSteps').children.length+1;
-  const div=document.createElement('div'); div.className='panel'; div.style.cssText='padding:12px;margin-bottom:8px;background:var(--panel)';
-  div.innerHTML=`<div class="field"><label>Step ${n} — Message</label><textarea rows="2" placeholder="Step ${n} message…"></textarea></div><div class="field"><label>Wait before next (minutes)</label><input type="number" value="60" min="1"></div>`;
-  document.getElementById('chainSteps').appendChild(div);
-}
-
 async function doLogout(){ await api('/auth/logout',{method:'POST'}); location.href='/login'; }
-
-// ─── Utils ──────────────────────────────────────────────
 function esc(s){ const d=document.createElement('div');d.textContent=s;return d.innerHTML; }
 function fmtDate(s){ if(!s) return '—'; const d=new Date(s); return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short'})+' '+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}); }
 function dlBlob(content,name,type){ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type}));a.download=name;a.click(); }
 
-// ─── Override onOpen for groups cache ───────────────────
-const _onOpen = onOpen;
-function onOpen(p){
-  if(p==='groups') return onOpenGroups();
-  _onOpen(p);
-}
-
-// ─── Boot ───────────────────────────────────────────────
+// ─── Boot ────────────────────────────────────────────────
 boot();
 </script>
 </body>

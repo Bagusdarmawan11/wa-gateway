@@ -355,3 +355,82 @@ export function guessMimetype(url) {
   };
   return map[ext] || 'application/octet-stream';
 }
+
+/** Pairing via 8-digit code (no QR). Nomor harus format internasional tanpa +, misal 628xxx */
+export async function requestPairingCode(deviceId, phoneNumber) {
+  const s = getOrCreate(deviceId);
+  const device = await getDevice(deviceId);
+  if (!device) throw new Error('Device tidak ditemukan');
+
+  // Bersihkan nomor: hanya angka
+  const cleanNumber = String(phoneNumber).replace(/[^0-9]/g, '');
+  if (!cleanNumber || cleanNumber.length < 10) throw new Error('Nomor tidak valid');
+
+  s.status = 'starting';
+  s.qrDataUrl = null;
+
+  const { state, saveCreds } = await useDbAuthState(deviceId);
+  const { version } = await fetchLatestBaileysVersion();
+
+  s.sock = makeWASocket({
+    version,
+    logger,
+    auth: {
+      creds: state.creds,
+      keys: makeCacheableSignalKeyStore(state.keys, logger),
+    },
+    browser: ['Synpera', 'Chrome', '1.0.0'],
+    markOnlineOnConnect: false,
+    generateHighQualityLinkPreview: false,
+  });
+
+  s.sock.ev.on('creds.update', saveCreds);
+
+  // Minta pairing code segera setelah socket ready
+  let code = null;
+  await new Promise((resolve) => {
+    // Tunggu sebentar agar socket terdaftar
+    setTimeout(async () => {
+      try {
+        code = await s.sock.requestPairingCode(cleanNumber);
+        console.log(`[device ${deviceId}] Pairing code: ${code}`);
+        resolve();
+      } catch (e) {
+        console.error(`[device ${deviceId}] requestPairingCode error:`, e.message);
+        resolve();
+      }
+    }, 2000);
+  });
+
+  s.sock.ev.on('connection.update', async (update) => {
+    const { connection, lastDisconnect } = update;
+    if (connection === 'open') {
+      s.status = 'connected';
+      s.qrDataUrl = null;
+      s.me = s.sock.user;
+      const number = (s.sock.user?.id || '').split(':')[0];
+      await pool.query('UPDATE devices SET number = $1 WHERE id = $2', [number, deviceId]);
+      console.log(`[device ${deviceId}] Terhubung (code) sebagai`, number);
+      fireWebhook(device.webhook_connect_url, { event: 'connect', device_id: deviceId, number, status: 'connected' });
+    }
+    if (connection === 'close') {
+      const code2 = lastDisconnect?.error?.output?.statusCode;
+      s.status = 'disconnected';
+      s.me = null;
+      if (code2 === DisconnectReason.loggedOut) {
+        await clearAuthState(deviceId);
+        await pool.query('UPDATE devices SET number = NULL WHERE id = $1', [deviceId]);
+        return;
+      }
+      if (!s.reconnecting) {
+        s.reconnecting = true;
+        setTimeout(() => {
+          s.reconnecting = false;
+          connectDevice(deviceId).catch(() => {});
+        }, 3000);
+      }
+    }
+  });
+
+  return code;
+}

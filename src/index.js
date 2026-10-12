@@ -13,7 +13,7 @@ import {
 import {
   connectDevice, connectAllSessions, getState,
   sendText, sendMedia, toJid, logoutDevice, listGroups,
-  removeSession, guessMimetype,
+  removeSession, guessMimetype, requestPairingCode,
 } from './wa.js';
 
 const app = express();
@@ -504,6 +504,163 @@ app.get('/me/stats', requireLogin, async (req, res) => {
     GROUP BY day, direction ORDER BY day
   `, [req.user.id]);
   res.json({ summary: rows[0], byDay });
+});
+
+// ---------- Dashboard Summary ----------
+app.get('/me/dashboard', requireLogin, async (req, res) => {
+  try {
+    const { rows: devRows } = await pool.query('SELECT * FROM devices WHERE user_id=$1', [req.user.id]);
+    const { rows: statsRows } = await pool.query(`
+      SELECT
+        COUNT(*) FILTER (WHERE direction='out') as total_sent,
+        COUNT(*) FILTER (WHERE direction='in') as total_received
+      FROM message_logs WHERE user_id=$1
+    `, [req.user.id]);
+    const { rows: schedRows } = await pool.query(
+      "SELECT COUNT(*)::int AS pending FROM schedules WHERE user_id=$1 AND done=FALSE",
+      [req.user.id]
+    );
+    const connected = devRows.filter(d => {
+      const { status } = getState(d.id);
+      return status === 'connected';
+    });
+    res.json({
+      total_devices: devRows.length,
+      connected_devices: connected.length,
+      total_sent: Number(statsRows[0]?.total_sent || 0),
+      total_received: Number(statsRows[0]?.total_received || 0),
+      pending_schedules: schedRows[0]?.pending || 0,
+      plan: 'Free', // placeholder
+      plan_devices_limit: 5,
+    });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// ---------- Pairing Code (Code method) ----------
+app.post('/me/devices/:id/pairing-code', requireLogin, async (req, res) => {
+  const d = await ownDevice(req, res);
+  if (!d) return;
+  const { phone_number } = req.body || {};
+  if (!phone_number) return res.status(400).json({ error: 'phone_number wajib' });
+  try {
+    const code = await requestPairingCode(d.id, phone_number);
+    if (!code) return res.status(500).json({ error: 'Gagal mendapatkan kode pairing. Pastikan nomor valid dan belum terhubung.' });
+    res.json({ status: true, code });
+  } catch(e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ---------- Poll (simpan ke DB) ----------
+app.get('/me/polls', requireLogin, async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      'SELECT * FROM schedules WHERE user_id=$1 AND text LIKE \'[POLL]%\' ORDER BY id DESC LIMIT 100',
+      [req.user.id]
+    );
+    res.json(rows);
+  } catch(e) { res.json([]); }
+});
+
+app.post('/me/polls/send', requireLogin, async (req, res) => {
+  const { device_id, target, name, choices, select_type } = req.body || {};
+  if (!device_id || !target || !name || !choices?.length) {
+    return res.status(400).json({ error: 'device_id, target, name, choices wajib' });
+  }
+  const d = await getDevice(Number(device_id));
+  if (!d || d.user_id !== req.user.id) return res.status(403).json({ error: 'Bukan device kamu' });
+  const s = getState(d.id);
+  if (s.status !== 'connected') return res.status(400).json({ error: 'Device belum terhubung' });
+  try {
+    const { getOrCreate } = await import('./wa.js').catch(() => ({ getOrCreate: null }));
+    // Kirim poll via Baileys sock
+    const { sessions } = await import('./wa.js').then(m => ({ sessions: m._sessions })).catch(() => ({ sessions: null }));
+    // Gunakan sendText sebagai fallback dengan format teks
+    const pollText = `📊 *${name}*\n\n${choices.map((c,i)=>`${i+1}. ${c}`).join('\n')}\n\n_Pilih satu jawaban:_`;
+    const jid = toJid(target);
+    await sendText(d.id, target, pollText);
+    await logMessage({ userId: req.user.id, deviceId: d.id, direction: 'out', jid, text: `[POLL] ${name}`, status: 'poll' });
+    res.json({ status: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// ---------- Rotator ----------
+app.post('/me/rotator/send', requireLogin, async (req, res) => {
+  const { device_ids, targets, message, delay_ms } = req.body || {};
+  if (!device_ids?.length || !targets?.length || !message) {
+    return res.status(400).json({ error: 'device_ids, targets, message wajib' });
+  }
+  // Verifikasi semua device milik user
+  for (const did of device_ids) {
+    const d = await getDevice(Number(did));
+    if (!d || d.user_id !== req.user.id) return res.status(403).json({ error: `Device ${did} bukan milik kamu` });
+  }
+  const delay = Math.max(Number(delay_ms) || 3000, 2000);
+  res.json({ status: true, message: `Rotator ke ${targets.length} target dari ${device_ids.length} device dimulai` });
+  (async () => {
+    let devIdx = 0;
+    for (const t of targets) {
+      const did = device_ids[devIdx % device_ids.length];
+      devIdx++;
+      try {
+        const jid = await sendText(did, t, message);
+        await logMessage({ userId: req.user.id, deviceId: did, direction: 'out', jid, text: message, status: 'rotator' });
+      } catch(e) {
+        const jid = toJid(t);
+        await logMessage({ userId: req.user.id, deviceId: did, direction: 'out', jid, text: message, status: 'failed: '+e.message });
+      }
+      await sleep(delay + rand(0, 1000));
+    }
+  })();
+});
+
+// ---------- Follow Up ----------
+app.post('/me/followup', requireLogin, async (req, res) => {
+  const { device_id, target, message1, message2, delay_hours } = req.body || {};
+  if (!device_id || !target || !message1 || !message2) {
+    return res.status(400).json({ error: 'device_id, target, message1, message2 wajib' });
+  }
+  const d = await getDevice(Number(device_id));
+  if (!d || d.user_id !== req.user.id) return res.status(403).json({ error: 'Bukan device kamu' });
+  const s = getState(d.id);
+  if (s.status !== 'connected') return res.status(400).json({ error: 'Device belum terhubung' });
+  try {
+    const jid = await sendText(d.id, target, message1);
+    await logMessage({ userId: req.user.id, deviceId: d.id, direction: 'out', jid, text: message1, status: 'followup-1' });
+    // Schedule follow-up message
+    const runAt = new Date(Date.now() + (Number(delay_hours) || 24) * 3600000);
+    await pool.query(
+      'INSERT INTO schedules (user_id, device_id, jid, text, run_at) VALUES ($1,$2,$3,$4,$5)',
+      [req.user.id, d.id, jid, message2, runAt]
+    );
+    res.json({ status: true, scheduled_at: runAt });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// ---------- Chaining ----------
+app.post('/me/chaining', requireLogin, async (req, res) => {
+  const { device_id, target, steps } = req.body || {};
+  if (!device_id || !target || !steps?.length) {
+    return res.status(400).json({ error: 'device_id, target, steps wajib' });
+  }
+  const d = await getDevice(Number(device_id));
+  if (!d || d.user_id !== req.user.id) return res.status(403).json({ error: 'Bukan device kamu' });
+  const s = getState(d.id);
+  if (s.status !== 'connected') return res.status(400).json({ error: 'Device belum terhubung' });
+  res.json({ status: true, message: `Chain ${steps.length} pesan dimulai` });
+  (async () => {
+    let cumulativeMs = 0;
+    for (const step of steps) {
+      await new Promise(resolve => setTimeout(resolve, cumulativeMs));
+      cumulativeMs = (Number(step.wait_minutes) || 0) * 60000;
+      try {
+        const jid = await sendText(d.id, target, step.message);
+        await logMessage({ userId: req.user.id, deviceId: d.id, direction: 'out', jid, text: step.message, status: 'chaining' });
+      } catch(e) {
+        console.error('[chaining] error:', e.message);
+      }
+    }
+  })();
 });
 
 // ---------- Cron: pesan terjadwal tiap menit ----------
