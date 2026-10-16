@@ -1,0 +1,27 @@
+{
+  "name": "synpera",
+  "version": "3.0.0",
+  "description": "WhatsApp API Gateway multi-user (Baileys + Express + Neon PostgreSQL)",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "engines": {
+    "node": "22.x"
+  },
+  "dependencies": {
+    "@whiskeysockets/baileys": "6.7.22",
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.7",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^2.0.2",
+    "node-cron": "^3.0.3",
+    "pg": "^8.13.1",
+    "pino": "^9.5.0",
+    "nodemailer": "^6.9.14",
+    "qrcode": "^1.5.4"
+  }
+}
