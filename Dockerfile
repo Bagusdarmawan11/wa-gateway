@@ -1,10 +1,10 @@
 FROM node:22-alpine
 WORKDIR /app
-# Menyalin package.json saja
-COPY package.json ./
-# Memaksa menggunakan npm install biasa
-RUN npm install
-# Menyalin sisa kode aplikasi
+
+# Install git (dibutuhkan oleh dependency Baileys)
+RUN apk add --no-cache git
+
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev
 COPY . .
-# Jalankan aplikasi
 CMD ["npm", "start"]
