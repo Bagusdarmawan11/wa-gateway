@@ -4,7 +4,7 @@ WORKDIR /app
 # Install git (dibutuhkan oleh dependency Baileys)
 RUN apk add --no-cache git
 
-COPY package.json package-lock.json ./
-RUN npm ci --omit=dev
+COPY package.json ./
+RUN npm install
 COPY . .
 CMD ["npm", "start"]
