@@ -1271,12 +1271,24 @@ async function doConnectQR(){
   closeM('connectMethodModal');
   await api(`/me/devices/${currentConnectDeviceId}/connect`,{method:'POST'});
   toast('Connecting… QR will appear shortly');
-  setTimeout(async()=>{
+  // Tunggu QR siap dengan retry — cek tiap 1.5 detik, maksimal 15 detik
+  let waited = 0;
+  const waitQr = setInterval(async()=>{
+    waited += 1500;
     devices = await api('/me/devices');
     const d = devices.find(x=>x.id===currentConnectDeviceId);
-    if(d?.state?.status==='qr') showQr(currentConnectDeviceId);
     renderDevices();
-  },2500);
+    if(d?.state?.status==='qr'){
+      clearInterval(waitQr);
+      showQr(currentConnectDeviceId);
+    } else if(d?.state?.status==='connected'){
+      clearInterval(waitQr);
+      toast('Connected! ✅');
+    } else if(waited >= 15000){
+      clearInterval(waitQr);
+      toast('QR timeout — coba lagi','err');
+    }
+  }, 1500);
 }
 
 function showCodeMethod(){
@@ -1422,10 +1434,34 @@ async function showQr(id){
   if(d?.state?.qr) document.getElementById('qrImg').src=d.state.qr;
   document.getElementById('qrStatus').textContent='Waiting for scan…';
   openM('qrModal'); clearInterval(qrPoll);
+  let expiredCount = 0;
   qrPoll=setInterval(async()=>{
-    devices=await api('/me/devices'); const dd=devices.find(x=>x.id===id); if(!dd){clearInterval(qrPoll);return;}
-    if(dd.state?.qr) document.getElementById('qrImg').src=dd.state.qr;
-    if(dd.state?.status==='connected'){clearInterval(qrPoll);closeM('qrModal');renderDevices();toast('Connected! ✅');}
+    devices=await api('/me/devices');
+    const dd=devices.find(x=>x.id===id);
+    if(!dd){clearInterval(qrPoll);return;}
+    // Update QR kalau ada yang baru
+    if(dd.state?.qr) {
+      document.getElementById('qrImg').src=dd.state.qr;
+      document.getElementById('qrStatus').textContent='Waiting for scan…';
+      expiredCount = 0;
+    }
+    // Berhasil connect
+    if(dd.state?.status==='connected'){
+      clearInterval(qrPoll);closeM('qrModal');renderDevices();toast('Connected! ✅');
+      return;
+    }
+    // QR expired (status idle/disconnected dan tidak ada QR baru)
+    if(!dd.state?.qr && dd.state?.status!=='starting' && dd.state?.status!=='qr'){
+      expiredCount++;
+      if(expiredCount >= 3){ // 3x poll tanpa QR = expired, minta reconnect
+        expiredCount = 0;
+        document.getElementById('qrStatus').textContent='QR expired, meminta QR baru…';
+        // Minta QR baru otomatis
+        try {
+          await api(`/me/devices/${id}/connect`,{method:'POST'});
+        } catch(e){}
+      }
+    }
   },3000);
 }
 
