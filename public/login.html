@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Masuk — Synpera</title>
+<link rel="icon" type="image/png" href="/assets/favicon.png">
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<style>
+  :root, [data-theme="dark"] {
+    --bg:#070b16; --card:rgba(255,255,255,.05); --border:rgba(255,255,255,.12);
+    --text:#e9eef7; --muted:#93a1b8; --input:rgba(255,255,255,.05);
+    --accent-soft:rgba(59,130,246,.12); --accent-border:rgba(59,130,246,.45); --accent-text:#93c5fd;
+    --success:rgba(34,197,94,.12); --success-border:rgba(34,197,94,.35); --success-text:#4ade80;
+  }
+  [data-theme="light"] {
+    --bg:#f6f8fc; --card:rgba(255,255,255,.85); --border:rgba(15,23,42,.12);
+    --text:#0f172a; --muted:#5b6b84; --input:rgba(15,23,42,.04);
+    --accent-soft:rgba(29,78,216,.08); --accent-border:rgba(29,78,216,.4); --accent-text:#1d4ed8;
+    --success:rgba(22,163,74,.1); --success-border:rgba(22,163,74,.35); --success-text:#16a34a;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family:'Inter',system-ui,sans-serif; min-height:100vh;
+    background:var(--bg); color:var(--text);
+    display:flex; align-items:center; justify-content:center;
+    padding:24px; position:relative; overflow:hidden; transition:background .35s, color .35s;
+  }
+  .blob { position:absolute; border-radius:50%; filter:blur(130px); opacity:.26; animation:drift 16s ease-in-out infinite alternate; pointer-events:none; }
+  [data-theme="light"] .blob { opacity:.15; }
+  .b1 { width:480px;height:480px; background:#1e3a8a; top:-140px; left:-120px; }
+  .b2 { width:400px;height:400px; background:#0e7490; bottom:-120px; right:-100px; animation-delay:-8s; }
+  @keyframes drift { from{transform:translate(0,0) scale(1);} to{transform:translate(50px,40px) scale(1.12);} }
+  .card {
+    width:100%; max-width:420px; padding:40px 36px; border-radius:24px;
+    background:var(--card); border:1px solid var(--border);
+    backdrop-filter:blur(22px) saturate(160%);
+    box-shadow:0 24px 60px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.1);
+    animation:fadeUp .6s ease both; position:relative; z-index:1;
+  }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(20px);} to{opacity:1;transform:translateY(0);} }
+  .logo { display:flex; align-items:center; justify-content:center; gap:11px; font-weight:800; font-size:1.25rem; text-decoration:none; color:var(--text); margin-bottom:6px; }
+  .logo img { width:36px;height:36px; object-fit:contain; }
+  h1 { text-align:center; font-size:1.45rem; font-weight:800; margin:16px 0 6px; letter-spacing:-.02em; }
+  .sub { text-align:center; color:var(--muted); font-size:.92rem; margin-bottom:28px; }
+  label { display:block; font-size:.85rem; font-weight:600; margin-bottom:7px; }
+  .field { margin-bottom:18px; }
+  .input-wrap { position:relative; }
+  input[type="email"], input[type="password"], input[type="text"] {
+    width:100%; padding:13px 16px; border-radius:13px; font-size:.95rem; font-family:inherit;
+    background:var(--input); border:1px solid var(--border); color:var(--text); outline:none; transition:all .25s;
+  }
+  input:focus { border-color:var(--accent-border); box-shadow:0 0 0 3px var(--accent-soft); }
+  .toggle-pw {
+    position:absolute; right:8px; top:50%; transform:translateY(-50%);
+    background:none; border:none; cursor:pointer; padding:8px; border-radius:8px;
+    color:var(--muted); transition:color .2s; display:grid; place-items:center;
+  }
+  .toggle-pw:hover { color:var(--text); }
+  .remember-row {
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:20px; font-size:.88rem;
+  }
+  .remember-label { display:flex; align-items:center; gap:8px; cursor:pointer; color:var(--muted); user-select:none; }
+  .remember-label input[type="checkbox"] {
+    width:16px; height:16px; accent-color:#2563eb; padding:0; margin:0; cursor:pointer; border-radius:4px;
+  }
+  .forgot-link { color:var(--accent-text); text-decoration:none; font-weight:600; font-size:.88rem; }
+  .forgot-link:hover { text-decoration:underline; }
+  .btn {
+    width:100%; padding:14px; border-radius:14px; border:none; cursor:pointer;
+    font-weight:700; font-size:1rem; font-family:inherit; color:#fff;
+    background:linear-gradient(135deg,#2563eb,#0891b2);
+    box-shadow:0 4px 20px rgba(37,99,235,.3); transition:all .25s;
+  }
+  .btn:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(37,99,235,.4); }
+  .btn:disabled { opacity:.6; cursor:not-allowed; transform:none; }
+  .msg {
+    display:none; padding:12px 16px; border-radius:12px; margin-bottom:18px; font-size:.88rem;
+  }
+  .msg.error {
+    background:rgba(239,68,68,.12); border:1px solid rgba(239,68,68,.35);
+    color:#f87171; animation:shake .4s;
+  }
+  .msg.success {
+    background:var(--success); border:1px solid var(--success-border);
+    color:var(--success-text);
+  }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+  .switch { text-align:center; margin-top:22px; color:var(--muted); font-size:.9rem; }
+  .switch a { color:var(--accent-text); text-decoration:none; font-weight:600; }
+  .switch a:hover { text-decoration:underline; }
+  .divider { border:none; border-top:1px solid var(--border); margin:20px 0; }
+  /* Lupa kata sandi panel */
+  #forgotPanel { display:none; }
+  #loginPanel { display:block; }
+  .ts-wrap { display:flex; justify-content:center; margin-bottom:18px; }
+  /* Sembunyikan branding Turnstile agar tetap clean */
+  .cf-turnstile { transform-origin:center; }
+</style>
+</head>
+<body>
+<div class="blob b1"></div><div class="blob b2"></div>
+
+<div class="card">
+  <a href="/" class="logo"><img src="/assets/logo.png" alt="Synpera"> Synpera</a>
+
+  <!-- ===== Panel Login ===== -->
+  <div id="loginPanel">
+    <h1>Selamat Datang Kembali</h1>
+    <p class="sub">Masuk untuk mengelola WhatsApp API kamu</p>
+
+    <div class="msg error" id="loginError"></div>
+
+    <form id="loginForm">
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="loginEmail" placeholder="nama@email.com" required autocomplete="email">
+      </div>
+      <div class="field">
+        <label>Kata Sandi</label>
+        <div class="input-wrap">
+          <input type="password" id="loginPw" placeholder="••••••••" required autocomplete="current-password" style="padding-right:46px">
+          <button type="button" class="toggle-pw" id="toggleLoginPw" aria-label="Tampilkan password">
+            <svg id="eyeOpen" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg id="eyeClosed" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="remember-row">
+        <label class="remember-label">
+          <input type="checkbox" id="rememberMe"> Ingat saya
+        </label>
+        <a href="#" class="forgot-link" id="showForgot">Lupa kata sandi?</a>
+      </div>
+
+      <div class="ts-wrap">
+        <div class="cf-turnstile" data-sitekey="0x4AAAAAAFR5QERU61mACiR6" data-theme="auto" id="tsTurnstileLogin" data-callback="onTurnstileLoginSuccess" data-expired-callback="onTurnstileLoginExpire"></div>
+      </div>
+
+      <button class="btn" type="submit" id="loginBtn">Masuk</button>
+    </form>
+
+    <p class="switch">Belum punya akun? <a href="/register">Daftar gratis</a></p>
+  </div>
+
+  <!-- ===== Panel Lupa Kata Sandi ===== -->
+  <div id="forgotPanel">
+    <h1>Atur Ulang Kata Sandi</h1>
+    <p class="sub">Masukkan email terdaftar kamu — kami kirimkan link untuk membuat kata sandi baru</p>
+
+    <div class="msg error" id="forgotError"></div>
+    <div class="msg success" id="forgotSuccess"></div>
+
+    <form id="forgotForm">
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="forgotEmail" placeholder="nama@email.com" required autocomplete="email">
+      </div>
+
+      <div class="ts-wrap">
+        <div class="cf-turnstile" data-sitekey="0x4AAAAAAFR5QERU61mACiR6" data-theme="auto" id="tsTurnstileForgot" data-callback="onTurnstileForgotSuccess" data-expired-callback="onTurnstileForgotExpire"></div>
+      </div>
+
+      <button class="btn" type="submit" id="forgotBtn">Kirim Link Reset</button>
+    </form>
+
+    <p class="switch"><a href="#" id="backToLogin">← Kembali ke Masuk</a></p>
+  </div>
+</div>
+
+<script>
+  // ===== Tema (dari localStorage, tanpa toggle di halaman ini) =====
+  const root = document.documentElement;
+  root.setAttribute('data-theme', localStorage.getItem('synpera-theme') || 'dark');
+
+  // ===== Toggle password =====
+  const loginPw = document.getElementById('loginPw');
+  document.getElementById('toggleLoginPw').onclick = () => {
+    const show = loginPw.type === 'password';
+    loginPw.type = show ? 'text' : 'password';
+    document.getElementById('eyeOpen').style.display = show ? 'none' : 'block';
+    document.getElementById('eyeClosed').style.display = show ? 'block' : 'none';
+  };
+
+  // ===== Isi email dari URL param (dikirim dari halaman register / redirect) =====
+  const urlParams = new URLSearchParams(location.search);
+  if (urlParams.get('email')) {
+    document.getElementById('loginEmail').value = urlParams.get('email');
+  }
+
+  // ===== Turnstile helpers =====
+  // Callback opsional untuk logging
+  window.onTurnstileLoginSuccess  = (t) => console.log('[TS] login ready', t?.slice(0,10));
+  window.onTurnstileForgotSuccess = (t) => console.log('[TS] forgot ready', t?.slice(0,10));
+
+  // Ambil token — coba dari turnstile.getResponse, fallback ke input tersembunyi
+  function getTurnstileToken(widgetId) {
+    try {
+      const t = turnstile.getResponse(widgetId);
+      if (t) return t;
+    } catch {}
+    // Fallback: ambil dari input[name="cf-turnstile-response"] dalam widget
+    const wrap = document.getElementById(widgetId);
+    const inp = wrap?.querySelector('input[name="cf-turnstile-response"]');
+    return inp?.value || '';
+  }
+
+  // ===== Tampilkan error/success =====
+  function showMsg(elId, type, text) {
+    const el = document.getElementById(elId);
+    el.className = 'msg ' + type;
+    el.textContent = text;
+    el.style.display = 'block';
+  }
+  function hideMsg(elId) {
+    document.getElementById(elId).style.display = 'none';
+  }
+
+  // ===== Form Login =====
+  document.getElementById('loginForm').onsubmit = async (e) => {
+    e.preventDefault();
+    hideMsg('loginError');
+    const btn = document.getElementById('loginBtn');
+    btn.disabled = true; btn.textContent = 'Memproses…';
+
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = loginPw.value;
+    const remember = document.getElementById('rememberMe').checked;
+    let tsToken = getTurnstileToken('tsTurnstileLogin');
+
+    // Jika token belum ada, tunggu max 5 detik
+    if (!tsToken) {
+      btn.textContent = 'Menunggu verifikasi…';
+      for (let i = 0; i < 10; i++) {
+        await new Promise(r => setTimeout(r, 500));
+        tsToken = getTurnstileToken('tsTurnstileLogin');
+        if (tsToken) break;
+      }
+    }
+    if (!tsToken) {
+      showMsg('loginError', 'error', 'Verifikasi Cloudflare gagal. Coba refresh halaman lalu submit kembali.');
+      btn.disabled = false; btn.textContent = 'Masuk';
+      return;
+    }
+
+    try {
+      const r = await fetch('/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, remember, ts_token: tsToken }),
+      });
+      const data = await r.json();
+
+      if (r.status === 404 || (data.redirect_register)) {
+        // Email belum terdaftar → arahkan ke register dengan email ter-isi
+        location.href = '/register?email=' + encodeURIComponent(email);
+        return;
+      }
+      if (!r.ok) throw new Error(data.error || 'Login gagal');
+      location.href = '/dashboard';
+    } catch (e2) {
+      showMsg('loginError', 'error', e2.message);
+      btn.disabled = false; btn.textContent = 'Masuk';
+      try { turnstile.reset('tsTurnstileLogin'); } catch {}
+    }
+  };
+
+  // ===== Lupa Kata Sandi – toggle panel =====
+  document.getElementById('showForgot').onclick = (e) => {
+    e.preventDefault();
+    document.getElementById('loginPanel').style.display = 'none';
+    document.getElementById('forgotPanel').style.display = 'block';
+    // Isi email jika sudah diisi di form login
+    const em = document.getElementById('loginEmail').value;
+    if (em) document.getElementById('forgotEmail').value = em;
+  };
+  document.getElementById('backToLogin').onclick = (e) => {
+    e.preventDefault();
+    document.getElementById('forgotPanel').style.display = 'none';
+    document.getElementById('loginPanel').style.display = 'block';
+    hideMsg('forgotError'); hideMsg('forgotSuccess');
+    try { turnstile.reset('tsTurnstileForgot'); } catch {}
+  };
+
+  // ===== Form Lupa Kata Sandi =====
+  document.getElementById('forgotForm').onsubmit = async (e) => {
+    e.preventDefault();
+    hideMsg('forgotError'); hideMsg('forgotSuccess');
+    const btn = document.getElementById('forgotBtn');
+    btn.disabled = true; btn.textContent = 'Mengirim…';
+
+    const email = document.getElementById('forgotEmail').value.trim();
+    let tsToken = getTurnstileToken('tsTurnstileForgot');
+
+    if (!tsToken) {
+      btn.textContent = 'Menunggu verifikasi…';
+      for (let i = 0; i < 10; i++) {
+        await new Promise(r => setTimeout(r, 500));
+        tsToken = getTurnstileToken('tsTurnstileForgot');
+        if (tsToken) break;
+      }
+    }
+    if (!tsToken) {
+      showMsg('forgotError', 'error', 'Verifikasi Cloudflare gagal. Coba refresh halaman lalu submit kembali.');
+      btn.disabled = false; btn.textContent = 'Kirim Link Reset';
+      return;
+    }
+
+    try {
+      const r = await fetch('/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, ts_token: tsToken }),
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || 'Gagal mengirim email');
+      showMsg('forgotSuccess', 'success',
+        'Link reset kata sandi telah dikirim. Silakan cek inbox atau folder spam emailmu, lalu klik link di dalamnya untuk membuat kata sandi baru.');
+      btn.textContent = 'Terkirim ✓';
+    } catch (e2) {
+      showMsg('forgotError', 'error', e2.message);
+      btn.disabled = false; btn.textContent = 'Kirim Link Reset';
+      try { turnstile.reset('tsTurnstileForgot'); } catch {}
+    }
+  };
+</script>
+</body>
+</html>
