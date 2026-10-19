@@ -291,7 +291,7 @@ tr:hover td{background:var(--panel)}
 .modal-box.wide{max-width:640px}
 .modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
 .modal-head h3{font-size:1.1rem;font-weight:750}
-.modal-close{background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;padding:4px;border-radius:6px}
+.modal-close{background:none;border:none;color:var(--muted);cursor:pointer;padding:6px;border-radius:6px;display:flex;align-items:center;justify-content:center;transition:color .15s,background .15s}
 .modal-close:hover{color:var(--text)}
 
 /* MISC */
@@ -515,8 +515,8 @@ pre.code-block{background:var(--code-bg);border:1px solid var(--border);border-r
   <div class="panel">
     <div class="panel-head"><h2>Contacts</h2>
       <div style="display:flex;gap:8px">
-        <button class="btn btn-ghost btn-sm" onclick="exportContacts()">Export CSV</button>
-        <button class="btn btn-primary btn-sm" onclick="openAddContact()">+ Add Contact</button>
+        <button class="btn btn-ghost btn-sm" onclick="exportContacts()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" style="vertical-align:middle;margin-right:4px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export CSV</button>
+        <button class="btn btn-primary btn-sm" onclick="openAddContact()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" style="vertical-align:middle;margin-right:4px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Contact</button>
       </div>
     </div>
     <div class="field"><input id="pbSearch" placeholder="Search contacts…" oninput="renderPhonebook()"></div>
@@ -536,9 +536,9 @@ pre.code-block{background:var(--code-bg);border:1px solid var(--border);border-r
       <div class="field"><label>Target JID</label><input id="histTarget" placeholder="Search JID…" oninput="loadHistory()"></div>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
-      <button class="btn btn-danger btn-sm" onclick="deleteSelected()">Delete Selected</button>
-      <button class="btn btn-danger btn-sm" onclick="deleteAllHistory()">Delete All</button>
-      <button class="btn btn-ghost btn-sm" onclick="exportHistory()">⬇ Download CSV</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteSelected()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><polyline points="3,6 5,6 21,6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg> Delete Selected</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteAllHistory()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><polyline points="3,6 5,6 21,6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg> Delete All</button>
+      <button class="btn btn-ghost btn-sm" onclick="exportHistory()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" style="vertical-align:middle;margin-right:4px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export CSV</button>
     </div>
     <div class="table-wrap"><table>
       <thead><tr><th><input type="checkbox" id="checkAll" onchange="toggleAll(this)"></th><th>ID</th><th>Time</th><th>Device</th><th>Target</th><th>Type</th><th>Message</th></tr></thead>
@@ -554,7 +554,7 @@ pre.code-block{background:var(--code-bg);border:1px solid var(--border);border-r
     <div class="field"><label>Device</label><select id="sendDev"></select></div>
     <div class="field"><label>Select Target</label><select id="sendTargetType" onchange="updateSendTarget()"><option value="input">Manual Input</option><option value="group">Group</option><option value="phonebook">Phonebook</option></select></div>
     <div class="field" id="stManual"><label>Input Target <span class="hint">— 1 number per line</span></label><textarea id="sendTargets" rows="4" placeholder="628123456789&#10;628987654321"></textarea></div>
-    <div class="field" id="stGroup" style="display:none"><label>Select Group</label><select id="sendGroupSel"><option>— Load groups first —</option></select><button class="btn btn-ghost btn-sm" style="margin-top:6px" onclick="loadGroupsForSend()">↻ Refresh Groups</button></div>
+    <div class="field" id="stGroup" style="display:none"><label>Select Group</label><select id="sendGroupSel"><option>— Load groups first —</option></select><button class="btn btn-ghost btn-sm" style="margin-top:6px" onclick="loadGroupsForSend()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" style="vertical-align:middle;margin-right:4px"><polyline points="23,4 23,10 17,10"/><polyline points="1,20 1,14 7,14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>Refresh Groups</button></div>
     <div class="field" id="stPhonebook" style="display:none"><label>Select Contact</label><select id="sendPbSel"><option value="">— choose —</option></select></div>
     <div class="row">
       <div class="field"><label>Country</label><select id="sendCountry"><option value="62">🇮🇩 Indonesia (+62)</option><option value="1">🇺🇸 USA/Canada (+1)</option><option value="44">🇬🇧 UK (+44)</option><option value="91">🇮🇳 India (+91)</option><option value="86">🇨🇳 China (+86)</option><option value="60">🇲🇾 Malaysia (+60)</option><option value="65">🇸🇬 Singapore (+65)</option></select></div>
@@ -591,7 +591,7 @@ pre.code-block{background:var(--code-bg);border:1px solid var(--border);border-r
   <div class="panel"><h2>Add Template</h2>
     <div class="field"><label>Name</label><input id="tplName" placeholder="Template name"></div>
     <div class="field"><label>Message</label><textarea id="tplMsg" rows="5" placeholder="Input your template message"></textarea><div class="typing-hint">Variables: {name}, {var1}, {var2}</div></div>
-    <button class="btn btn-primary" id="tplSaveBtn" onclick="saveTpl()">+ Add</button>
+    <button class="btn btn-primary" id="tplSaveBtn" onclick="saveTpl()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" style="vertical-align:middle;margin-right:4px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add</button>
   </div>
   <div id="tplList"></div>
 </div>
@@ -625,7 +625,7 @@ pre.code-block{background:var(--code-bg);border:1px solid var(--border);border-r
       <div class="field"><label>Cron Expression</label><input id="recCron" placeholder="0 9 * * 1-5" oninput="showCronHint()"><div class="cron-hint" id="cronHint"></div></div>
     </div>
     <div class="field"><label>Message</label><textarea id="recMsg" rows="3" placeholder="Your recurring message…"></textarea></div>
-    <button class="btn btn-primary" onclick="addRecurring()">+ Add Recurring</button>
+    <button class="btn btn-primary" onclick="addRecurring()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" style="vertical-align:middle;margin-right:4px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Recurring</button>
   </div>
   <div id="recList"></div>
 </div>
@@ -637,7 +637,7 @@ pre.code-block{background:var(--code-bg);border:1px solid var(--border);border-r
     <div class="field"><label>Device</label><select id="arDev" onchange="loadAR()"></select></div>
     <div class="row"><div class="field"><label>Keyword</label><input id="arKw" placeholder="hello"></div><div class="field"><label>Match Mode</label><select id="arMode"><option value="exact">Exact</option><option value="contains">Contains</option><option value="startswith">Starts With</option></select></div></div>
     <div class="field"><label>Response</label><textarea id="arResp" rows="3" placeholder="Hi! Thanks for your message…"></textarea></div>
-    <button class="btn btn-primary" onclick="addAR()">+ Add Rule</button>
+    <button class="btn btn-primary" onclick="addAR()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" style="vertical-align:middle;margin-right:4px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Rule</button>
   </div>
   <div id="arList"></div>
 </div>
@@ -685,8 +685,8 @@ pre.code-block{background:var(--code-bg);border:1px solid var(--border);border-r
     <div class="row"><div class="field"><label>Device</label><select id="chainDev"></select></div><div class="field"><label>Target</label><input id="chainTarget" placeholder="628123456789"></div></div>
     <div id="chainSteps"></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
-      <button class="btn btn-ghost btn-sm" onclick="addChainStep()">+ Add Step</button>
-      <button class="btn btn-danger btn-sm" onclick="clearChainSteps()">Clear All</button>
+      <button class="btn btn-ghost btn-sm" onclick="addChainStep()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" style="vertical-align:middle;margin-right:4px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Step</button>
+      <button class="btn btn-danger btn-sm" onclick="clearChainSteps()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" style="vertical-align:middle;margin-right:4px"><polyline points="3,6 5,6 21,6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>Clear All</button>
     </div>
     <button class="btn btn-primary" onclick="doChaining()">▶ Start Chain</button>
     <div id="chainStatus" style="margin-top:10px;font-size:.84rem;color:var(--muted)"></div>
@@ -733,7 +733,7 @@ pre.code-block{background:var(--code-bg);border:1px solid var(--border);border-r
   <div class="panel">
     <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:16px">
       <div class="field" style="flex:1;min-width:200px;margin-bottom:0"><label>Device</label><select id="grpDev" onchange="loadGroups()"></select></div>
-      <button class="btn btn-ghost btn-sm" onclick="loadGroups()">↻ Refresh</button>
+      <button class="btn btn-ghost btn-sm" onclick="loadGroups()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" style="vertical-align:middle;margin-right:4px"><polyline points="23,4 23,10 17,10"/><polyline points="1,20 1,14 7,14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>Refresh</button>
     </div>
     <div class="groups-grid" id="grpGrid"><p style="color:var(--muted)">Select a device above</p></div>
   </div>
@@ -941,7 +941,7 @@ Authorization: Bearer {device_token}
 <!-- Add Device Modal -->
 <div class="modal" id="addDeviceModal">
   <div class="modal-box">
-    <div class="modal-head"><h3 data-i18n="add_device_title">Add Device</h3><button class="modal-close" onclick="closeM('addDeviceModal')">✕</button></div>
+    <div class="modal-head"><h3 data-i18n="add_device_title">Add Device</h3><button class="modal-close" onclick="closeM('addDeviceModal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
     <div class="add-device-field">
       <label data-i18n="add_device_name_label">Device Name <span style="color:var(--muted);font-weight:400;font-size:.74rem" data-i18n="add_device_name_hint">— optional, auto-filled from WhatsApp after connect</span></label>
       <div class="input-with-icon"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div><input id="addDevName" placeholder="e.g. Fonnte, My WA" autocomplete="off"></div>
@@ -961,7 +961,7 @@ Authorization: Bearer {device_token}
 <!-- Connect Method Modal -->
 <div class="modal" id="connectMethodModal">
   <div class="modal-box">
-    <div class="modal-head"><h3>Connect Method</h3><button class="modal-close" onclick="closeM('connectMethodModal')">✕</button></div>
+    <div class="modal-head"><h3>Connect Method</h3><button class="modal-close" onclick="closeM('connectMethodModal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
     <p style="color:var(--muted);font-size:.85rem;margin-bottom:4px">Choose how you want to link this device to WhatsApp.</p>
     <div class="connect-methods">
       <button class="connect-method-btn" onclick="doConnectQR()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h.01M14 17h.01M17 14h.01M17 17h3v3h-3z"/></svg>QR</button>
@@ -976,7 +976,7 @@ Authorization: Bearer {device_token}
 <!-- Code Pairing Modal -->
 <div class="modal" id="codePairingModal">
   <div class="modal-box">
-    <div class="modal-head"><h3 id="codePairingTitle">Connect via Code</h3><button class="modal-close" onclick="closeM('codePairingModal')">✕</button></div>
+    <div class="modal-head"><h3 id="codePairingTitle">Connect via Code</h3><button class="modal-close" onclick="closeM('codePairingModal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
     <p style="color:var(--muted);font-size:.84rem;margin-bottom:16px">Enter your WhatsApp number to receive an 8-digit pairing code.</p>
     <div class="field">
       <label>WhatsApp Number (full format)</label>
@@ -1001,7 +1001,7 @@ Authorization: Bearer {device_token}
       <h3 id="waWebTitle">Connect via WA Web</h3>
       <div style="display:flex;align-items:center;gap:10px">
         <button class="btn btn-primary btn-sm" onclick="toast('Watch tutorial: replace with your YouTube link','err')">Watch tutorial</button>
-        <button class="modal-close" onclick="closeM('waWebModal')">✕</button>
+        <button class="modal-close" onclick="closeM('waWebModal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
     </div>
     <p style="color:var(--muted);font-size:.84rem;margin-bottom:4px">Use this when your WhatsApp account asks for a passkey during login. It takes about 2 minutes.</p>
@@ -1045,7 +1045,7 @@ Authorization: Bearer {device_token}
 <!-- Passkey Info Modal -->
 <div class="modal" id="passkeyModal">
   <div class="modal-box">
-    <div class="modal-head"><h3>Connect via Passkey</h3><button class="modal-close" onclick="closeM('passkeyModal')">✕</button></div>
+    <div class="modal-head"><h3>Connect via Passkey</h3><button class="modal-close" onclick="closeM('passkeyModal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
     <div class="passkey-info">
       <b>ℹ️ Passkey accounts</b><br>
       If your WhatsApp account uses a passkey during login, use <b>Passkey</b> or <b>WA Web</b> method instead of QR. The QR method won't work for passkey-protected accounts.
@@ -1061,7 +1061,7 @@ Authorization: Bearer {device_token}
 <!-- QR Modal -->
 <div class="modal" id="qrModal">
   <div class="modal-box" style="text-align:center">
-    <div class="modal-head"><h3>Scan QR Code</h3><button class="modal-close" onclick="closeM('qrModal')">✕</button></div>
+    <div class="modal-head"><h3>Scan QR Code</h3><button class="modal-close" onclick="closeM('qrModal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
     <img id="qrImg" alt="QR">
     <p style="margin-top:12px;font-size:.8rem;color:var(--muted)">Open WhatsApp → Linked Devices → Link a Device</p>
     <div id="qrStatus" style="margin-top:6px;font-size:.8rem;color:var(--muted)"></div>
@@ -1071,7 +1071,7 @@ Authorization: Bearer {device_token}
 <!-- Device Edit Modal -->
 <div class="modal" id="devEditModal">
   <div class="modal-box wide">
-    <div class="modal-head"><h3 data-i18n="device_settings_title">Device Settings</h3><button class="modal-close" onclick="closeM('devEditModal')">✕</button></div>
+    <div class="modal-head"><h3 data-i18n="device_settings_title">Device Settings</h3><button class="modal-close" onclick="closeM('devEditModal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
     <div class="field"><label data-i18n="device_name_label">Device Name</label><input id="eDevName"></div>
     <div class="field"><label>Whitelist IP <span class="hint">(comma separated, blank = all)</span></label><input id="eDevIp" placeholder="0.0.0.0"></div>
     <div style="border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:14px">
@@ -1089,13 +1089,13 @@ Authorization: Bearer {device_token}
 
 <!-- Group Detail Modal -->
 <div class="modal" id="grpModal">
-  <div class="modal-box"><div class="modal-head"><h3>Group Detail</h3><button class="modal-close" onclick="closeM('grpModal')">✕</button></div><div id="grpModalContent"></div></div>
+  <div class="modal-box"><div class="modal-head"><h3>Group Detail</h3><button class="modal-close" onclick="closeM('grpModal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div><div id="grpModalContent"></div></div>
 </div>
 
 <!-- Phonebook Modal -->
 <div class="modal" id="pbModal">
   <div class="modal-box">
-    <div class="modal-head"><h3 id="pbModalTitle">Add Contact</h3><button class="modal-close" onclick="closeM('pbModal')">✕</button></div>
+    <div class="modal-head"><h3 id="pbModalTitle">Add Contact</h3><button class="modal-close" onclick="closeM('pbModal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
     <div class="field"><label>Name</label><input id="pbMName" placeholder="John Doe"></div>
     <div class="field"><label>Number</label><input id="pbMNum" placeholder="628123456789"></div>
     <div class="field"><label>Notes</label><input id="pbMNote" placeholder="optional…"></div>
@@ -1537,19 +1537,23 @@ function renderDevices(){
     const st = d.state?.status||'idle';
     const stCls = st==='connected'?'st-connected':st==='qr'?'st-qr':'st-off';
     const stLabel = st==='connected'?t.dev_status_connected:st==='qr'?t.dev_status_qr:t.dev_status_offline;
+    const avatarColor = st==='connected'?'var(--green)':st==='qr'?'var(--yellow)':'var(--muted)';
+    const avatarBg = st==='connected'?'rgba(34,197,94,.13)':st==='qr'?'rgba(251,191,36,.12)':'var(--accent-soft)';
     return `<div class="device-card">
-      <div class="device-avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg></div>
+      <div class="device-avatar" style="background:${avatarBg};color:${avatarColor}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="24" height="24"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+      </div>
       <div class="device-info">
         <div class="device-name">${esc(d.name)} <span class="status-pill ${stCls}"><span class="dot"></span>${stLabel}</span></div>
         <div class="device-num">${d.number||t.dev_not_connected} · Token: ${d.token?.slice(0,12)}…</div>
       </div>
       <div class="device-actions">
         ${st!=='connected'?`<button class="btn btn-primary btn-sm" onclick="connectExisting(${d.id})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" style="vertical-align:middle;margin-right:4px"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>${t.dev_btn_connect}</button>`:''}
-        ${st==='qr'?`<button class="btn btn-ghost btn-sm" onclick="showQr(${d.id})">${t.dev_btn_show_qr}</button>`:''}
-        ${st==='connected'?`<button class="btn btn-ghost btn-sm" onclick="disconnectDev(${d.id})">${t.dev_btn_disconnect}</button>`:''}
+        ${st==='qr'?`<button class="btn btn-ghost btn-sm" onclick="showQr(${d.id})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" style="vertical-align:middle;margin-right:4px"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h.01M14 17h.01M17 14h.01M17 17h3v3h-3z"/></svg>${t.dev_btn_show_qr}</button>`:''}
+        ${st==='connected'?`<button class="btn btn-ghost btn-sm" onclick="disconnectDev(${d.id})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" style="vertical-align:middle;margin-right:4px"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>${t.dev_btn_disconnect}</button>`:''}
         <button class="btn btn-ghost btn-sm" onclick="openDevEdit(${d.id})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" style="vertical-align:middle;margin-right:4px"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>${t.dev_btn_settings}</button>
-        <button class="btn btn-ghost btn-sm" onclick="regenTok(${d.id})">↻ ${t.dev_btn_token}</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteDev(${d.id})">✕</button>
+        <button class="btn btn-ghost btn-sm" onclick="regenTok(${d.id})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" style="vertical-align:middle;margin-right:4px"><polyline points="23,4 23,10 17,10"/><polyline points="1,20 1,14 7,14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>${t.dev_btn_token}</button>
+        <button class="btn btn-danger btn-sm" style="padding:5px 8px" onclick="deleteDev(${d.id})" title="Delete device"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><polyline points="3,6 5,6 21,6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
       </div>
     </div>`;
   }).join('');
@@ -1582,7 +1586,7 @@ async function disconnectDev(id){
   showConfirm(`Putuskan koneksi perangkat "${d?.name||id}"?`, async()=>{
     await api(`/me/devices/${id}/disconnect`,{method:'POST'});
     devices = await api('/me/devices'); renderDevices(); toast('Disconnected');
-  }, {icon:'🔌', title:'Putuskan Koneksi', okLabel:'Disconnect', okClass:'btn-danger'});
+  }, {icon:'<svg viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="36" height="36"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>', title:'Putuskan Koneksi', okLabel:'Disconnect', okClass:'btn-danger'});
 }
 async function deleteDev(id){
   const d = devices.find(x=>x.id===id);
@@ -1703,7 +1707,7 @@ function renderPhonebook(){
   el.innerHTML=filtered.map(c=>`<div class="pb-contact">
     <div class="pb-av">${c.name.charAt(0).toUpperCase()}</div>
     <div style="flex:1"><div class="pb-name">${esc(c.name)}</div><div class="pb-num">${c.number}</div></div>
-    <div style="display:flex;gap:6px"><button class="btn btn-ghost btn-sm" onclick="editPb('${c.id}')">Edit</button><button class="btn btn-danger btn-sm" onclick="deletePb('${c.id}')">✕</button></div>
+    <div style="display:flex;gap:6px"><button class="btn btn-ghost btn-sm" onclick="editPb('${c.id}')">Edit</button><button class="btn btn-danger btn-sm" style="padding:5px 8px" onclick="deletePb('${c.id}')" title="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><polyline points="3,6 5,6 21,6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button></div>
   </div>`).join('');
   const sel=document.getElementById('sendPbSel');
   if(sel) sel.innerHTML='<option value="">— select —</option>'+phonebook.map(c=>`<option value="${c.number}">${c.name} (${c.number})</option>`).join('');
@@ -1766,7 +1770,7 @@ async function loadInbox(){
     <td style="font-size:.74rem;color:var(--muted)">${r.sender_name||'unknown'}</td>
     <td class="td-wrap">${esc(r.text||'[media]')}</td>
     <td style="font-size:.74rem;color:var(--muted)">${fmtDate(r.created_at)}</td>
-    <td><button class="btn btn-ghost btn-sm" onclick="replyInbox('${r.jid}')">Reply</button></td>
+    <td><button class="btn btn-ghost btn-sm" onclick="replyInbox('${r.jid}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" style="vertical-align:middle;margin-right:4px"><polyline points="9,17 4,12 9,7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>Reply</button></td>
   </tr>`).join('');
 }
 function replyInbox(jid){ goPage('send'); setTimeout(()=>{ document.getElementById('sendTargets').value=jid; },200); }
@@ -1778,8 +1782,8 @@ async function loadTpls(){
   if(!tpls.length){el.innerHTML='<div class="panel" style="color:var(--muted);font-size:.84rem">No templates yet.</div>';return;}
   el.innerHTML=tpls.map(t=>`<div class="panel" style="padding:14px 16px;display:flex;align-items:center;gap:12px;margin-bottom:10px">
     <div style="flex:1"><div style="font-weight:600;margin-bottom:3px">${esc(t.name)}</div><div style="font-size:.79rem;color:var(--muted)">${esc(t.message.slice(0,120))}${t.message.length>120?'…':''}</div></div>
-    <button class="btn btn-ghost btn-sm" onclick="editTpl(${t.id})">Edit</button>
-    <button class="btn btn-danger btn-sm" onclick="deleteTpl(${t.id})">✕</button>
+    <button class="btn btn-ghost btn-sm" onclick="editTpl(${t.id})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" style="vertical-align:middle;margin-right:4px"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit</button>
+    <button class="btn btn-danger btn-sm" style="padding:5px 8px" onclick="deleteTpl(${t.id})" title="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><polyline points="3,6 5,6 21,6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
   </div>`).join('');
 }
 function editTpl(id){ const t=tpls.find(x=>x.id===id); if(!t) return; tplEditId=id; document.getElementById('tplName').value=t.name; document.getElementById('tplMsg').value=t.message; document.getElementById('tplSaveBtn').textContent='Update'; }
@@ -1885,8 +1889,8 @@ async function loadRecurring(){
       <div style="font-size:.76rem;color:var(--muted);margin-top:2px;display:flex;align-items:center;gap:4px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>${esc(r.device_name||'—')} → ${r.target}</div>
       <div style="font-size:.76rem;color:var(--muted);display:flex;align-items:center;gap:4px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>${r.cron_expr}${r.last_run?' | Last: '+fmtDate(r.last_run):''}</div>
     </div>
-    <button class="btn btn-ghost btn-sm" onclick="toggleRec(${r.id})">${r.active?'Pause':'Resume'}</button>
-    <button class="btn btn-danger btn-sm" onclick="deleteRec(${r.id})">✕</button>
+    <button class="btn btn-ghost btn-sm" onclick="toggleRec(${r.id})">${r.active?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" style="vertical-align:middle;margin-right:4px"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>Pause':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" style="vertical-align:middle;margin-right:4px"><polygon points="5,3 19,12 5,21"/></svg>Resume'}</button>
+    <button class="btn btn-danger btn-sm" style="padding:5px 8px" onclick="deleteRec(${r.id})" title="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><polyline points="3,6 5,6 21,6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
   </div>`).join('');
 }
 async function addRecurring(){
@@ -1908,7 +1912,7 @@ async function loadAR(){
     <div style="flex:1"><b>${esc(r.keyword)}</b> <span class="badge b-blue">${r.match_mode}</span>${!r.active?' <span class="badge b-red">Off</span>':''}
     <div style="font-size:.78rem;color:var(--muted);margin-top:2px">${esc(r.response)}</div></div>
     <button class="btn btn-ghost btn-sm" onclick="toggleAR(${r.id})">${r.active?'Disable':'Enable'}</button>
-    <button class="btn btn-danger btn-sm" onclick="deleteAR(${r.id})">✕</button>
+    <button class="btn btn-danger btn-sm" style="padding:5px 8px" onclick="deleteAR(${r.id})" title="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><polyline points="3,6 5,6 21,6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
   </div>`).join('');
 }
 async function addAR(){
@@ -2037,7 +2041,7 @@ async function loadSched(){
     <td class="td-wrap">${esc(r.text||'')}</td>
     <td style="font-size:.74rem;color:var(--muted)">${fmtDate(r.run_at)}</td>
     <td><span class="badge ${r.done?'b-green':'b-yellow'}">${r.done?'Done':'Pending'}</span></td>
-    <td><button class="btn btn-danger btn-sm" onclick="deleteSched(${r.id})">✕</button></td>
+    <td><button class="btn btn-danger btn-sm" style="padding:5px 8px" onclick="deleteSched(${r.id})" title="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><polyline points="3,6 5,6 21,6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button></td>
   </tr>`).join('');
 }
 async function deleteSched(id){ await api(`/me/schedules/${id}`,{method:'DELETE'}); loadSched(); toast('Deleted'); }
@@ -2077,7 +2081,7 @@ function renderApiPage(){
     <div style="font-weight:700;margin-bottom:8px">${esc(d.name)}<span style="color:var(--muted);font-weight:400;margin-left:8px;font-size:.8rem">${d.number||''}</span></div>
     <div class="token-box"><code id="tok${d.id}">${d.token}</code>
       <button class="btn btn-ghost btn-sm" onclick="navigator.clipboard.writeText('${d.token}').then(()=>toast('Copied!'))">Copy</button>
-      <button class="btn btn-ghost btn-sm" onclick="regenTok(${d.id})">↻ Regen</button>
+      <button class="btn btn-ghost btn-sm" onclick="regenTok(${d.id})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" style="vertical-align:middle;margin-right:4px"><circle cx="7.5" cy="15.5" r="5.5"/><path d="M21 2l-9.6 9.6M15.5 7.5l3 3"/></svg>Regen</button>
     </div>
   </div>`).join('');
 }
