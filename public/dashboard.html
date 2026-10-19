@@ -774,7 +774,7 @@ Authorization: Bearer {device_token}
   <h1 data-i18n="nav_docs">Documentation</h1><p class="sub">Complete API guide for developers</p>
 
   <div class="doc-section">
-    <h2>🚀 Getting Started</h2>
+    <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20" style="vertical-align:middle;margin-right:7px"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg> <span data-i18n="docs_getting_started">Getting Started</span></h2>
     <p>Synpera provides a REST API that lets you send and receive WhatsApp messages programmatically. Every request requires a device token, which you can find in the <b>API & Token</b> section.</p>
     <div class="video-placeholder">
       <div class="play-btn" onclick="toast('Replace this with your actual YouTube embed URL','err')"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg></div>
@@ -847,7 +847,7 @@ Authorization: Bearer {device_token}
   </div>
 
   <div class="doc-section">
-    <h2>📱 Device Status</h2>
+    <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20" style="vertical-align:middle;margin-right:7px"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg> <span data-i18n="docs_device_status">Device Status</span></h2>
     <div class="endpoint-block">
       <div class="endpoint-title"><span class="method-badge m-get">GET</span>/api/device</div>
       <pre class="code-block">// Success Response
@@ -860,7 +860,7 @@ Authorization: Bearer {device_token}
   </div>
 
   <div class="doc-section">
-    <h2>🔔 Webhooks</h2>
+    <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20" style="vertical-align:middle;margin-right:7px"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg> <span data-i18n="nav_webhook">Webhooks</span></h2>
     <p>Configure webhook URLs in your device settings to receive real-time notifications.</p>
     <div class="endpoint-block">
       <div class="endpoint-title">Incoming Message Payload</div>
@@ -969,7 +969,7 @@ Authorization: Bearer {device_token}
       <button class="connect-method-btn" onclick="showPasskeyInfo()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Passkey</button>
       <button class="connect-method-btn" onclick="showWAWebGuide()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>WA Web</button>
     </div>
-    <p style="font-size:.78rem;color:var(--muted);margin-top:8px;padding:10px 12px;background:var(--panel);border-radius:8px">💡 If your account uses a passkey, try <b>Passkey</b> or <b>WA Web</b> instead of QR.</p>
+    <p style="font-size:.78rem;color:var(--muted);margin-top:8px;padding:10px 12px;background:var(--panel);border-radius:8px;display:flex;align-items:flex-start;gap:7px"><svg viewBox="0 0 24 24" fill="none" stroke="var(--yellow)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>If your account uses a passkey, try <b>Passkey</b> or <b>WA Web</b> instead of QR.</p>
   </div>
 </div>
 
@@ -1107,7 +1107,7 @@ Authorization: Bearer {device_token}
 <!-- Custom Confirm Modal -->
 <div class="modal" id="confirmModal" style="z-index:500">
   <div class="modal-box" style="max-width:400px;text-align:center">
-    <div style="font-size:2rem;margin-bottom:10px" id="confirmIcon">⚠️</div>
+    <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:center" id="confirmIcon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--yellow)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="36" height="36"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
     <h3 id="confirmTitle" style="margin-bottom:8px;font-size:1.05rem">Konfirmasi</h3>
     <p id="confirmMsg" style="color:var(--muted);font-size:.88rem;margin-bottom:20px;line-height:1.5"></p>
     <div style="display:flex;gap:10px;justify-content:center">
@@ -1351,7 +1351,15 @@ async function api(path,opts={}){
 }
 
 // ─── Toast ──────────────────────────────────────────────
-function toast(msg,type='ok'){ const el=document.getElementById('toast'); el.textContent=msg; el.className=`toast ${type} show`; clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('show'),3500); }
+function toast(msg,type='ok'){
+  const el=document.getElementById('toast');
+  const svgOk='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" style="vertical-align:middle;margin-right:6px;flex-shrink:0"><polyline points="20,6 9,17 4,12"/></svg>';
+  const svgErr='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" style="vertical-align:middle;margin-right:6px;flex-shrink:0"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+  const cleanMsg = msg.replace(/✅/g,'').replace(/[⚠️⚡🗑️🔑📱⏰💡🚀🔔]/gu,'').trim();
+  el.innerHTML = (type==='err'?svgErr:svgOk) + cleanMsg;
+  el.style.display='flex'; el.style.alignItems='center';
+  el.className=`toast ${type} show`; clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('show'),3500);
+}
 
 // ─── Modal ──────────────────────────────────────────────
 function openM(id){ document.getElementById(id).classList.add('open'); }
@@ -1359,7 +1367,7 @@ function closeM(id){ document.getElementById(id).classList.remove('open'); }
 
 // ─── Custom Confirm ──────────────────────────────────────
 function showConfirm(msg, onOk, opts={}){
-  document.getElementById('confirmIcon').textContent = opts.icon || '⚠️';
+  document.getElementById('confirmIcon').innerHTML = opts.icon || '<svg viewBox="0 0 24 24" fill="none" stroke="var(--yellow)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="36" height="36"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
   document.getElementById('confirmTitle').textContent = opts.title || 'Konfirmasi';
   document.getElementById('confirmMsg').textContent = msg;
   const okBtn = document.getElementById('confirmOk');
@@ -1392,7 +1400,7 @@ async function loadDashboard(){
     document.getElementById('dashReceived').textContent = d.total_received;
     document.getElementById('dashPlan').textContent = d.plan || 'Free';
     document.getElementById('dashDevLimit').innerHTML = `Device limit: <b>${d.plan_devices_limit}</b>`;
-    if(d.pending_schedules>0) document.getElementById('dashPending').textContent = `⏰ ${d.pending_schedules} pending schedule(s)`;
+    if(d.pending_schedules>0) document.getElementById('dashPending').innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" style="vertical-align:middle;margin-right:4px"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>${d.pending_schedules} pending schedule(s)`;
   } catch(e){ console.error('dashboard error',e); }
 }
 
@@ -1536,10 +1544,10 @@ function renderDevices(){
         <div class="device-num">${d.number||t.dev_not_connected} · Token: ${d.token?.slice(0,12)}…</div>
       </div>
       <div class="device-actions">
-        ${st!=='connected'?`<button class="btn btn-primary btn-sm" onclick="connectExisting(${d.id})">⚡ ${t.dev_btn_connect}</button>`:''}
+        ${st!=='connected'?`<button class="btn btn-primary btn-sm" onclick="connectExisting(${d.id})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" style="vertical-align:middle;margin-right:4px"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>${t.dev_btn_connect}</button>`:''}
         ${st==='qr'?`<button class="btn btn-ghost btn-sm" onclick="showQr(${d.id})">${t.dev_btn_show_qr}</button>`:''}
         ${st==='connected'?`<button class="btn btn-ghost btn-sm" onclick="disconnectDev(${d.id})">${t.dev_btn_disconnect}</button>`:''}
-        <button class="btn btn-ghost btn-sm" onclick="openDevEdit(${d.id})">⚙ ${t.dev_btn_settings}</button>
+        <button class="btn btn-ghost btn-sm" onclick="openDevEdit(${d.id})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" style="vertical-align:middle;margin-right:4px"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>${t.dev_btn_settings}</button>
         <button class="btn btn-ghost btn-sm" onclick="regenTok(${d.id})">↻ ${t.dev_btn_token}</button>
         <button class="btn btn-danger btn-sm" onclick="deleteDev(${d.id})">✕</button>
       </div>
@@ -1581,7 +1589,7 @@ async function deleteDev(id){
   showConfirm(`Hapus perangkat "${d?.name||id}"? Semua session WA akan dihapus.`, async()=>{
     await api(`/me/devices/${id}`,{method:'DELETE'});
     devices = devices.filter(d=>d.id!==id); renderDevices(); populateDevSelects(); toast('Deleted');
-  }, {icon:'🗑️', title:'Hapus Perangkat', okLabel:'Hapus', okClass:'btn-danger'});
+  }, {icon:'<svg viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="36" height="36"><polyline points="3,6 5,6 21,6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>', title:'Hapus Perangkat', okLabel:'Hapus', okClass:'btn-danger'});
 }
 function openDevEdit(id){
   const d=devices.find(x=>x.id===id); if(!d) return;
@@ -1614,7 +1622,7 @@ async function regenTok(id){
   const d = devices.find(x=>x.id===id);
   showConfirm(`Regenerate token perangkat "${d?.name||id}"? Token lama akan berhenti bekerja.`, async()=>{
     await api(`/me/devices/${id}/regenerate-token`,{method:'POST'}); devices=await api('/me/devices'); renderDevices(); toast('Token regenerated!');
-  }, {icon:'🔑', title:'Regenerate Token', okLabel:'Regenerate', okClass:'btn-warn'});
+  }, {icon:'<svg viewBox="0 0 24 24" fill="none" stroke="var(--yellow)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="36" height="36"><circle cx="7.5" cy="15.5" r="5.5"/><path d="M21 2l-9.6 9.6M15.5 7.5l3 3"/></svg>', title:'Regenerate Token', okLabel:'Regenerate', okClass:'btn-warn'});
 }
 async function showQr(id){
   // Ambil QR terkini langsung dari server
@@ -1741,8 +1749,8 @@ async function loadHistory(){
 }
 function toggleSel(id,checked){ if(checked) selectedIds.add(id); else selectedIds.delete(id); }
 function toggleAll(cb){ document.querySelectorAll('#histBody input[type=checkbox]').forEach(c=>{ c.checked=cb.checked; const id=Number(c.closest('tr').cells[1].textContent); if(cb.checked) selectedIds.add(id); else selectedIds.delete(id); }); }
-async function deleteSelected(){ if(!selectedIds.size){toast('Select messages first','err');return;} showConfirm(`Hapus ${selectedIds.size} pesan yang dipilih?`, async()=>{ await api('/me/logs',{method:'DELETE',body:JSON.stringify({ids:[...selectedIds]})}); toast('Deleted'); loadHistory(); },{icon:'🗑️',title:'Hapus Pesan',okLabel:'Hapus'}); }
-async function deleteAllHistory(){ showConfirm('Hapus SEMUA riwayat pesan? Tindakan ini tidak bisa dibatalkan.', async()=>{ const dev=document.getElementById('histDev')?.value; await api('/me/logs',{method:'DELETE',body:JSON.stringify(dev?{device:dev}:{})}); toast('All deleted'); loadHistory(); },{icon:'⚠️',title:'Hapus Semua Riwayat',okLabel:'Hapus Semua'}); }
+async function deleteSelected(){ if(!selectedIds.size){toast('Select messages first','err');return;} showConfirm(`Hapus ${selectedIds.size} pesan yang dipilih?`, async()=>{ await api('/me/logs',{method:'DELETE',body:JSON.stringify({ids:[...selectedIds]})}); toast('Deleted'); loadHistory(); },{icon:'<svg viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="36" height="36"><polyline points="3,6 5,6 21,6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>',title:'Hapus Pesan',okLabel:'Hapus'}); }
+async function deleteAllHistory(){ showConfirm('Hapus SEMUA riwayat pesan? Tindakan ini tidak bisa dibatalkan.', async()=>{ const dev=document.getElementById('histDev')?.value; await api('/me/logs',{method:'DELETE',body:JSON.stringify(dev?{device:dev}:{})}); toast('All deleted'); loadHistory(); },{icon:'<svg viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="36" height="36"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',title:'Hapus Semua Riwayat',okLabel:'Hapus Semua'}); }
 function exportHistory(){ const dev=document.getElementById('histDev')?.value; const dir=document.getElementById('histStatus')?.value; let url='/me/logs/export?'; if(dev) url+=`device=${dev}&`; if(dir) url+=`direction=${dir}&`; location.href=url; }
 
 // ─── Inbox ──────────────────────────────────────────────
@@ -1874,8 +1882,8 @@ async function loadRecurring(){
   el.innerHTML=rows.map(r=>`<div class="panel" style="padding:14px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px">
     <div style="flex:1;min-width:200px">
       <div style="font-weight:700">${esc(r.name)} <span class="badge ${r.active?'b-green':'b-red'}">${r.active?'Active':'Paused'}</span></div>
-      <div style="font-size:.76rem;color:var(--muted);margin-top:2px">📱 ${esc(r.device_name||'—')} → ${r.target}</div>
-      <div style="font-size:.76rem;color:var(--muted)">⏰ ${r.cron_expr}${r.last_run?' | Last: '+fmtDate(r.last_run):''}</div>
+      <div style="font-size:.76rem;color:var(--muted);margin-top:2px;display:flex;align-items:center;gap:4px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>${esc(r.device_name||'—')} → ${r.target}</div>
+      <div style="font-size:.76rem;color:var(--muted);display:flex;align-items:center;gap:4px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>${r.cron_expr}${r.last_run?' | Last: '+fmtDate(r.last_run):''}</div>
     </div>
     <button class="btn btn-ghost btn-sm" onclick="toggleRec(${r.id})">${r.active?'Pause':'Resume'}</button>
     <button class="btn btn-danger btn-sm" onclick="deleteRec(${r.id})">✕</button>
@@ -1927,7 +1935,7 @@ async function doRotator(){
     const res=await api('/me/rotator/send',{method:'POST',body:JSON.stringify({device_ids,targets,message,delay_ms})});
     if(res.error) throw new Error(res.error);
     toast(res.message||'Rotator started! ✅');
-    document.getElementById('rotStatus').textContent='✅ '+res.message;
+    document.getElementById('rotStatus').innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" style="vertical-align:middle;margin-right:5px"><polyline points="20,6 9,17 4,12"/></svg>'+res.message;
   } catch(e){ toast('Error: '+e.message,'err'); }
 }
 
@@ -1943,7 +1951,7 @@ async function doFollowUp(){
     const res=await api('/me/followup',{method:'POST',body:JSON.stringify({device_id,target,message1,message2,delay_hours})});
     if(res.error) throw new Error(res.error);
     toast('First message sent! Follow-up scheduled ✅');
-    document.getElementById('fuStatus').textContent=`✅ Follow-up scheduled for: ${fmtDate(res.scheduled_at)}`;
+    document.getElementById('fuStatus').innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" style="vertical-align:middle;margin-right:5px"><polyline points="20,6 9,17 4,12"/></svg>Follow-up scheduled for: ${fmtDate(res.scheduled_at)}`;
   } catch(e){ toast('Error: '+e.message,'err'); }
 }
 
@@ -1971,7 +1979,7 @@ async function doChaining(){
     const res=await api('/me/chaining',{method:'POST',body:JSON.stringify({device_id,target,steps})});
     if(res.error) throw new Error(res.error);
     toast(res.message||'Chain started! ✅');
-    document.getElementById('chainStatus').textContent='✅ '+res.message;
+    document.getElementById('chainStatus').innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" style="vertical-align:middle;margin-right:5px"><polyline points="20,6 9,17 4,12"/></svg>'+res.message;
   } catch(e){ toast('Error: '+e.message,'err'); }
 }
 
