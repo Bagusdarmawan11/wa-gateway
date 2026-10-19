@@ -470,23 +470,23 @@ pre.code-block{background:var(--code-bg);border:1px solid var(--border);border-r
   <div class="dash-grid">
     <div class="dash-card blue">
       <div class="dc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg></div>
-      <div class="dc-num" id="dashDevices">—</div><div class="dc-lbl">Total Devices</div>
+      <div class="dc-num" id="dashDevices">—</div><div class="dc-lbl" data-i18n="dash_total_devices">Total Devices</div>
     </div>
     <div class="dash-card green">
       <div class="dc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22,4 12,14.01 9,11.01"/></svg></div>
-      <div class="dc-num" id="dashConnected">—</div><div class="dc-lbl">Connected</div>
+      <div class="dc-num" id="dashConnected">—</div><div class="dc-lbl" data-i18n="dash_connected">Connected</div>
     </div>
     <div class="dash-card cyan">
       <div class="dc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg></div>
-      <div class="dc-num" id="dashSent">—</div><div class="dc-lbl">Messages Sent</div>
+      <div class="dc-num" id="dashSent">—</div><div class="dc-lbl" data-i18n="dash_sent">Messages Sent</div>
     </div>
     <div class="dash-card yellow">
       <div class="dc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22,12 16,12 14,15 10,15 8,12 2,12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg></div>
-      <div class="dc-num" id="dashReceived">—</div><div class="dc-lbl">Messages Received</div>
+      <div class="dc-num" id="dashReceived">—</div><div class="dc-lbl" data-i18n="dash_received">Messages Received</div>
     </div>
   </div>
   <div class="panel" style="max-width:520px">
-    <div class="panel-head"><h2>Subscription Plan</h2></div>
+    <div class="panel-head"><h2 data-i18n="dash_plan_title">Subscription Plan</h2></div>
     <div class="plan-panel">
       <span class="plan-badge" id="dashPlan">Free</span>
       <div class="plan-info">
@@ -500,10 +500,10 @@ pre.code-block{background:var(--code-bg);border:1px solid var(--border);border-r
 <!-- ===== DEVICES PAGE ===== -->
 <div class="page" id="page-devices">
   <div class="page-header">
-    <div><h1 data-i18n="nav_device">My Devices</h1><p class="sub" style="margin-bottom:0">Manage connected WhatsApp devices</p></div>
+    <div><h1 data-i18n="nav_device">My Devices</h1><p class="sub" style="margin-bottom:0" data-i18n="device_sub">Manage connected WhatsApp devices</p></div>
     <button class="btn btn-primary" onclick="openAddDeviceModal()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Add Device
+      <span data-i18n="add_device_btn">Add Device</span>
     </button>
   </div>
   <div id="devicesList"></div>
@@ -941,15 +941,10 @@ Authorization: Bearer {device_token}
 <!-- Add Device Modal -->
 <div class="modal" id="addDeviceModal">
   <div class="modal-box">
-    <div class="modal-head"><h3>Add Device</h3><button class="modal-close" onclick="closeM('addDeviceModal')">✕</button></div>
+    <div class="modal-head"><h3 data-i18n="add_device_title">Add Device</h3><button class="modal-close" onclick="closeM('addDeviceModal')">✕</button></div>
     <div class="add-device-field">
-      <label>Device Name</label>
+      <label data-i18n="add_device_name_label">Device Name <span style="color:var(--muted);font-weight:400;font-size:.74rem" data-i18n="add_device_name_hint">— optional, auto-filled from WhatsApp after connect</span></label>
       <div class="input-with-icon"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div><input id="addDevName" placeholder="e.g. Fonnte, My WA" autocomplete="off"></div>
-    </div>
-    <div class="add-device-field">
-      <label>WhatsApp Number <span style="color:var(--muted);font-weight:400;font-size:.74rem">— full format including country code</span></label>
-      <div class="input-with-icon" id="addDevNumWrap"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 11.61 19a19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 3.09 4.18 2 2 0 0 1 5.07 2h3a2 2 0 0 1 2 1.72 12.8 12.8 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L9.91 9.91A16 16 0 0 0 16 16l1.27-1.27a2 2 0 0 1 2.11-.45 12.8 12.8 0 0 0 2.81.7A2 2 0 0 1 24 17z"/></svg></div><input id="addDevNum" placeholder="6282222097005" type="tel" autocomplete="off"></div>
-      <div style="font-size:.74rem;color:var(--muted);margin-top:4px">e.g. 628xxx (Indonesia), 1xxx (US)</div>
     </div>
     <div class="add-device-field" style="border:1px solid var(--border);border-radius:12px;padding:14px">
       <div class="sw-row"><div class="sw-info"><b>Chatbot Mode</b><span>Set to on if you are building a chatbot</span></div><label class="sw"><input type="checkbox" id="addDevChatbot"><span class="sl"></span></label></div>
@@ -958,7 +953,7 @@ Authorization: Bearer {device_token}
     </div>
     <button class="btn btn-primary" style="width:100%;margin-top:16px;justify-content:center" onclick="submitAddDevice()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Add Device
+      <span data-i18n="add_device_btn">Add Device</span>
     </button>
   </div>
 </div>
@@ -1076,8 +1071,8 @@ Authorization: Bearer {device_token}
 <!-- Device Edit Modal -->
 <div class="modal" id="devEditModal">
   <div class="modal-box wide">
-    <div class="modal-head"><h3>Device Settings</h3><button class="modal-close" onclick="closeM('devEditModal')">✕</button></div>
-    <div class="field"><label>Device Name</label><input id="eDevName"></div>
+    <div class="modal-head"><h3 data-i18n="device_settings_title">Device Settings</h3><button class="modal-close" onclick="closeM('devEditModal')">✕</button></div>
+    <div class="field"><label data-i18n="device_name_label">Device Name</label><input id="eDevName"></div>
     <div class="field"><label>Whitelist IP <span class="hint">(comma separated, blank = all)</span></label><input id="eDevIp" placeholder="0.0.0.0"></div>
     <div style="border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:14px">
       <div class="sw-row"><div class="sw-info"><b>Auto Read</b><span>Mark incoming messages as read</span></div><label class="sw"><input type="checkbox" id="eAutoread"><span class="sl"></span></label></div>
@@ -1127,7 +1122,7 @@ Authorization: Bearer {device_token}
 <script>
 // ─── State ──────────────────────────────────────────────
 let me = null, devices = [], phonebook = JSON.parse(localStorage.getItem('pb')||'[]'), selectedIds = new Set();
-let tplEditId = null, qrPoll = null, currentConnectDeviceId = null, grpCache = [];
+let tplEditId = null, qrPoll = null, currentConnectDeviceId = null, currentConnectCustomName = '', grpCache = [];
 
 // ─── Boot ───────────────────────────────────────────────
 async function boot(){
@@ -1249,18 +1244,90 @@ function toggleTheme(){
 
 // ─── i18n ───────────────────────────────────────────────
 const T = {
-  en:{ nav_main:'Main Feature',nav_dashboard:'Dashboard',dashboard_sub:'Overview of your account',nav_device:'Device',nav_phonebook:'Phonebook',nav_history:'Message History',nav_send:'Send',nav_inbox:'Inbox',nav_template:'Template',nav_poll:'Poll',nav_recurring:'Recurring',nav_autoreply:'Autoreply',nav_submission:'Submission',nav_rotator:'Rotator',nav_followup:'Follow Up',nav_chaining:'Chaining',nav_webhook:'Webhook',nav_invoices:'Invoices',nav_stats:'Statistics',nav_settings_label:'Settings',nav_groups:'Groups',nav_schedule:'Scheduled',nav_api:'API & Token',nav_docs:'Documentation',settings:'Settings',logout:'Logout',settings_sub:'Customize your experience',lang_title:'Language / Bahasa',lang_sub:'Choose the display language for the interface',theme_title:'Appearance',theme_label:'Dark / Light Mode',theme_sub:'Toggle the interface color scheme' },
-  id:{ nav_main:'Fitur Utama',nav_dashboard:'Beranda',dashboard_sub:'Ringkasan akun Anda',nav_device:'Perangkat',nav_phonebook:'Buku Telepon',nav_history:'Riwayat Pesan',nav_send:'Kirim',nav_inbox:'Kotak Masuk',nav_template:'Template',nav_poll:'Polling',nav_recurring:'Berulang',nav_autoreply:'Balas Otomatis',nav_submission:'Pengiriman',nav_rotator:'Rotator',nav_followup:'Tindak Lanjut',nav_chaining:'Chaining',nav_webhook:'Webhook',nav_invoices:'Faktur',nav_stats:'Statistik',nav_settings_label:'Pengaturan',nav_groups:'Grup',nav_schedule:'Terjadwal',nav_api:'API & Token',nav_docs:'Dokumentasi',settings:'Pengaturan',logout:'Keluar',settings_sub:'Sesuaikan pengalaman Anda',lang_title:'Bahasa / Language',lang_sub:'Pilih bahasa tampilan antarmuka',theme_title:'Tampilan',theme_label:'Mode Gelap / Terang',theme_sub:'Ganti skema warna antarmuka' },
-  zh:{ nav_main:'主要功能',nav_dashboard:'仪表盘',dashboard_sub:'账户概览',nav_device:'设备',nav_phonebook:'电话簿',nav_history:'消息历史',nav_send:'发送',nav_inbox:'收件箱',nav_template:'模板',nav_poll:'投票',nav_recurring:'定期',nav_autoreply:'自动回复',nav_submission:'提交',nav_rotator:'轮换',nav_followup:'跟进',nav_chaining:'链接',nav_webhook:'Webhook',nav_invoices:'发票',nav_stats:'统计',nav_settings_label:'设置',nav_groups:'群组',nav_schedule:'已计划',nav_api:'API & 令牌',nav_docs:'文档',settings:'设置',logout:'退出',settings_sub:'自定义您的体验',lang_title:'语言',lang_sub:'选择界面显示语言',theme_title:'外观',theme_label:'深色 / 浅色模式',theme_sub:'切换界面配色方案' },
-  ru:{ nav_main:'Функции',nav_dashboard:'Главная',dashboard_sub:'Обзор аккаунта',nav_device:'Устройство',nav_phonebook:'Телефонная книга',nav_history:'История сообщений',nav_send:'Отправить',nav_inbox:'Входящие',nav_template:'Шаблон',nav_poll:'Опрос',nav_recurring:'Повторяющееся',nav_autoreply:'Автоответ',nav_submission:'Отправка',nav_rotator:'Ротатор',nav_followup:'Последующие',nav_chaining:'Цепочка',nav_webhook:'Webhook',nav_invoices:'Счета',nav_stats:'Статистика',nav_settings_label:'Настройки',nav_groups:'Группы',nav_schedule:'Запланированное',nav_api:'API и Токен',nav_docs:'Документация',settings:'Настройки',logout:'Выйти',settings_sub:'Настройте интерфейс',lang_title:'Язык',lang_sub:'Выберите язык отображения',theme_title:'Внешний вид',theme_label:'Тёмный / Светлый',theme_sub:'Переключить цветовую схему' },
-  ko:{ nav_main:'주요 기능',nav_dashboard:'대시보드',dashboard_sub:'계정 개요',nav_device:'기기',nav_phonebook:'전화번호부',nav_history:'메시지 기록',nav_send:'보내기',nav_inbox:'받은 편지함',nav_template:'템플릿',nav_poll:'투표',nav_recurring:'반복',nav_autoreply:'자동 응답',nav_submission:'제출',nav_rotator:'로테이터',nav_followup:'팔로우업',nav_chaining:'체이닝',nav_webhook:'웹훅',nav_invoices:'청구서',nav_stats:'통계',nav_settings_label:'설정',nav_groups:'그룹',nav_schedule:'예약됨',nav_api:'API & 토큰',nav_docs:'문서',settings:'설정',logout:'로그아웃',settings_sub:'인터페이스 설정',lang_title:'언어',lang_sub:'표시 언어 선택',theme_title:'외관',theme_label:'다크 / 라이트 모드',theme_sub:'색 구성표 전환' },
-  ar:{ nav_main:'الميزات',nav_dashboard:'لوحة التحكم',dashboard_sub:'نظرة عامة على حسابك',nav_device:'الجهاز',nav_phonebook:'دفتر الهاتف',nav_history:'سجل الرسائل',nav_send:'إرسال',nav_inbox:'الوارد',nav_template:'القالب',nav_poll:'استطلاع',nav_recurring:'متكرر',nav_autoreply:'الرد التلقائي',nav_submission:'التقديم',nav_rotator:'الدوار',nav_followup:'المتابعة',nav_chaining:'التسلسل',nav_webhook:'ويب هوك',nav_invoices:'الفواتير',nav_stats:'الإحصائيات',nav_settings_label:'الإعدادات',nav_groups:'المجموعات',nav_schedule:'المجدولة',nav_api:'API والرمز',nav_docs:'الوثائق',settings:'الإعدادات',logout:'تسجيل الخروج',settings_sub:'تخصيص تجربتك',lang_title:'اللغة',lang_sub:'اختر لغة الواجهة',theme_title:'المظهر',theme_label:'الوضع الداكن / الفاتح',theme_sub:'تبديل نظام الألوان' },
-  es:{ nav_main:'Funciones',nav_dashboard:'Panel',dashboard_sub:'Resumen de tu cuenta',nav_device:'Dispositivo',nav_docs:'Documentación',settings:'Configuración',logout:'Cerrar sesión',lang_title:'Idioma',lang_sub:'Elige el idioma de la interfaz',theme_title:'Apariencia',theme_label:'Modo oscuro/claro',theme_sub:'Cambiar esquema de colores' },
-  fr:{ nav_main:'Fonctionnalités',nav_dashboard:'Tableau de bord',dashboard_sub:"Vue d'ensemble",nav_device:'Appareil',nav_docs:'Documentation',settings:'Paramètres',logout:'Déconnexion',lang_title:'Langue',lang_sub:"Choisissez la langue de l'interface",theme_title:'Apparence',theme_label:'Mode sombre/clair',theme_sub:'Changer le thème' },
-  de:{ nav_main:'Funktionen',nav_dashboard:'Dashboard',dashboard_sub:'Kontoübersicht',nav_device:'Gerät',nav_docs:'Dokumentation',settings:'Einstellungen',logout:'Abmelden',lang_title:'Sprache',lang_sub:'Wählen Sie die Anzeigesprache',theme_title:'Erscheinungsbild',theme_label:'Dunkel-/Hellmodus',theme_sub:'Farbschema umschalten' },
-  pt:{ nav_main:'Recursos',nav_dashboard:'Painel',dashboard_sub:'Visão geral da conta',nav_device:'Dispositivo',nav_docs:'Documentação',settings:'Configurações',logout:'Sair',lang_title:'Idioma',lang_sub:'Escolha o idioma da interface',theme_title:'Aparência',theme_label:'Modo escuro/claro',theme_sub:'Alternar esquema de cores' },
-  ja:{ nav_main:'機能',nav_dashboard:'ダッシュボード',dashboard_sub:'アカウント概要',nav_device:'デバイス',nav_docs:'ドキュメント',settings:'設定',logout:'ログアウト',lang_title:'言語',lang_sub:'表示言語を選択',theme_title:'外観',theme_label:'ダーク/ライトモード',theme_sub:'カラースキームを切替' },
-  hi:{ nav_main:'सुविधाएँ',nav_dashboard:'डैशबोर्ड',dashboard_sub:'खाता अवलोकन',nav_device:'डिवाइस',nav_docs:'दस्तावेज़',settings:'सेटिंग्स',logout:'लॉग आउट',lang_title:'भाषा',lang_sub:'इंटरफ़ेस भाषा चुनें',theme_title:'दिखावट',theme_label:'डार्क/लाइट मोड',theme_sub:'रंग थीम बदलें' },
+  en:{ nav_main:'Main Feature',nav_dashboard:'Dashboard',dashboard_sub:'Overview of your account',nav_device:'Device',nav_phonebook:'Phonebook',nav_history:'Message History',nav_send:'Send',nav_inbox:'Inbox',nav_template:'Template',nav_poll:'Poll',nav_recurring:'Recurring',nav_autoreply:'Autoreply',nav_submission:'Submission',nav_rotator:'Rotator',nav_followup:'Follow Up',nav_chaining:'Chaining',nav_webhook:'Webhook',nav_invoices:'Invoices',nav_stats:'Statistics',nav_settings_label:'Settings',nav_groups:'Groups',nav_schedule:'Scheduled',nav_api:'API & Token',nav_docs:'Documentation',settings:'Settings',logout:'Logout',settings_sub:'Customize your experience',lang_title:'Language / Bahasa',lang_sub:'Choose the display language for the interface',theme_title:'Appearance',theme_label:'Dark / Light Mode',theme_sub:'Toggle the interface color scheme',
+    dash_total_devices:'Total Devices',dash_connected:'Connected',dash_sent:'Messages Sent',dash_received:'Messages Received',dash_plan_title:'Subscription Plan',
+    device_sub:'Manage connected WhatsApp devices',add_device_btn:'Add Device',add_device_title:'Add Device',add_device_name_label:'Device Name',add_device_name_hint:'— optional, auto-filled from WhatsApp after connect',
+    device_settings_title:'Device Settings',device_name_label:'Device Name',
+    dev_status_connected:'Connected',dev_status_qr:'QR Ready',dev_status_offline:'Offline',dev_not_connected:'Not connected',dev_no_devices:'No devices yet. Click "Add Device" to get started.',
+    dev_btn_connect:'Connect',dev_btn_show_qr:'Show QR',dev_btn_disconnect:'Disconnect',dev_btn_settings:'Settings',dev_btn_token:'Token',
+  },
+  id:{ nav_main:'Fitur Utama',nav_dashboard:'Beranda',dashboard_sub:'Ringkasan akun Anda',nav_device:'Perangkat',nav_phonebook:'Buku Telepon',nav_history:'Riwayat Pesan',nav_send:'Kirim',nav_inbox:'Kotak Masuk',nav_template:'Template',nav_poll:'Polling',nav_recurring:'Berulang',nav_autoreply:'Balas Otomatis',nav_submission:'Pengiriman',nav_rotator:'Rotator',nav_followup:'Tindak Lanjut',nav_chaining:'Chaining',nav_webhook:'Webhook',nav_invoices:'Faktur',nav_stats:'Statistik',nav_settings_label:'Pengaturan',nav_groups:'Grup',nav_schedule:'Terjadwal',nav_api:'API & Token',nav_docs:'Dokumentasi',settings:'Pengaturan',logout:'Keluar',settings_sub:'Sesuaikan pengalaman Anda',lang_title:'Bahasa / Language',lang_sub:'Pilih bahasa tampilan antarmuka',theme_title:'Tampilan',theme_label:'Mode Gelap / Terang',theme_sub:'Ganti skema warna antarmuka',
+    dash_total_devices:'Total Perangkat',dash_connected:'Terhubung',dash_sent:'Pesan Terkirim',dash_received:'Pesan Diterima',dash_plan_title:'Paket Langganan',
+    device_sub:'Kelola perangkat WhatsApp yang terhubung',add_device_btn:'Tambah Perangkat',add_device_title:'Tambah Perangkat',add_device_name_label:'Nama Perangkat',add_device_name_hint:'— opsional, otomatis diisi dari WhatsApp setelah terhubung',
+    device_settings_title:'Pengaturan Perangkat',device_name_label:'Nama Perangkat',
+    dev_status_connected:'Terhubung',dev_status_qr:'QR Siap',dev_status_offline:'Offline',dev_not_connected:'Belum terhubung',dev_no_devices:'Belum ada perangkat. Klik "Tambah Perangkat" untuk memulai.',
+    dev_btn_connect:'Hubungkan',dev_btn_show_qr:'Tampilkan QR',dev_btn_disconnect:'Putuskan',dev_btn_settings:'Pengaturan',dev_btn_token:'Token',
+  },
+  zh:{ nav_main:'主要功能',nav_dashboard:'仪表盘',dashboard_sub:'账户概览',nav_device:'设备',nav_phonebook:'电话簿',nav_history:'消息历史',nav_send:'发送',nav_inbox:'收件箱',nav_template:'模板',nav_poll:'投票',nav_recurring:'定期',nav_autoreply:'自动回复',nav_submission:'提交',nav_rotator:'轮换',nav_followup:'跟进',nav_chaining:'链接',nav_webhook:'Webhook',nav_invoices:'发票',nav_stats:'统计',nav_settings_label:'设置',nav_groups:'群组',nav_schedule:'已计划',nav_api:'API & 令牌',nav_docs:'文档',settings:'设置',logout:'退出',settings_sub:'自定义您的体验',lang_title:'语言',lang_sub:'选择界面显示语言',theme_title:'外观',theme_label:'深色 / 浅色模式',theme_sub:'切换界面配色方案',
+    dash_total_devices:'设备总数',dash_connected:'已连接',dash_sent:'已发消息',dash_received:'已收消息',dash_plan_title:'订阅计划',
+    device_sub:'管理已连接的 WhatsApp 设备',add_device_btn:'添加设备',add_device_title:'添加设备',add_device_name_label:'设备名称',add_device_name_hint:'— 可选，连接后自动从 WhatsApp 填入',
+    device_settings_title:'设备设置',device_name_label:'设备名称',
+    dev_status_connected:'已连接',dev_status_qr:'QR 就绪',dev_status_offline:'离线',dev_not_connected:'未连接',dev_no_devices:'暂无设备，点击"添加设备"开始。',
+    dev_btn_connect:'连接',dev_btn_show_qr:'显示 QR',dev_btn_disconnect:'断开',dev_btn_settings:'设置',dev_btn_token:'令牌',
+  },
+  ru:{ nav_main:'Функции',nav_dashboard:'Главная',dashboard_sub:'Обзор аккаунта',nav_device:'Устройство',nav_phonebook:'Телефонная книга',nav_history:'История сообщений',nav_send:'Отправить',nav_inbox:'Входящие',nav_template:'Шаблон',nav_poll:'Опрос',nav_recurring:'Повторяющееся',nav_autoreply:'Автоответ',nav_submission:'Отправка',nav_rotator:'Ротатор',nav_followup:'Последующие',nav_chaining:'Цепочка',nav_webhook:'Webhook',nav_invoices:'Счета',nav_stats:'Статистика',nav_settings_label:'Настройки',nav_groups:'Группы',nav_schedule:'Запланированное',nav_api:'API и Токен',nav_docs:'Документация',settings:'Настройки',logout:'Выйти',settings_sub:'Настройте интерфейс',lang_title:'Язык',lang_sub:'Выберите язык отображения',theme_title:'Внешний вид',theme_label:'Тёмный / Светлый',theme_sub:'Переключить цветовую схему',
+    dash_total_devices:'Всего устройств',dash_connected:'Подключено',dash_sent:'Отправлено сообщений',dash_received:'Получено сообщений',dash_plan_title:'Тарифный план',
+    device_sub:'Управление подключёнными устройствами WhatsApp',add_device_btn:'Добавить устройство',add_device_title:'Добавить устройство',add_device_name_label:'Имя устройства',add_device_name_hint:'— необязательно, заполняется из WhatsApp после подключения',
+    device_settings_title:'Настройки устройства',device_name_label:'Имя устройства',
+    dev_status_connected:'Подключено',dev_status_qr:'QR готов',dev_status_offline:'Офлайн',dev_not_connected:'Не подключено',dev_no_devices:'Нет устройств. Нажмите «Добавить устройство».',
+    dev_btn_connect:'Подключить',dev_btn_show_qr:'Показать QR',dev_btn_disconnect:'Отключить',dev_btn_settings:'Настройки',dev_btn_token:'Токен',
+  },
+  ko:{ nav_main:'주요 기능',nav_dashboard:'대시보드',dashboard_sub:'계정 개요',nav_device:'기기',nav_phonebook:'전화번호부',nav_history:'메시지 기록',nav_send:'보내기',nav_inbox:'받은 편지함',nav_template:'템플릿',nav_poll:'투표',nav_recurring:'반복',nav_autoreply:'자동 응답',nav_submission:'제출',nav_rotator:'로테이터',nav_followup:'팔로우업',nav_chaining:'체이닝',nav_webhook:'웹훅',nav_invoices:'청구서',nav_stats:'통계',nav_settings_label:'설정',nav_groups:'그룹',nav_schedule:'예약됨',nav_api:'API & 토큰',nav_docs:'문서',settings:'설정',logout:'로그아웃',settings_sub:'인터페이스 설정',lang_title:'언어',lang_sub:'표시 언어 선택',theme_title:'외관',theme_label:'다크 / 라이트 모드',theme_sub:'색 구성표 전환',
+    dash_total_devices:'전체 기기',dash_connected:'연결됨',dash_sent:'전송된 메시지',dash_received:'수신된 메시지',dash_plan_title:'구독 플랜',
+    device_sub:'연결된 WhatsApp 기기 관리',add_device_btn:'기기 추가',add_device_title:'기기 추가',add_device_name_label:'기기 이름',add_device_name_hint:'— 선택 사항, 연결 후 WhatsApp에서 자동 입력',
+    device_settings_title:'기기 설정',device_name_label:'기기 이름',
+    dev_status_connected:'연결됨',dev_status_qr:'QR 준비',dev_status_offline:'오프라인',dev_not_connected:'연결 안 됨',dev_no_devices:'기기가 없습니다. "기기 추가"를 클릭하세요.',
+    dev_btn_connect:'연결',dev_btn_show_qr:'QR 보기',dev_btn_disconnect:'연결 해제',dev_btn_settings:'설정',dev_btn_token:'토큰',
+  },
+  ar:{ nav_main:'الميزات',nav_dashboard:'لوحة التحكم',dashboard_sub:'نظرة عامة على حسابك',nav_device:'الجهاز',nav_phonebook:'دفتر الهاتف',nav_history:'سجل الرسائل',nav_send:'إرسال',nav_inbox:'الوارد',nav_template:'القالب',nav_poll:'استطلاع',nav_recurring:'متكرر',nav_autoreply:'الرد التلقائي',nav_submission:'التقديم',nav_rotator:'الدوار',nav_followup:'المتابعة',nav_chaining:'التسلسل',nav_webhook:'ويب هوك',nav_invoices:'الفواتير',nav_stats:'الإحصائيات',nav_settings_label:'الإعدادات',nav_groups:'المجموعات',nav_schedule:'المجدولة',nav_api:'API والرمز',nav_docs:'الوثائق',settings:'الإعدادات',logout:'تسجيل الخروج',settings_sub:'تخصيص تجربتك',lang_title:'اللغة',lang_sub:'اختر لغة الواجهة',theme_title:'المظهر',theme_label:'الوضع الداكن / الفاتح',theme_sub:'تبديل نظام الألوان',
+    dash_total_devices:'إجمالي الأجهزة',dash_connected:'متصل',dash_sent:'الرسائل المرسلة',dash_received:'الرسائل المستلمة',dash_plan_title:'خطة الاشتراك',
+    device_sub:'إدارة أجهزة واتساب المتصلة',add_device_btn:'إضافة جهاز',add_device_title:'إضافة جهاز',add_device_name_label:'اسم الجهاز',add_device_name_hint:'— اختياري، يُملأ تلقائياً من واتساب بعد الاتصال',
+    device_settings_title:'إعدادات الجهاز',device_name_label:'اسم الجهاز',
+    dev_status_connected:'متصل',dev_status_qr:'QR جاهز',dev_status_offline:'غير متصل',dev_not_connected:'غير متصل',dev_no_devices:'لا توجد أجهزة. انقر على "إضافة جهاز".',
+    dev_btn_connect:'اتصال',dev_btn_show_qr:'عرض QR',dev_btn_disconnect:'قطع الاتصال',dev_btn_settings:'الإعدادات',dev_btn_token:'الرمز',
+  },
+  es:{ nav_main:'Funciones',nav_dashboard:'Panel',dashboard_sub:'Resumen de tu cuenta',nav_device:'Dispositivo',nav_docs:'Documentación',settings:'Configuración',logout:'Cerrar sesión',lang_title:'Idioma',lang_sub:'Elige el idioma de la interfaz',theme_title:'Apariencia',theme_label:'Modo oscuro/claro',theme_sub:'Cambiar esquema de colores',
+    dash_total_devices:'Total de dispositivos',dash_connected:'Conectado',dash_sent:'Mensajes enviados',dash_received:'Mensajes recibidos',dash_plan_title:'Plan de suscripción',
+    device_sub:'Administrar dispositivos WhatsApp conectados',add_device_btn:'Agregar dispositivo',add_device_title:'Agregar dispositivo',add_device_name_label:'Nombre del dispositivo',add_device_name_hint:'— opcional, se llena automáticamente desde WhatsApp al conectar',
+    device_settings_title:'Configuración del dispositivo',device_name_label:'Nombre del dispositivo',
+    dev_status_connected:'Conectado',dev_status_qr:'QR listo',dev_status_offline:'Sin conexión',dev_not_connected:'Sin conectar',dev_no_devices:'Sin dispositivos. Haz clic en "Agregar dispositivo".',
+    dev_btn_connect:'Conectar',dev_btn_show_qr:'Ver QR',dev_btn_disconnect:'Desconectar',dev_btn_settings:'Configuración',dev_btn_token:'Token',
+  },
+  fr:{ nav_main:'Fonctionnalités',nav_dashboard:'Tableau de bord',dashboard_sub:"Vue d'ensemble",nav_device:'Appareil',nav_docs:'Documentation',settings:'Paramètres',logout:'Déconnexion',lang_title:'Langue',lang_sub:"Choisissez la langue de l'interface",theme_title:'Apparence',theme_label:'Mode sombre/clair',theme_sub:'Changer le thème',
+    dash_total_devices:'Total appareils',dash_connected:'Connecté',dash_sent:'Messages envoyés',dash_received:'Messages reçus',dash_plan_title:'Plan d\'abonnement',
+    device_sub:'Gérer les appareils WhatsApp connectés',add_device_btn:'Ajouter un appareil',add_device_title:'Ajouter un appareil',add_device_name_label:'Nom de l\'appareil',add_device_name_hint:'— facultatif, rempli automatiquement depuis WhatsApp après connexion',
+    device_settings_title:'Paramètres de l\'appareil',device_name_label:'Nom de l\'appareil',
+    dev_status_connected:'Connecté',dev_status_qr:'QR prêt',dev_status_offline:'Hors ligne',dev_not_connected:'Non connecté',dev_no_devices:'Aucun appareil. Cliquez sur "Ajouter un appareil".',
+    dev_btn_connect:'Connecter',dev_btn_show_qr:'Afficher QR',dev_btn_disconnect:'Déconnecter',dev_btn_settings:'Paramètres',dev_btn_token:'Token',
+  },
+  de:{ nav_main:'Funktionen',nav_dashboard:'Dashboard',dashboard_sub:'Kontoübersicht',nav_device:'Gerät',nav_docs:'Dokumentation',settings:'Einstellungen',logout:'Abmelden',lang_title:'Sprache',lang_sub:'Wählen Sie die Anzeigesprache',theme_title:'Erscheinungsbild',theme_label:'Dunkel-/Hellmodus',theme_sub:'Farbschema umschalten',
+    dash_total_devices:'Geräte gesamt',dash_connected:'Verbunden',dash_sent:'Gesendete Nachrichten',dash_received:'Empfangene Nachrichten',dash_plan_title:'Abonnementplan',
+    device_sub:'Verbundene WhatsApp-Geräte verwalten',add_device_btn:'Gerät hinzufügen',add_device_title:'Gerät hinzufügen',add_device_name_label:'Gerätename',add_device_name_hint:'— optional, wird nach der Verbindung automatisch aus WhatsApp befüllt',
+    device_settings_title:'Geräteeinstellungen',device_name_label:'Gerätename',
+    dev_status_connected:'Verbunden',dev_status_qr:'QR bereit',dev_status_offline:'Offline',dev_not_connected:'Nicht verbunden',dev_no_devices:'Keine Geräte. Klicken Sie auf "Gerät hinzufügen".',
+    dev_btn_connect:'Verbinden',dev_btn_show_qr:'QR anzeigen',dev_btn_disconnect:'Trennen',dev_btn_settings:'Einstellungen',dev_btn_token:'Token',
+  },
+  pt:{ nav_main:'Recursos',nav_dashboard:'Painel',dashboard_sub:'Visão geral da conta',nav_device:'Dispositivo',nav_docs:'Documentação',settings:'Configurações',logout:'Sair',lang_title:'Idioma',lang_sub:'Escolha o idioma da interface',theme_title:'Aparência',theme_label:'Modo escuro/claro',theme_sub:'Alternar esquema de cores',
+    dash_total_devices:'Total de dispositivos',dash_connected:'Conectado',dash_sent:'Mensagens enviadas',dash_received:'Mensagens recebidas',dash_plan_title:'Plano de assinatura',
+    device_sub:'Gerenciar dispositivos WhatsApp conectados',add_device_btn:'Adicionar dispositivo',add_device_title:'Adicionar dispositivo',add_device_name_label:'Nome do dispositivo',add_device_name_hint:'— opcional, preenchido automaticamente do WhatsApp após conectar',
+    device_settings_title:'Configurações do dispositivo',device_name_label:'Nome do dispositivo',
+    dev_status_connected:'Conectado',dev_status_qr:'QR pronto',dev_status_offline:'Offline',dev_not_connected:'Não conectado',dev_no_devices:'Sem dispositivos. Clique em "Adicionar dispositivo".',
+    dev_btn_connect:'Conectar',dev_btn_show_qr:'Ver QR',dev_btn_disconnect:'Desconectar',dev_btn_settings:'Configurações',dev_btn_token:'Token',
+  },
+  ja:{ nav_main:'機能',nav_dashboard:'ダッシュボード',dashboard_sub:'アカウント概要',nav_device:'デバイス',nav_docs:'ドキュメント',settings:'設定',logout:'ログアウト',lang_title:'言語',lang_sub:'表示言語を選択',theme_title:'外観',theme_label:'ダーク/ライトモード',theme_sub:'カラースキームを切替',
+    dash_total_devices:'デバイス合計',dash_connected:'接続中',dash_sent:'送信済みメッセージ',dash_received:'受信済みメッセージ',dash_plan_title:'サブスクリプションプラン',
+    device_sub:'接続済み WhatsApp デバイスの管理',add_device_btn:'デバイスを追加',add_device_title:'デバイスを追加',add_device_name_label:'デバイス名',add_device_name_hint:'— 省略可、接続後 WhatsApp から自動入力',
+    device_settings_title:'デバイス設定',device_name_label:'デバイス名',
+    dev_status_connected:'接続中',dev_status_qr:'QR 準備完了',dev_status_offline:'オフライン',dev_not_connected:'未接続',dev_no_devices:'デバイスがありません。「デバイスを追加」をクリックしてください。',
+    dev_btn_connect:'接続',dev_btn_show_qr:'QR 表示',dev_btn_disconnect:'切断',dev_btn_settings:'設定',dev_btn_token:'トークン',
+  },
+  hi:{ nav_main:'सुविधाएँ',nav_dashboard:'डैशबोर्ड',dashboard_sub:'खाता अवलोकन',nav_device:'डिवाइस',nav_docs:'दस्तावेज़',settings:'सेटिंग्स',logout:'लॉग आउट',lang_title:'भाषा',lang_sub:'इंटरफ़ेस भाषा चुनें',theme_title:'दिखावट',theme_label:'डार्क/लाइट मोड',theme_sub:'रंग थीम बदलें',
+    dash_total_devices:'कुल उपकरण',dash_connected:'कनेक्टेड',dash_sent:'भेजे गए संदेश',dash_received:'प्राप्त संदेश',dash_plan_title:'सदस्यता योजना',
+    device_sub:'कनेक्टेड WhatsApp उपकरण प्रबंधित करें',add_device_btn:'उपकरण जोड़ें',add_device_title:'उपकरण जोड़ें',add_device_name_label:'उपकरण का नाम',add_device_name_hint:'— वैकल्पिक, कनेक्ट होने के बाद WhatsApp से स्वतः भरा जाएगा',
+    device_settings_title:'उपकरण सेटिंग्स',device_name_label:'उपकरण का नाम',
+    dev_status_connected:'कनेक्टेड',dev_status_qr:'QR तैयार',dev_status_offline:'ऑफलाइन',dev_not_connected:'कनेक्ट नहीं',dev_no_devices:'कोई उपकरण नहीं। "उपकरण जोड़ें" पर क्लिक करें।',
+    dev_btn_connect:'कनेक्ट',dev_btn_show_qr:'QR दिखाएं',dev_btn_disconnect:'डिस्कनेक्ट',dev_btn_settings:'सेटिंग्स',dev_btn_token:'टोकन',
+  },
 };
 
 function applyLang(l){
@@ -1332,7 +1399,6 @@ async function loadDashboard(){
 // ─── Add Device Flow ────────────────────────────────────
 function openAddDeviceModal(){
   document.getElementById('addDevName').value='';
-  document.getElementById('addDevNum').value='';
   document.getElementById('addDevChatbot').checked=false;
   document.getElementById('addDevPersonal').checked=false;
   document.getElementById('addDevGroup').checked=false;
@@ -1340,10 +1406,13 @@ function openAddDeviceModal(){
 }
 
 async function submitAddDevice(){
-  const name = document.getElementById('addDevName').value.trim();
-  if(!name){ toast('Device name is required','err'); return; }
+  const inputName = document.getElementById('addDevName').value.trim();
+  // Name is optional — use temp placeholder, will be auto-updated after WA connect
+  const name = inputName || ('Device ' + (devices.length + 1));
   try {
     const d = await api('/me/devices',{method:'POST',body:JSON.stringify({name})});
+    // Store whether user set a custom name, for auto-fill logic after connect
+    d._customName = !!inputName;
     // Update device settings (chatbot, personal, group)
     const ar_personal = document.getElementById('addDevPersonal').checked;
     const ar_group = document.getElementById('addDevGroup').checked;
@@ -1353,6 +1422,7 @@ async function submitAddDevice(){
     devices = await api('/me/devices');
     renderDevices(); populateDevSelects();
     currentConnectDeviceId = d.id;
+    currentConnectCustomName = inputName; // save for auto-fill after connect
     closeM('addDeviceModal');
     openM('connectMethodModal');
     toast('Device added! Now choose a connection method.');
@@ -1373,6 +1443,7 @@ async function doConnectQR(){
     if(!d) return;
     if(d.state?.status==='connected'){
       toast('Terhubung! ✅');
+      autoFillDeviceName(currentConnectDeviceId);
     } else if(d.state?.status==='qr'){
       showQr(currentConnectDeviceId);
     } else {
@@ -1385,9 +1456,7 @@ async function doConnectQR(){
 
 function showCodeMethod(){
   closeM('connectMethodModal');
-  // Pre-fill phone from add device form
-  const num = document.getElementById('addDevNum')?.value || '';
-  document.getElementById('codePhone').value = num;
+  document.getElementById('codePhone').value = '';
   document.getElementById('codePairingResult').style.display='none';
   document.getElementById('pairingCodeDisplay').textContent='——————';
   document.getElementById('codePairingTitle').textContent = 'Connect via Code';
@@ -1415,6 +1484,7 @@ async function requestCode(){
         closeM('codePairingModal');
         renderDevices();
         toast('Device connected! ✅');
+        autoFillDeviceName(currentConnectDeviceId);
       }
     },3000);
   } catch(e){ toast('Error: '+e.message,'err'); }
@@ -1426,10 +1496,9 @@ function showPasskeyInfo(){ closeM('connectMethodModal'); openM('passkeyModal');
 function showWAWebGuide(){
   closeM('connectMethodModal');
   closeM('passkeyModal');
-  // Set bookmark button with device number
-  const num = document.getElementById('addDevNum')?.value || 'Synpera';
+  // Set bookmark button label
   const btn = document.getElementById('waWebBookmarkBtn');
-  btn.textContent = num || 'Synpera';
+  btn.textContent = 'Synpera';
   // Draggable bookmark
   btn.setAttribute('href','javascript:(function(){window.open("'+location.origin+'/wa-link?device='+currentConnectDeviceId+'","_blank","width=400,height=500");})()');
   openM('waWebModal');
@@ -1444,6 +1513,7 @@ function showWAWebGuide(){
         closeM('waWebModal');
         renderDevices();
         toast('Device connected via WA Web! ✅');
+        autoFillDeviceName(currentConnectDeviceId);
       }
     },3000);
   }
@@ -1452,23 +1522,25 @@ function showWAWebGuide(){
 // ─── Devices ────────────────────────────────────────────
 function renderDevices(){
   const el = document.getElementById('devicesList');
-  if(!devices.length){ el.innerHTML=`<div class="panel" style="text-align:center;color:var(--muted);padding:28px">No devices yet. Click "Add Device" to get started.</div>`; return; }
+  const lang = localStorage.getItem('lang')||'en';
+  const t = {...T['en'], ...(T[lang]||{})};
+  if(!devices.length){ el.innerHTML=`<div class="panel" style="text-align:center;color:var(--muted);padding:28px">${t.dev_no_devices}</div>`; return; }
   el.innerHTML = devices.map(d=>{
     const st = d.state?.status||'idle';
     const stCls = st==='connected'?'st-connected':st==='qr'?'st-qr':'st-off';
-    const stLabel = st==='connected'?'Connected':st==='qr'?'QR Ready':'Offline';
+    const stLabel = st==='connected'?t.dev_status_connected:st==='qr'?t.dev_status_qr:t.dev_status_offline;
     return `<div class="device-card">
-      <div class="device-avatar">📱</div>
+      <div class="device-avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg></div>
       <div class="device-info">
         <div class="device-name">${esc(d.name)} <span class="status-pill ${stCls}"><span class="dot"></span>${stLabel}</span></div>
-        <div class="device-num">${d.number||'Not connected'} · Token: ${d.token?.slice(0,12)}…</div>
+        <div class="device-num">${d.number||t.dev_not_connected} · Token: ${d.token?.slice(0,12)}…</div>
       </div>
       <div class="device-actions">
-        ${st!=='connected'?`<button class="btn btn-primary btn-sm" onclick="connectExisting(${d.id})">⚡ Connect</button>`:''}
-        ${st==='qr'?`<button class="btn btn-ghost btn-sm" onclick="showQr(${d.id})">Show QR</button>`:''}
-        ${st==='connected'?`<button class="btn btn-ghost btn-sm" onclick="disconnectDev(${d.id})">Disconnect</button>`:''}
-        <button class="btn btn-ghost btn-sm" onclick="openDevEdit(${d.id})">⚙ Settings</button>
-        <button class="btn btn-ghost btn-sm" onclick="regenTok(${d.id})">↻ Token</button>
+        ${st!=='connected'?`<button class="btn btn-primary btn-sm" onclick="connectExisting(${d.id})">⚡ ${t.dev_btn_connect}</button>`:''}
+        ${st==='qr'?`<button class="btn btn-ghost btn-sm" onclick="showQr(${d.id})">${t.dev_btn_show_qr}</button>`:''}
+        ${st==='connected'?`<button class="btn btn-ghost btn-sm" onclick="disconnectDev(${d.id})">${t.dev_btn_disconnect}</button>`:''}
+        <button class="btn btn-ghost btn-sm" onclick="openDevEdit(${d.id})">⚙ ${t.dev_btn_settings}</button>
+        <button class="btn btn-ghost btn-sm" onclick="regenTok(${d.id})">↻ ${t.dev_btn_token}</button>
         <button class="btn btn-danger btn-sm" onclick="deleteDev(${d.id})">✕</button>
       </div>
     </div>`;
@@ -1477,7 +1549,24 @@ function renderDevices(){
 
 function connectExisting(id){
   currentConnectDeviceId = id;
+  currentConnectCustomName = ''; // existing device: no pending auto-fill
   openM('connectMethodModal');
+}
+
+// Auto-fill device name from WhatsApp pushName after connect (only if user left name blank)
+async function autoFillDeviceName(deviceId){
+  if(currentConnectCustomName) return; // user set a custom name, skip
+  try {
+    const devs = await api('/me/devices');
+    const d = devs.find(x=>x.id===deviceId);
+    if(!d) return;
+    const waName = d.state?.me?.name || d.state?.me?.verifiedName;
+    if(waName){
+      await api(`/me/devices/${deviceId}`,{method:'PUT',body:JSON.stringify({name: waName})});
+      devices = await api('/me/devices');
+      renderDevices(); populateDevSelects();
+    }
+  } catch(e){ /* non-critical */ }
 }
 
 async function disconnectDev(id){
@@ -1559,6 +1648,7 @@ async function showQr(id){
         closeM('qrModal');
         renderDevices();
         toast('Terhubung! ✅');
+        autoFillDeviceName(id);
         return;
       }
 
