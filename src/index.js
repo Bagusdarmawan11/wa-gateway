@@ -131,8 +131,18 @@ app.delete('/me/devices/:id', requireLogin, async (req, res) => {
 app.post('/me/devices/:id/connect', requireLogin, async (req, res) => {
   const d = await ownDevice(req, res);
   if (!d) return;
+  // Jalankan connect lalu tunggu sampai QR/connected tersedia (maks 20 detik)
   connectDevice(d.id).catch(() => {});
-  res.json({ status: true });
+  const deadline = Date.now() + 20000;
+  while (Date.now() < deadline) {
+    await sleep(800);
+    const st = getState(d.id);
+    if (st.status === 'qr' || st.status === 'connected') {
+      return res.json({ status: true, state: st });
+    }
+  }
+  // Timeout: kembalikan status terkini apa adanya
+  res.json({ status: true, state: getState(d.id) });
 });
 
 app.post('/me/devices/:id/disconnect', requireLogin, async (req, res) => {
