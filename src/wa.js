@@ -42,6 +42,7 @@ function getOrCreate(deviceId) {
       qrDataUrl: null,
       me: null,
       reconnectTimer: null,
+      presenceTimer: null,
       lastActivity: Date.now(),
     });
   }
@@ -84,6 +85,10 @@ export function getState(deviceId) {
 
 // ─── Tutup socket dengan bersih ───────────────────────────────────────────────
 function closeSocket(s) {
+  if (s.presenceTimer) {
+    clearInterval(s.presenceTimer);
+    s.presenceTimer = null;
+  }
   if (s.sock) {
     try { s.sock.ev.removeAllListeners(); } catch {}
     try { s.sock.end(); } catch {}
@@ -153,6 +158,16 @@ export async function connectDevice(deviceId) {
       fireWebhook(device.webhook_connect_url, {
         event: 'connect', device_id: deviceId, number, status: 'connected',
       });
+      // Kirim available presence berkala agar WA deteksi sebagai online (tiap 10 menit)
+      if (s.presenceTimer) clearInterval(s.presenceTimer);
+      s.presenceTimer = setInterval(async () => {
+        if (s.sock !== sock || s.status !== 'connected') {
+          clearInterval(s.presenceTimer);
+          s.presenceTimer = null;
+          return;
+        }
+        try { await sock.sendPresenceUpdate('available'); } catch {}
+      }, 10 * 60 * 1000);
     }
 
     if (connection === 'close') {

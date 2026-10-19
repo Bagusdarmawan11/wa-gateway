@@ -161,6 +161,8 @@ h1{font-size:1.5rem;font-weight:800;margin-bottom:5px;letter-spacing:-.02em}
 .btn-danger{background:var(--red-soft);color:var(--red);border:1px solid var(--red-border)}
 .btn-danger:hover{background:rgba(239,68,68,.2)}
 .btn-success{background:var(--green-soft);color:var(--green);border:1px solid var(--green-border)}
+.btn-warn{background:rgba(251,191,36,.12);color:var(--yellow);border:1px solid rgba(251,191,36,.3)}
+.btn-warn:hover{background:rgba(251,191,36,.2)}
 .btn-sm{padding:5px 10px;font-size:.76rem;border-radius:8px}
 .btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
 .btn-group{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
@@ -337,9 +339,21 @@ pre.code-block{background:var(--code-bg);border:1px solid var(--border);border-r
   main.sidebar-collapsed{margin-left:0!important}
   .hamburger-btn{display:flex}
   .sidebar-toggle-btn{display:none}
+  /* Mobile navbar: hamburger kiri, logo & user kanan */
+  .navbar-left{flex-direction:row}
+  .navbar-logo{order:1;margin-left:auto}
+  .navbar-right{order:2}
+  /* Sembunyikan info nama/email & theme di navbar mobile */
+  .navbar-user .name{display:none}
   .navbar-user .email{display:none}
+  .navbar-user{padding:6px 8px}
+  .theme-btn{display:none}
+  /* Dash grid tetap 2 kolom kotak-kotak di mobile */
+  .dash-grid{grid-template-columns:1fr 1fr;gap:10px}
+  .dash-card{padding:14px}
+  .dash-card .dc-num{font-size:1.5rem}
   .row,.row3{grid-template-columns:1fr}
-  .stat-grid,.dash-grid{grid-template-columns:1fr 1fr}
+  .stat-grid{grid-template-columns:1fr 1fr}
   .filter-bar .field{min-width:100%}
   h1{font-size:1.25rem}
   .groups-grid{grid-template-columns:1fr}
@@ -349,7 +363,8 @@ pre.code-block{background:var(--code-bg);border:1px solid var(--border);border-r
   .connect-methods{grid-template-columns:1fr 1fr}
 }
 @media(max-width:480px){
-  .dash-grid,.stat-grid{grid-template-columns:1fr}
+  .dash-grid{grid-template-columns:1fr 1fr}
+  .stat-grid{grid-template-columns:1fr 1fr}
   .connect-methods{grid-template-columns:1fr}
   .lang-grid{grid-template-columns:repeat(2,1fr)}
 }
@@ -368,6 +383,7 @@ pre.code-block{background:var(--code-bg);border:1px solid var(--border);border-r
       <svg id="menuIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
       <svg id="closeIcon" style="display:none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
+    <!-- Logo: di desktop tampil di kiri sidebar toggle, di mobile via CSS order jadi kanan -->
     <a class="navbar-logo" href="/"><img src="/assets/logo.png" alt="Synpera">Synpera</a>
   </div>
   <div class="navbar-right">
@@ -1058,6 +1074,19 @@ Authorization: Bearer {device_token}
   </div>
 </div>
 
+<!-- Custom Confirm Modal -->
+<div class="modal" id="confirmModal" style="z-index:500">
+  <div class="modal-box" style="max-width:400px;text-align:center">
+    <div style="font-size:2rem;margin-bottom:10px" id="confirmIcon">⚠️</div>
+    <h3 id="confirmTitle" style="margin-bottom:8px;font-size:1.05rem">Konfirmasi</h3>
+    <p id="confirmMsg" style="color:var(--muted);font-size:.88rem;margin-bottom:20px;line-height:1.5"></p>
+    <div style="display:flex;gap:10px;justify-content:center">
+      <button class="btn btn-ghost" id="confirmCancel" onclick="closeM('confirmModal')">Batal</button>
+      <button class="btn btn-danger" id="confirmOk">Ya, Lanjutkan</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -1086,9 +1115,16 @@ async function boot(){
   populateDevSelects();
   renderDevices();
 
+  // Restore halaman terakhir dari hash URL — tidak redirect ke dashboard
   const hash = location.hash.replace('#','');
-  if(hash && document.querySelector(`.nav-item[data-page="${hash}"]`)){
-    document.querySelector(`.nav-item[data-page="${hash}"]`).click();
+  const validPage = hash && document.querySelector(`.nav-item[data-page="${hash}"]`);
+  if(validPage){
+    // Langsung aktifkan page tanpa click (supaya tidak ada double-flash)
+    document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+    document.querySelector(`.nav-item[data-page="${hash}"]`).classList.add('active');
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.getElementById('page-'+hash)?.classList.add('active');
+    onOpen(hash);
   } else {
     goPage('dashboard');
   }
@@ -1210,6 +1246,21 @@ function toast(msg,type='ok'){ const el=document.getElementById('toast'); el.tex
 // ─── Modal ──────────────────────────────────────────────
 function openM(id){ document.getElementById(id).classList.add('open'); }
 function closeM(id){ document.getElementById(id).classList.remove('open'); }
+
+// ─── Custom Confirm ──────────────────────────────────────
+function showConfirm(msg, onOk, opts={}){
+  document.getElementById('confirmIcon').textContent = opts.icon || '⚠️';
+  document.getElementById('confirmTitle').textContent = opts.title || 'Konfirmasi';
+  document.getElementById('confirmMsg').textContent = msg;
+  const okBtn = document.getElementById('confirmOk');
+  okBtn.textContent = opts.okLabel || 'Ya, Lanjutkan';
+  okBtn.className = 'btn ' + (opts.okClass || 'btn-danger');
+  // Remove old listener
+  const newBtn = okBtn.cloneNode(true);
+  okBtn.parentNode.replaceChild(newBtn, okBtn);
+  newBtn.addEventListener('click', () => { closeM('confirmModal'); onOk(); });
+  openM('confirmModal');
+}
 
 // ─── Device selects ─────────────────────────────────────
 function populateDevSelects(){
@@ -1387,14 +1438,18 @@ function connectExisting(id){
 }
 
 async function disconnectDev(id){
-  if(!confirm('Disconnect?')) return;
-  await api(`/me/devices/${id}/disconnect`,{method:'POST'});
-  devices = await api('/me/devices'); renderDevices(); toast('Disconnected');
+  const d = devices.find(x=>x.id===id);
+  showConfirm(`Putuskan koneksi perangkat "${d?.name||id}"?`, async()=>{
+    await api(`/me/devices/${id}/disconnect`,{method:'POST'});
+    devices = await api('/me/devices'); renderDevices(); toast('Disconnected');
+  }, {icon:'🔌', title:'Putuskan Koneksi', okLabel:'Disconnect', okClass:'btn-danger'});
 }
 async function deleteDev(id){
-  if(!confirm('Delete this device?')) return;
-  await api(`/me/devices/${id}`,{method:'DELETE'});
-  devices = devices.filter(d=>d.id!==id); renderDevices(); populateDevSelects(); toast('Deleted');
+  const d = devices.find(x=>x.id===id);
+  showConfirm(`Hapus perangkat "${d?.name||id}"? Semua session WA akan dihapus.`, async()=>{
+    await api(`/me/devices/${id}`,{method:'DELETE'});
+    devices = devices.filter(d=>d.id!==id); renderDevices(); populateDevSelects(); toast('Deleted');
+  }, {icon:'🗑️', title:'Hapus Perangkat', okLabel:'Hapus', okClass:'btn-danger'});
 }
 function openDevEdit(id){
   const d=devices.find(x=>x.id===id); if(!d) return;
@@ -1424,8 +1479,10 @@ async function saveDevEdit(){
   devices=await api('/me/devices'); renderDevices(); populateDevSelects(); closeM('devEditModal'); toast('Saved!');
 }
 async function regenTok(id){
-  if(!confirm('Regenerate token? Old one stops working.')) return;
-  await api(`/me/devices/${id}/regenerate-token`,{method:'POST'}); devices=await api('/me/devices'); renderDevices(); toast('Token regenerated!');
+  const d = devices.find(x=>x.id===id);
+  showConfirm(`Regenerate token perangkat "${d?.name||id}"? Token lama akan berhenti bekerja.`, async()=>{
+    await api(`/me/devices/${id}/regenerate-token`,{method:'POST'}); devices=await api('/me/devices'); renderDevices(); toast('Token regenerated!');
+  }, {icon:'🔑', title:'Regenerate Token', okLabel:'Regenerate', okClass:'btn-warn'});
 }
 async function showQr(id){
   // Ambil QR terkini langsung dari server
@@ -1551,8 +1608,8 @@ async function loadHistory(){
 }
 function toggleSel(id,checked){ if(checked) selectedIds.add(id); else selectedIds.delete(id); }
 function toggleAll(cb){ document.querySelectorAll('#histBody input[type=checkbox]').forEach(c=>{ c.checked=cb.checked; const id=Number(c.closest('tr').cells[1].textContent); if(cb.checked) selectedIds.add(id); else selectedIds.delete(id); }); }
-async function deleteSelected(){ if(!selectedIds.size){toast('Select messages first','err');return;} if(!confirm(`Delete ${selectedIds.size} messages?`)) return; await api('/me/logs',{method:'DELETE',body:JSON.stringify({ids:[...selectedIds]})}); toast('Deleted'); loadHistory(); }
-async function deleteAllHistory(){ if(!confirm('Delete ALL history?')) return; const dev=document.getElementById('histDev')?.value; await api('/me/logs',{method:'DELETE',body:JSON.stringify(dev?{device:dev}:{})}); toast('All deleted'); loadHistory(); }
+async function deleteSelected(){ if(!selectedIds.size){toast('Select messages first','err');return;} showConfirm(`Hapus ${selectedIds.size} pesan yang dipilih?`, async()=>{ await api('/me/logs',{method:'DELETE',body:JSON.stringify({ids:[...selectedIds]})}); toast('Deleted'); loadHistory(); },{icon:'🗑️',title:'Hapus Pesan',okLabel:'Hapus'}); }
+async function deleteAllHistory(){ showConfirm('Hapus SEMUA riwayat pesan? Tindakan ini tidak bisa dibatalkan.', async()=>{ const dev=document.getElementById('histDev')?.value; await api('/me/logs',{method:'DELETE',body:JSON.stringify(dev?{device:dev}:{})}); toast('All deleted'); loadHistory(); },{icon:'⚠️',title:'Hapus Semua Riwayat',okLabel:'Hapus Semua'}); }
 function exportHistory(){ const dev=document.getElementById('histDev')?.value; const dir=document.getElementById('histStatus')?.value; let url='/me/logs/export?'; if(dev) url+=`device=${dev}&`; if(dir) url+=`direction=${dir}&`; location.href=url; }
 
 // ─── Inbox ──────────────────────────────────────────────
