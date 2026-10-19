@@ -41,7 +41,8 @@
 ::-webkit-scrollbar-thumb:hover{background:var(--accent)}
 *{scrollbar-width:thin;scrollbar-color:var(--scroll-thumb) var(--scroll-track);margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%}
-body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background .35s,color .35s;overflow-x:hidden}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background .35s,color .35s,opacity .25s ease;overflow-x:hidden;opacity:0}
+body.loaded{opacity:1}
 
 /* NAVBAR */
 .navbar{
@@ -67,7 +68,8 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 }
 .hamburger-btn:hover{background:var(--panel)}
 .hamburger-btn svg{display:block;width:20px;height:20px}
-.navbar-logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:1.05rem;color:var(--text);text-decoration:none}
+.navbar-logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:1.05rem;color:var(--text);text-decoration:none;transition:opacity .2s}
+.navbar-logo:hover{opacity:.8}
 .navbar-logo img{width:26px;height:26px;object-fit:contain}
 .navbar-right{display:flex;align-items:center;gap:8px}
 .theme-btn{background:var(--panel);border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:9px;cursor:pointer;font-size:.85rem;transition:all .2s}
@@ -111,14 +113,16 @@ aside.sidebar-collapsed .nav-item{justify-content:center;padding:10px 0}
 .nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;color:var(--muted);font-size:.875rem;font-weight:550;cursor:pointer;transition:all .2s;border:none;background:none;text-align:left;width:100%;font-family:inherit;white-space:nowrap}
 .nav-item svg{width:16px;height:16px;flex-shrink:0}
 .nav-item:hover{background:var(--panel);color:var(--text)}
-.nav-item.active{background:var(--accent-soft);color:var(--accent-text)}
+.nav-item.active{background:var(--accent-soft);color:var(--accent-text);box-shadow:inset 3px 0 0 var(--accent)}
 
 /* MAIN */
 main{flex:1;padding:28px 28px 40px;margin-left:var(--sidebar-w);min-width:0;transition:margin-left .3s}
 main.sidebar-collapsed{margin-left:56px}
-.page{display:none;animation:fadeIn .3s ease}
+.page{display:none;animation:fadeIn .28s cubic-bezier(.4,0,.2,1)}
 .page.active{display:block}
-@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes shimmerSlide{0%{transform:translateX(-100%)}100%{transform:translateX(300%)}}
+@keyframes glowPulse{0%,100%{opacity:.6}50%{opacity:1}}
 h1{font-size:1.5rem;font-weight:800;margin-bottom:5px;letter-spacing:-.02em}
 .sub{color:var(--muted);font-size:.9rem;margin-bottom:22px}
 
@@ -127,20 +131,37 @@ h1{font-size:1.5rem;font-weight:800;margin-bottom:5px;letter-spacing:-.02em}
 .page-header h1{margin-bottom:0}
 
 /* PANELS */
-.panel{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:18px}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:18px;transition:border-color .2s}
+.panel:hover{border-color:var(--accent-border)}
 .panel h2{font-size:.98rem;font-weight:700;margin-bottom:14px}
 .panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px}
 .panel-head h2{margin-bottom:0}
 
 /* DASHBOARD CARDS */
 .dash-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;margin-bottom:24px}
-.dash-card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:20px;position:relative;overflow:hidden}
-.dash-card::before{content:'';position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;opacity:.07}
-.dash-card.blue::before{background:var(--accent)}
-.dash-card.green::before{background:var(--green)}
-.dash-card.yellow::before{background:var(--yellow)}
-.dash-card.cyan::before{background:var(--accent2)}
-.dash-card .dc-icon{font-size:1.6rem;margin-bottom:10px}
+.dash-card{
+  background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:20px;
+  position:relative;overflow:hidden;cursor:default;
+  transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease;
+}
+.dash-card:hover{transform:translateY(-3px)}
+.dash-card.blue:hover{border-color:rgba(59,130,246,.5);box-shadow:0 8px 30px rgba(59,130,246,.12)}
+.dash-card.green:hover{border-color:rgba(34,197,94,.4);box-shadow:0 8px 30px rgba(34,197,94,.1)}
+.dash-card.yellow:hover{border-color:rgba(251,191,36,.4);box-shadow:0 8px 30px rgba(251,191,36,.1)}
+.dash-card.cyan:hover{border-color:rgba(34,211,238,.4);box-shadow:0 8px 30px rgba(34,211,238,.1)}
+/* Shimmer line at top */
+.dash-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:99px;opacity:0;transition:opacity .22s}
+.dash-card:hover::after{opacity:1}
+.dash-card.blue::after{background:linear-gradient(90deg,transparent,var(--accent),transparent)}
+.dash-card.green::after{background:linear-gradient(90deg,transparent,var(--green),transparent)}
+.dash-card.yellow::after{background:linear-gradient(90deg,transparent,var(--yellow),transparent)}
+.dash-card.cyan::after{background:linear-gradient(90deg,transparent,var(--accent2),transparent)}
+.dash-card .dc-icon{display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:12px;margin-bottom:12px}
+.dash-card.blue .dc-icon{background:rgba(59,130,246,.14);color:var(--accent)}
+.dash-card.green .dc-icon{background:rgba(34,197,94,.14);color:var(--green)}
+.dash-card.yellow .dc-icon{background:rgba(251,191,36,.14);color:var(--yellow)}
+.dash-card.cyan .dc-icon{background:rgba(34,211,238,.14);color:var(--accent2)}
+.dash-card .dc-icon svg{width:20px;height:20px}
 .dash-card .dc-num{font-size:2rem;font-weight:800;color:var(--accent-text);line-height:1}
 .dash-card.green .dc-num{color:var(--green)}
 .dash-card.yellow .dc-num{color:var(--yellow)}
@@ -154,7 +175,9 @@ h1{font-size:1.5rem;font-weight:800;margin-bottom:5px;letter-spacing:-.02em}
 /* BUTTONS */
 .btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:10px;font-weight:600;font-size:.84rem;border:none;cursor:pointer;font-family:inherit;transition:all .2s;white-space:nowrap}
 .btn svg{width:14px;height:14px}
-.btn-primary{background:linear-gradient(135deg,#2563eb,#0891b2);color:#fff}
+.btn-primary{background:linear-gradient(135deg,#2563eb,#0891b2);color:#fff;position:relative;overflow:hidden}
+.btn-primary::before{content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);transform:skewX(-20deg);transition:none;pointer-events:none}
+.btn-primary:hover::before{animation:shimmerSlide .55s ease forwards}
 .btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(37,99,235,.35)}
 .btn-ghost{background:var(--panel);color:var(--text);border:1px solid var(--border)}
 .btn-ghost:hover{background:var(--accent-soft);border-color:var(--accent-border)}
@@ -253,7 +276,8 @@ tr:hover td{background:var(--panel)}
 @keyframes pulse{50%{opacity:.4}}
 
 /* DEVICE CARDS */
-.device-card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:14px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.device-card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:14px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;transition:border-color .2s,box-shadow .2s,transform .2s}
+.device-card:hover{border-color:var(--accent-border);box-shadow:0 4px 20px rgba(59,130,246,.08);transform:translateY(-1px)}
 .device-avatar{width:44px;height:44px;border-radius:12px;background:var(--accent-soft);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0}
 .device-info{flex:1;min-width:0}
 .device-name{font-weight:700;font-size:1rem;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
@@ -277,7 +301,8 @@ pre.code-block{background:var(--code-bg);border:1px solid var(--border);border-r
 .filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:flex-end}
 .filter-bar .field{flex:1;min-width:120px;margin-bottom:0}
 .stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;margin-bottom:22px}
-.stat-card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:18px;text-align:center}
+.stat-card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:18px;text-align:center;transition:border-color .2s,transform .2s,box-shadow .2s}
+.stat-card:hover{border-color:var(--accent-border);transform:translateY(-2px);box-shadow:0 6px 20px rgba(59,130,246,.1)}
 .stat-card .num{font-size:2rem;font-weight:800;color:var(--accent-text)}
 .stat-card .lbl{font-size:.76rem;color:var(--muted);margin-top:3px}
 .pb-contact{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
@@ -343,10 +368,8 @@ pre.code-block{background:var(--code-bg);border:1px solid var(--border);border-r
   .navbar-left{flex-direction:row}
   .navbar-logo{order:1;margin-left:auto}
   .navbar-right{order:2}
-  /* Sembunyikan info nama/email & theme di navbar mobile */
-  .navbar-user .name{display:none}
-  .navbar-user .email{display:none}
-  .navbar-user{padding:6px 8px}
+  /* Sembunyikan semua info user & theme di navbar mobile — hanya logo+nama Synpera */
+  .navbar-user{display:none}
   .theme-btn{display:none}
   /* Dash grid tetap 2 kolom kotak-kotak di mobile */
   .dash-grid{grid-template-columns:1fr 1fr;gap:10px}
@@ -445,10 +468,22 @@ pre.code-block{background:var(--code-bg);border:1px solid var(--border);border-r
   <h1 data-i18n="nav_dashboard">Dashboard</h1>
   <p class="sub" data-i18n="dashboard_sub">Overview of your Synpera account</p>
   <div class="dash-grid">
-    <div class="dash-card blue"><div class="dc-icon">📱</div><div class="dc-num" id="dashDevices">—</div><div class="dc-lbl">Total Devices</div></div>
-    <div class="dash-card green"><div class="dc-icon">✅</div><div class="dc-num" id="dashConnected">—</div><div class="dc-lbl">Connected</div></div>
-    <div class="dash-card cyan"><div class="dc-icon">📤</div><div class="dc-num" id="dashSent">—</div><div class="dc-lbl">Messages Sent</div></div>
-    <div class="dash-card yellow"><div class="dc-icon">📥</div><div class="dc-num" id="dashReceived">—</div><div class="dc-lbl">Messages Received</div></div>
+    <div class="dash-card blue">
+      <div class="dc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg></div>
+      <div class="dc-num" id="dashDevices">—</div><div class="dc-lbl">Total Devices</div>
+    </div>
+    <div class="dash-card green">
+      <div class="dc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22,4 12,14.01 9,11.01"/></svg></div>
+      <div class="dc-num" id="dashConnected">—</div><div class="dc-lbl">Connected</div>
+    </div>
+    <div class="dash-card cyan">
+      <div class="dc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg></div>
+      <div class="dc-num" id="dashSent">—</div><div class="dc-lbl">Messages Sent</div>
+    </div>
+    <div class="dash-card yellow">
+      <div class="dc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22,12 16,12 14,15 10,15 8,12 2,12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg></div>
+      <div class="dc-num" id="dashReceived">—</div><div class="dc-lbl">Messages Received</div>
+    </div>
   </div>
   <div class="panel" style="max-width:520px">
     <div class="panel-head"><h2>Subscription Plan</h2></div>
@@ -1096,6 +1131,8 @@ let tplEditId = null, qrPoll = null, currentConnectDeviceId = null, grpCache = [
 
 // ─── Boot ───────────────────────────────────────────────
 async function boot(){
+  // Sembunyikan body sampai halaman aktif benar ditentukan (cegah glitch flash ke dashboard)
+  // body opacity:0 by default via CSS, .loaded akan membuatnya visible
   applySavedTheme();
   const lang = localStorage.getItem('lang')||'en';
   applyLang(lang);
@@ -1109,7 +1146,10 @@ async function boot(){
     document.getElementById('navEmail').textContent = me.user.email;
     document.getElementById('dropName').textContent = me.user.name;
     document.getElementById('dropEmail').textContent = me.user.email;
-  } catch(e){ return; }
+  } catch(e){
+    document.body.classList.add('loaded');
+    return;
+  }
 
   devices = await api('/me/devices');
   populateDevSelects();
@@ -1119,7 +1159,7 @@ async function boot(){
   const hash = location.hash.replace('#','');
   const validPage = hash && document.querySelector(`.nav-item[data-page="${hash}"]`);
   if(validPage){
-    // Langsung aktifkan page tanpa click (supaya tidak ada double-flash)
+    // Langsung aktifkan page tanpa click (supaya tidak ada double-flash ke dashboard)
     document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
     document.querySelector(`.nav-item[data-page="${hash}"]`).classList.add('active');
     document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -1128,6 +1168,9 @@ async function boot(){
   } else {
     goPage('dashboard');
   }
+
+  // Tampilkan body setelah halaman aktif sudah di-set dengan benar (no glitch)
+  document.body.classList.add('loaded');
 }
 
 // ─── Navigation ─────────────────────────────────────────
